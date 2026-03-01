@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Клиенты | Строительный калькулятор</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="navbar">
+        <div class="navbar-container">
+            <div class="logo">Логотип</div>
+            <div class="user-profile">
+                <span class="user-name">Менеджер</span>
+                <div class="avatar">М</div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <header class="page-header">
+            <h1 class="page-title">Клиенты</h1>
+            <div class="controls-bar">
+                <div class="search-wrapper">
+                    <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input type="text" id="search-input" class="search-input" placeholder="Поиск по названию или ФИО...">
+                </div>
+
+                <div class="filter-wrapper" id="filter-wrapper">
+                    <button class="btn-secondary" id="filter-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                        </svg>
+                        Фильтры
+                        <span class="filter-badge" id="filter-badge" style="display: none;"></span>
+                    </button>
+
+                    <div class="filter-dropdown" id="filter-dropdown">
+                        <div class="filter-group">
+                            <h4 class="filter-title">Статус клиента</h4>
+                            <label class="custom-checkbox">
+                                <input type="checkbox" value="active" class="status-filter" checked>
+                                <span class="checkmark"></span>
+                                В работе
+                            </label>
+                            <label class="custom-checkbox">
+                                <input type="checkbox" value="inactive" class="status-filter" checked>
+                                <span class="checkmark"></span>
+                                Нет расчетов
+                            </label>
+                        </div>
+
+                        <div class="filter-group">
+                            <h4 class="filter-title">Наличие проектов</h4>
+                            <select id="projects-filter" class="custom-select">
+                                <option value="all">Все клиенты</option>
+                                <option value="with-projects">Есть проекты (>0)</option>
+                                <option value="no-projects">Без проектов (0)</option>
+                            </select>
+                        </div>
+                        <div class="filter-actions">
+                            <button class="btn-secondary btn-sm" id="reset-filters">Сбросить</button>
+                            <button class="btn-primary btn-sm" id="apply-filters">Применить</button>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn-primary" id="open-modal-btn">+ Создать</button>
+            </div>
+        </header>
+
+        <div class="table-card">
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Компания / Клиент</th>
+                            <th>Контактное лицо</th>
+                            <th>Телефон</th>
+                            <th>Проекты</th>
+                            <th>Статус</th>
+                            <th class="text-right">Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody id="clients-table-body">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <div class="modal-overlay" id="create-modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h2>Новый клиент</h2>
+                <button class="btn-close" id="close-modal-btn" aria-label="Закрыть">×</button>
+            </div>
+            <form class="modal-form" id="create-client-form">
+                <div class="input-group">
+                    <input type="text" id="company" placeholder=" " required>
+                    <label for="company">Название компании / ФИО</label>
+                </div>
+                <div class="input-group">
+                    <input type="text" id="contact_person" placeholder=" ">
+                    <label for="contact_person">Контактное лицо</label>
+                </div>
+                <div class="input-group">
+                    <input type="tel" id="phone" placeholder=" ">
+                    <label for="phone">Телефон</label>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" id="cancel-modal-btn">Отмена</button>
+                    <button type="submit" class="btn-primary">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

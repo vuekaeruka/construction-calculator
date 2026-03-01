@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Карточка клиента | Строительный калькулятор</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="navbar">
+        <div class="navbar-container">
+            <div class="logo">Логотип</div>
+            <div class="user-profile">
+                <div class="user-info-text">
+                    <span class="user-name">Менеджер</span>
+                    <span class="user-role">Отдел продаж</span>
+                </div>
+                <div class="avatar">М</div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <header class="page-header">
+            <div class="header-left">
+                <a href="../clients/index.html" class="btn-back" title="Вернуться к списку клиентов">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                </a>
+                <h1 class="page-title">Карточка клиента</h1>
+            </div>
+            <button class="btn-primary" id="open-calc-modal-btn">Создать расчет</button>
+        </header>
+
+        <div class="client-info-card" id="client-info-card">
+            <div class="client-info-header">
+                <h2 class="client-info-title">Информация о клиенте</h2>
+                <button class="btn-secondary btn-sm" id="edit-client-btn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                    </svg>
+                    Изменить
+                </button>
+            </div>
+            
+            <div class="client-details-grid">
+                <div class="detail-item">
+                    <span class="detail-label">ФИО</span>
+                    <div class="detail-value-group">
+                        <span id="display-name" class="detail-value">Загрузка...</span>
+                        <button class="icon-btn copy-btn" data-copy-target="display-name" title="Скопировать ФИО">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">Телефон</span>
+                    <div class="detail-value-group">
+                        <span id="display-phone" class="detail-value">Загрузка...</span>
+                        <button class="icon-btn copy-btn" data-copy-target="display-phone" title="Скопировать телефон">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">E-mail</span>
+                    <div class="detail-value-group">
+                        <span id="display-email" class="detail-value">Загрузка...</span>
+                        <button class="icon-btn copy-btn" data-copy-target="display-email" title="Скопировать E-mail">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="detail-item" id="org-container">
+                    <span class="detail-label">Организация</span>
+                    <span id="display-org" class="detail-value">Загрузка...</span>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">Город / Адрес</span>
+                    <span id="display-address" class="detail-value">Загрузка...</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-card">
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Расчет</th>
+                            <th>Дата</th>
+                            <th>Статус</th>
+                            <th>Адрес строительства</th>
+                            <th class="text-right">Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody id="calculations-table-body">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <div class="modal-overlay" id="edit-client-modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h2>Редактировать клиента</h2>
+                <button class="btn-close" id="close-edit-modal-btn" aria-label="Закрыть">×</button>
+            </div>
+            <form class="modal-form" id="edit-client-form">
+                <div class="input-group">
+                    <input type="text" id="edit-lastname" placeholder=" " required>
+                    <label for="edit-lastname">Фамилия</label>
+                </div>
+                <div class="input-group">
+                    <input type="text" id="edit-firstname" placeholder=" " required>
+                    <label for="edit-firstname">Имя</label>
+                </div>
+                <div class="input-group">
+                    <input type="text" id="edit-middlename" placeholder=" ">
+                    <label for="edit-middlename">Отчество</label>
+                </div>
+                <div class="input-group">
+                    <input type="text" id="edit-org" placeholder=" ">
+                    <label for="edit-org">Организация (необязательно)</label>
+                </div>
+                <div class="input-group">
+                    <input type="tel" id="edit-phone" placeholder=" ">
+                    <label for="edit-phone">Телефон</label>
+                </div>
+                <div class="input-group">
+                    <input type="email" id="edit-email" placeholder=" ">
+                    <label for="edit-email">E-mail</label>
+                </div>
+                <div class="input-group">
+                    <input type="text" id="edit-address" placeholder=" ">
+                    <label for="edit-address">Адрес</label>
+                </div>
+                <div class="modal-actions">
+                    <button type="submit" class="btn-primary">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="select-calc-modal">
+        <div class="modal-card select-calc-card">
+            <div class="modal-header">
+                <h2>Выбор конструктивного элемента</h2>
+                <button class="btn-close" id="close-calc-modal-btn" aria-label="Закрыть">×</button>
+            </div>
+            <div class="calc-options-grid">
+                <button class="calc-option-btn" data-type="frame">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"></path><path d="M5 21V7l7-4 7 4v14"></path><path d="M9 21v-4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v4"></path></svg>
+                    Каркас
+                </button>
+                <button class="calc-option-btn" data-type="foundation">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="18" width="18" height="4" rx="1"></rect><rect x="5" y="10" width="14" height="8"></rect><path d="M8 10V6"></path><path d="M16 10V6"></path></svg>
+                    Фундамент
+                </button>
+                <button class="calc-option-btn" data-type="roof">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="2 12 12 2 22 12"></polygon><path d="M12 2v20"></path></svg>
+                    Крыша
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
