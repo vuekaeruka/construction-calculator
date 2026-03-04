@@ -1,5 +1,5 @@
 from typing import Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 class UserSchema(BaseModel):
     id: int
@@ -20,15 +20,15 @@ class UserResponseSchema(BaseModel):
     role: str
 
 class UserCreateSchema(BaseModel):
-    last_name: str
-    first_name: str
-    role: Optional[str] = None
-    login: str
-    password: str
+    last_name: str = Field(max_length=255)
+    first_name: str = Field(max_length=255)
+    role: Optional[str] = Field(default=None, max_length=50)
+    login: str = Field(max_length=50)
+    password: str = Field(max_length=50)
 
 class UserUpdateSchema(BaseModel):
-    last_name: Optional[str] = None
-    first_name: Optional[str] = None
-    role: Optional[str] = None
-    login: Optional[str] = None
-    password: Optional[str] = None
+    last_name: Optional[str] = Field(default=None, max_length=255)
+    first_name: Optional[str] = Field(default=None, max_length=255)
+    role: Optional[str] = Field(default=None, max_length=50)
+    login: Optional[str] = Field(default=None, max_length=50)
+    password: Optional[str] = Field(default=None, max_length=50)
