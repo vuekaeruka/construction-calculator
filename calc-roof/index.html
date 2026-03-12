@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Расчет крыши | Строительный калькулятор</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="navbar">
+        <div class="navbar-container">
+            <div class="logo">Логотип</div>
+            <div class="user-profile">
+                <div class="user-info-text">
+                    <span class="user-name">Менеджер</span>
+                    <span class="user-role">Отдел продаж</span>
+                </div>
+                <div class="avatar">М</div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <header class="page-header">
+            <div class="header-left">
+                <a href="../client-card/index.html" class="btn-back" title="Вернуться в карточку клиента">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                </a>
+                <h1 class="page-title">Крыша</h1>
+            </div>
+            <div class="header-actions">
+                <button type="button" class="btn-secondary" id="clear-calc-btn">Очистить расчет</button>
+            </div>
+        </header>
+
+        <div class="client-mini-card">
+            <div class="client-details">
+                <span class="label">Клиент:</span>
+                <strong id="client-name">Загрузка...</strong>
+                <span class="sub-text" id="client-phone"></span>
+            </div>
+        </div>
+
+        <form id="calc-roof-form" class="calc-form" novalidate>
+            <div class="form-section address-section">
+                <div class="input-row">
+                    <div class="input-group" style="flex: 1;">
+                        <input type="text" id="object-address" placeholder=" " required>
+                        <label for="object-address">Ввести адрес объекта строительства</label>
+                    </div>
+                    <button type="button" class="btn-primary btn-sm" id="save-address-btn">Сохранить</button>
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-column">
+                    <div class="form-section">
+                        <h3 class="section-title">Конфигурация крыши</h3>
+                        <div class="input-group select-group">
+                            <label class="static-label">Тип крыши</label>
+                            <select id="roof-type" class="custom-select">
+                                <option value="gable">Двухскатная</option>
+                                <option value="shed">Односкатная</option>
+                                <option value="hip">Вальмовая (4 ската)</option>
+                                <option value="mansard">Мансардная</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3 class="section-title">Габариты (по коробке дома)</h3>
+                        <div class="input-group">
+                            <input type="number" id="house-length" placeholder=" " min="2" max="100" step="0.1" required>
+                            <label for="house-length">Длина дома, м</label>
+                        </div>
+                        <div class="input-group">
+                            <input type="number" id="house-width" placeholder=" " min="2" max="100" step="0.1" required>
+                            <label for="house-width">Ширина дома, м</label>
+                        </div>
+                        <div class="input-group">
+                            <input type="number" id="roof-height" placeholder=" " min="0.5" max="10" step="0.1" required>
+                            <label for="roof-height">Высота конька (от перекрытия), м</label>
+                        </div>
+                        <div class="input-group">
+                            <input type="number" id="overhang-length" placeholder=" " min="0.1" max="2" step="0.1" value="0.5" required>
+                            <label for="overhang-length">Длина свесов (карнизов), м</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-column">
+                    <div class="form-section">
+                        <h3 class="section-title">Кровельные материалы</h3>
+                        <div class="input-group select-group">
+                            <label class="static-label">Материал покрытия</label>
+                            <select id="roof-material" class="custom-select">
+                                <option value="metal" selected>Металлочерепица</option>
+                                <option value="corrugated">Профнастил</option>
+                                <option value="flexible">Гибкая черепица (с ОСБ)</option>
+                                <option value="onduline">Ондулин</option>
+                            </select>
+                        </div>
+                        <div class="input-group select-group">
+                            <label class="static-label">Водосточная система</label>
+                            <select id="gutter-system" class="custom-select">
+                                <option value="pvc">ПВХ (пластик)</option>
+                                <option value="metal">Металл</option>
+                                <option value="none">Не требуется</option>
+                            </select>
+                        </div>
+                        <div class="input-group select-group">
+                            <label class="static-label">Подшивка свесов (Софиты)</label>
+                            <select id="soffit-material" class="custom-select">
+                                <option value="plastic">Пластиковые софиты</option>
+                                <option value="wood">Деревянная вагонка</option>
+                                <option value="none">Без подшивки</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <label class="toggle-switch-wrapper">
+                            <input type="checkbox" id="toggle-insulation" class="toggle-input" checked>
+                            <span class="toggle-slider"></span>
+                            <h3 class="section-title toggle-title">Утепление кровли</h3>
+                        </label>
+                        
+                        <div class="collapsible-content active" id="insulation-content" style="display: flex;">
+                            <div class="input-group select-group">
+                                <label class="static-label">Материал утеплителя</label>
+                                <select id="insulation-material" class="custom-select">
+                                    <option value="mineral" selected>Минеральная вата</option>
+                                    <option value="basalt">Базальтовая вата</option>
+                                    <option value="eps">Пенополистирол (ЭППС)</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <input type="number" id="insulation-thickness" placeholder=" " min="50" max="400" step="10" value="200">
+                                <label for="insulation-thickness">Толщина утепления, мм</label>
+                            </div>
+                            <div class="input-group select-group">
+                                <label class="static-label">Гидро-пароизоляция</label>
+                                <select id="vapor-barrier" class="custom-select">
+                                    <option value="standard" selected>Стандартные мембраны</option>
+                                    <option value="premium">Премиум мембраны (с отражателем)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-primary btn-large">Рассчитать</button>
+            </div>
+        </form>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
