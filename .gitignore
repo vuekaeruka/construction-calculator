@@ -2,8 +2,12 @@
 __pycache__/
 *.pyc
 
+# Alembic
+#alembic.ini
+#migrations/**
+
 # SQLite
-*.db
+#*.db
 
 # ENV
-.env
+#.env
