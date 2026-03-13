@@ -1,29 +1,31 @@
 from typing import Optional
-from pydantic import BaseModel, Field
+from pydantic import Field
 
-class UserSchema(BaseModel):
+from src.schemas.base_schema import BaseSchema
+
+class UserSchema(BaseSchema):
     id: int
     last_name: str
     first_name: str
     login: str
     password: str
 
-class UserLoginSchema(BaseModel):
+class UserLoginSchema(BaseSchema):
     login: str
     password: str
 
-class UserResponseSchema(BaseModel):
+class UserResponseSchema(BaseSchema):
     id: int
     last_name: str
     first_name: str
 
-class UserCreateSchema(BaseModel):
+class UserCreateSchema(BaseSchema):
     last_name: str = Field(max_length=255)
     first_name: str = Field(max_length=255)
     login: str = Field(max_length=50)
     password: str = Field(max_length=50)
 
-class UserUpdateSchema(BaseModel):
+class UserUpdateSchema(BaseSchema):
     last_name: Optional[str] = Field(default=None, max_length=255)
     first_name: Optional[str] = Field(default=None, max_length=255)
     login: Optional[str] = Field(default=None, max_length=50)

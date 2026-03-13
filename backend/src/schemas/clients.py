@@ -1,8 +1,10 @@
 from typing import Optional
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import EmailStr, Field
 from datetime import datetime
 
-class ClientSchema(BaseModel):
+from src.schemas.base_schema import BaseSchema
+
+class ClientSchema(BaseSchema):
     id: int
     email: EmailStr
     phone_number: str
@@ -11,15 +13,22 @@ class ClientSchema(BaseModel):
     patronymic: str
     created_at: datetime
     updated_at: datetime
+
+class ClientFilter(BaseSchema):
+    email: Optional[str] = None
+    phone_number: Optional[str] = None
+    last_name: Optional[str] = None
+    first_name: Optional[str] = None
+    patronymic: Optional[str] = None
     
-class ClientCreateSchema(BaseModel):
+class ClientCreateSchema(BaseSchema):
     email: EmailStr = Field(max_length=255)
     phone_number: str = Field(max_length=30)
     last_name: str = Field(max_length=255)
     first_name: str = Field(max_length=255)
     patronymic: str = Field(max_length=255)
     
-class ClientUpdateSchema(BaseModel):
+class ClientUpdateSchema(BaseSchema):
     email: Optional[EmailStr] = Field(default=None, max_length=255)
     phone_number: Optional[str] = Field(default=None, max_length=30)
     last_name: Optional[str] = Field(default=None, max_length=255)

@@ -83,4 +83,4 @@ class SQLAlchemyRepository(AbstractRepository):
     async def delete(self, entity_id: int):
         stmt = delete(self.entity).filter_by(id=entity_id)
         result = await self._execute(stmt)
-        return result
+        return result if result.rowcount > 0 else None
