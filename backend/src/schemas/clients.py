@@ -15,11 +15,11 @@ class ClientSchema(BaseSchema):
     updated_at: datetime
 
 class ClientFilter(BaseSchema):
-    email: Optional[str] = None
-    phone_number: Optional[str] = None
-    last_name: Optional[str] = None
-    first_name: Optional[str] = None
-    patronymic: Optional[str] = None
+    email: Optional[EmailStr] = Field(default=None, max_length=255)
+    phone_number: Optional[str] = Field(default=None, max_length=30)
+    last_name: Optional[str] = Field(default=None, max_length=255)
+    first_name: Optional[str] = Field(default=None, max_length=255)
+    patronymic: Optional[str] = Field(default=None, max_length=255)
     
 class ClientCreateSchema(BaseSchema):
     email: EmailStr = Field(max_length=255)

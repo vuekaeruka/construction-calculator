@@ -5,7 +5,9 @@ from src.routes import *
 
 app = FastAPI(title="Construction Calculator API", prefix='/api')
 
-app.include_router(router=clients_router, prefix='/clients', tags=['clients'])
+app.include_router(router=clients_router)
+app.include_router(router=auth_router)
+app.include_router(router=users_router)
 
 app.add_middleware(
     CORSMiddleware,

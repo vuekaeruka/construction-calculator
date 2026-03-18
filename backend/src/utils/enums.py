@@ -1,4 +1,8 @@
-from enum import Enum, StrEnum
+from enum import StrEnum
+
+class TokenType(StrEnum):
+    ACCESS = 'access'
+    REFRESH = 'refresh'
 
 class CalcStatus(StrEnum):
     RELEVANT = 'Актуален'
