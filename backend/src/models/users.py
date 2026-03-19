@@ -1,6 +1,7 @@
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import Integer, String, DateTime, event
 from datetime import datetime
+from typing import List
 
 from src.models.base import BaseSQLModels
 
@@ -15,6 +16,12 @@ class User(BaseSQLModels):
     password: Mapped[str] = mapped_column(String(255), unique=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
+
+    calculations: Mapped[List['Calculation']] = relationship(
+        'Calculation',
+        lazy='selectin', 
+        back_populates='manager'
+    )
 
 @event.listens_for(User, "before_update")
 def set_expiration_on_update(mapper, connection, target):

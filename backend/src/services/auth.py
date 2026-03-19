@@ -10,7 +10,7 @@ from src.config import pwd_context, SecurityConfig, oauth2_scheme
 
 class AuthService:
 
-    async def registration(self, data: UserCreateSchema, uow: IUnitOfWork):
+    async def registration(self, uow: IUnitOfWork, data: UserCreateSchema):
         data.password = pwd_context.hash(data.password)
         async with uow:
             try:
@@ -22,7 +22,7 @@ class AuthService:
             except Exception as e:
                 raise HTTPException(status_code=400, detail=str(e))
     
-    async def login(self, login: str, password: str, uow: IUnitOfWork) -> dict:
+    async def login(self, uow: IUnitOfWork, login: str, password: str) -> dict:
         async with uow:
             user = await uow.users.get_one_filter_by(login=login)
             if not user or not pwd_context.verify(password, user.password):

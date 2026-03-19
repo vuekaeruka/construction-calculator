@@ -4,5 +4,5 @@ from src.models.materials import *
 class MaterialRepository(SQLAlchemyRepository):
     entity = Material
 
-class MaterialSubRepository(SQLAlchemyRepository):
+class MaterialCategoryRepository(SQLAlchemyRepository):
     entity = MaterialCategory

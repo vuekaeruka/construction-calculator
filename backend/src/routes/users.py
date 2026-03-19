@@ -13,7 +13,7 @@ async def create_user(uow: UOWdep, data: UserCreateSchema):
 
 @router.get("/me", status_code=200, response_model=UserSchema)
 async def get_me(uow: UOWdep, user_id: UserDep):
-    return await UserService.get_user_filter_by(user_id=user_id, uow=uow)
+    return await UserService.get_user_filter_by(uow, user_id)
 
 @router.get('/', status_code=200, response_model=List[UserSchema])
 async def get_users(uow: UOWdep, filters: UserFilter = Depends()):

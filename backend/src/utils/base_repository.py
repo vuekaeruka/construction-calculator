@@ -60,6 +60,7 @@ class SQLAlchemyRepository(AbstractRepository):
         stmt = insert(self.entity).values(**entity.__dict__).returning(self.entity)
         result = await self._execute(stmt)
         entity = result.scalars().first()
+        await self.session.refresh(entity)
         return entity
 
     async def get_all_filter_by(self, **kwargs):
@@ -78,6 +79,7 @@ class SQLAlchemyRepository(AbstractRepository):
         stmt = update(self.entity).filter_by(id=entity_id).values(**kwargs).returning(self.entity)
         result = await self._execute(stmt)
         entity = result.scalar_one_or_none()
+        await self.session.refresh(entity)
         return entity if entity else None
 
     async def delete(self, entity_id: int):

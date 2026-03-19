@@ -12,8 +12,6 @@ class UserSchema(BaseSchema):
     id: int
     last_name: str
     first_name: str
-    created_at: datetime
-    updated_at: datetime
 
 class UserFilter(BaseSchema):
     last_name: Optional[str] = Field(default=None, max_length=255)

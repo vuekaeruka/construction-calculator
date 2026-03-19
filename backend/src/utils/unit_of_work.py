@@ -14,7 +14,7 @@ class IUnitOfWork(ABC):
     construct_elements: Type[ConstructElementRepository]
     construct_sub_elements: Type[ConstructSubElementRepository]
     materials: Type[MaterialRepository]
-    material_subs: Type[MaterialSubRepository]
+    material_categories: Type[MaterialCategoryRepository]
     users: Type[UserRepository]
 
     @abstractmethod
@@ -32,7 +32,7 @@ class IUnitOfWork(ABC):
     @abstractmethod
     async def rollback(self):
         raise NotImplementedError()
-
+    
 class UnitOfWork(IUnitOfWork):
 
     def __init__(self):
@@ -48,7 +48,7 @@ class UnitOfWork(IUnitOfWork):
         self.construct_elements = ConstructElementRepository(self.session)
         self.construct_sub_elements = ConstructSubElementRepository(self.session)
         self.materials = MaterialRepository(self.session)
-        self.material_subs = MaterialSubRepository(self.session)
+        self.material_categories = MaterialCategoryRepository(self.session)
         self.users = UserRepository(self.session)
 
         return self

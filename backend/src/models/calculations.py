@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import Integer, String, DateTime, Numeric, ForeignKey, event
 from datetime import datetime, timedelta
 from decimal import Decimal
@@ -18,6 +18,19 @@ class Calculation(BaseSQLModels):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
     expires_at: Mapped[datetime] = mapped_column(DateTime)
+
+    manager: Mapped['User'] = relationship(
+        'User', 
+        foreign_keys=[manager_id], 
+        lazy='joined', 
+        back_populates='calculations'
+    )
+    client: Mapped['Client'] = relationship(
+        'Client', 
+        foreign_keys=[client_id], 
+        lazy='joined', 
+        back_populates='calculations'
+    )
     
 # Events
 @event.listens_for(Calculation, "before_insert")

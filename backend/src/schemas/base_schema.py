@@ -9,3 +9,7 @@ class BaseSchema(BaseModel):
     def sa_clean(obj: Any) -> dict:
         if hasattr(obj, "__dict__"):
             return {k: v for k, v in obj.__dict__.items() if not k.startswith("_sa")}
+        
+    model_config = {
+        "from_attributes": True
+    }

@@ -6,7 +6,7 @@ from src.schemas.clients import ClientCreateSchema, ClientUpdateSchema, ClientFi
 class ClientService:
     
     @staticmethod
-    async def create_client(data: ClientCreateSchema, uow: IUnitOfWork):
+    async def create_client(uow: IUnitOfWork, data: ClientCreateSchema):
         async with uow:
             new_client = await uow.clients.create(data)
             await uow.commit()
@@ -27,7 +27,7 @@ class ClientService:
             return client
         
     @staticmethod
-    async def update_client(client_id: int, data: ClientUpdateSchema, uow: IUnitOfWork):
+    async def update_client(uow: IUnitOfWork, client_id: int, data: ClientUpdateSchema):
         async with uow:
             upd_client = await uow.clients.update(entity_id=client_id, **data.clean_dict())
             if not upd_client:
@@ -36,7 +36,7 @@ class ClientService:
             return upd_client
         
     @staticmethod
-    async def delete_client(client_id: int, uow: IUnitOfWork):
+    async def delete_client(uow: IUnitOfWork, client_id: int):
         async with uow:
             del_client = await uow.clients.delete(client_id)
             if not del_client:

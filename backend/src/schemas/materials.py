@@ -2,23 +2,12 @@ from typing import Optional
 from pydantic import Field
 
 from src.schemas.base_schema import BaseSchema
-
-class MaterialCategorySchema(BaseSchema):
-    id: int
-    name: str
-
-class MaterialCategoryCreateSchema(BaseSchema):
-    id: int
-    name: str = Field(max_length=255)
-
-class MaterialCategoryCreateSchema(BaseSchema):
-    id: int
-    name: Optional[str] = Field(default=None, max_length=255)
-
+from src.schemas.material_categories import MaterialCategorySchema
 
 class MaterialSchema(BaseSchema):
     id: int
-    category_name: str
+    category: MaterialCategorySchema
+    name: str
     unit: str
     cost_price: float
     market_price: float
@@ -31,7 +20,14 @@ class MaterialCreateSchema(BaseSchema):
     market_price: float = Field(gt=0)
 
 class MaterialUpdateSchema(BaseSchema):
-    category_id: Optional[int] = None
+    category_id: Optional[int] = Field(default=None)
+    name: Optional[str] = Field(default=None, max_length=255)
+    unit: Optional[str] = Field(default=None, max_length=50)
+    cost_price: Optional[float] = Field(default=None, gt=0)
+    market_price: Optional[float] = Field(default=None, gt=0)
+
+class MaterialFilterSchema(BaseSchema):
+    category_id: Optional[int] = Field(default=None)
     name: Optional[str] = Field(default=None, max_length=255)
     unit: Optional[str] = Field(default=None, max_length=50)
     cost_price: Optional[float] = Field(default=None, gt=0)

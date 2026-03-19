@@ -11,8 +11,6 @@ class ClientSchema(BaseSchema):
     last_name: str
     first_name: str
     patronymic: str
-    created_at: datetime
-    updated_at: datetime
 
 class ClientFilter(BaseSchema):
     email: Optional[EmailStr] = Field(default=None, max_length=255)
