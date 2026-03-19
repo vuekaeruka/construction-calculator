@@ -148,9 +148,6 @@ body {
 .custom-select:focus { border-color: var(--accent); }
 .custom-select option { background: var(--bg-main); color: var(--text-primary); }
 
-/* Ряды для габаритов (высота, ширина, кол-во) */
-.dimensions-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
-
 /* Toggle Switch (Переключатели) */
 .toggle-switch-wrapper { display: flex; align-items: center; cursor: pointer; gap: 12px; margin-bottom: 8px; }
 .toggle-title { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
@@ -168,3 +165,61 @@ body {
 
 /* Подвал формы */
 .form-actions { display: flex; justify-content: flex-end; padding-top: 24px; border-top: 1px solid var(--border-color); margin-top: 16px; }
+
+
+/* ==========================================================================
+   --- ДИНАМИЧЕСКИЕ ПРОЕМЫ (Двери и Окна) ---
+   ========================================================================== */
+
+.proem-section {
+    margin-bottom: 24px;
+}
+
+.proem-row {
+    display: flex;
+    gap: 16px; /* Расстояние между полями ввода */
+    align-items: flex-end; /* Выравниваем поля и кнопку по нижней линии инпута */
+    margin-bottom: 16px;
+}
+
+/* Инпуты делят ширину строки поровну */
+.proem-row .input-group {
+    flex: 1;
+    min-width: 0; /* Фикс для flexbox, чтобы инпуты не вылезали за контейнер */
+}
+
+/* Стили для кнопок Плюс (+) и Минус (-) */
+.icon-btn {
+    border: none;
+    background: transparent;
+    padding: 8px;
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Кнопка должна стоять на одной линии с линией подчеркивания инпута */
+    margin-bottom: 4px; 
+}
+
+/* Зеленый цвет для плюсика */
+.add-proem {
+    color: #10B981; 
+}
+.add-proem:hover {
+    background-color: rgba(16, 185, 129, 0.1);
+}
+
+/* Красный цвет для минуса */
+.remove-proem {
+    color: var(--accent); /* Используем ваш красный из переменных */
+}
+.remove-proem:hover {
+    background-color: rgba(239, 68, 68, 0.1);
+}
+
+/* Настройки иконки внутри кнопки */
+.icon-btn svg {
+    stroke-width: 2.5;
+}

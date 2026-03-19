@@ -9,7 +9,6 @@ document.addEventListener('DOMContentLoaded', () => {
         email: 'test@example.com'
     };
 
-    // Моковые данные уже созданных расчетов
     let clientCalculations = [
         { id: 101, name: 'Расчет №101', type: 'Каркас', date: '02.02.2026', status: 'active', address: 'г. Ульяновск, ул. Тестовая, д. 35' },
         { id: 102, name: 'Расчет №102', type: 'Фундамент', date: '03.02.2026', status: 'inactive', address: 'г. Ульяновск, ул. Тестовая, д. 35' },
@@ -25,6 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const editClientModal = document.getElementById('edit-client-modal');
     const editClientForm = document.getElementById('edit-client-form');
     const closeEditModalBtn = document.getElementById('close-edit-modal-btn');
+    const cancelEditModalBtn = document.getElementById('cancel-edit-modal-btn'); // Новая кнопка
     
     const inputLastName = document.getElementById('edit-lastname');
     const inputFirstName = document.getElementById('edit-firstname');
@@ -47,7 +47,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const renderTable = () => {
         tableBody.innerHTML = '';
-        
         if (clientCalculations.length === 0) {
             tableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-secondary); padding: 32px;">Нет сохраненных расчетов</td></tr>`;
             return;
@@ -55,14 +54,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         clientCalculations.forEach(calc => {
             const tr = document.createElement('tr');
-            tr.style.cursor = 'pointer'; // Делаем строку визуально кликабельной
+            tr.style.cursor = 'pointer'; 
             
             let statusBadge = '';
             if (calc.status === 'active') statusBadge = '<span class="badge active">Актуален</span>';
             else if (calc.status === 'inactive') statusBadge = '<span class="badge inactive">Не актуален</span>';
             else if (calc.status === 'contract') statusBadge = '<span class="badge contract">Заключен договор</span>';
 
-            // ИМЕННО ЗДЕСЬ мы формируем ссылку на страницу результатов расчета
             const calcUrl = `../calculation/index.html?clientId=${currentClient.id}&calcId=${calc.id}`;
 
             tr.innerHTML = `
@@ -87,7 +85,6 @@ document.addEventListener('DOMContentLoaded', () => {
             tableBody.appendChild(tr);
         });
 
-        // Обработчики для кнопок внутри строки (чтобы не срабатывал переход по строке)
         document.querySelectorAll('.icon-btn.copy').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation(); 
@@ -106,7 +103,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    // --- Логика копирования текста ---
     document.querySelectorAll('.copy-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             const targetId = btn.dataset.copyTarget;
@@ -116,7 +112,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const originalHTML = btn.innerHTML;
                 btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
                 btn.classList.add('success');
-                
                 setTimeout(() => {
                     btn.innerHTML = originalHTML;
                     btn.classList.remove('success');
@@ -132,12 +127,14 @@ document.addEventListener('DOMContentLoaded', () => {
         inputMiddleName.value = currentClient.middleName || '';
         inputPhone.value = currentClient.phone || '';
         inputEmail.value = currentClient.email || '';
-        
         editClientModal.classList.add('active');
     });
 
     closeEditModalBtn.addEventListener('click', () => editClientModal.classList.remove('active'));
+    // Закрытие по новой кнопке "Отмена"
+    cancelEditModalBtn.addEventListener('click', () => editClientModal.classList.remove('active'));
     
+    // --- ВАЛИДАЦИЯ ФОРМЫ ---
     const validateEditForm = () => {
         const lastName = inputLastName.value.trim();
         const firstName = inputFirstName.value.trim();
@@ -145,15 +142,20 @@ document.addEventListener('DOMContentLoaded', () => {
         const phone = inputPhone.value.trim();
         const email = inputEmail.value.trim();
 
-        const hasDigits = /\d/;
-        if (hasDigits.test(lastName) || hasDigits.test(firstName) || hasDigits.test(middleName) || !lastName || !firstName) {
-            alert('Пожалуйста, введите корректные ФИО. Использование цифр недопустимо, поля "Имя" и "Фамилия" обязательны.');
+        const nameRegex = /^[a-zA-Zа-яА-ЯёЁ\s\-]+$/;
+        if (!lastName || !firstName) {
+            alert('Поля "Фамилия" и "Имя" обязательны для заполнения.');
+            if (!lastName) inputLastName.focus(); else inputFirstName.focus();
+            return false;
+        }
+        if (!nameRegex.test(lastName) || !nameRegex.test(firstName) || (middleName && !nameRegex.test(middleName))) {
+            alert('Пожалуйста, используйте только буквы, пробелы и дефисы в полях ФИО.');
             return false;
         }
 
-        const phoneRegex = /^[\+\(\)\- \d]{7,18}$/;
-        if (!phoneRegex.test(phone) || /[a-zA-Zа-яА-Я]/.test(phone)) {
-            alert('Введите корректный номер телефона. Разрешены только цифры и символы + ( ) -');
+        const rawPhoneDigits = phone.replace(/\D/g, '');
+        if (rawPhoneDigits.length < 11) {
+            alert('Введите корректный номер телефона (не менее 11 цифр).');
             inputPhone.focus();
             return false;
         }
@@ -175,18 +177,66 @@ document.addEventListener('DOMContentLoaded', () => {
         currentClient.lastName = inputLastName.value;
         currentClient.firstName = inputFirstName.value;
         currentClient.middleName = inputMiddleName.value;
-        currentClient.phone = inputPhone.value;
+        currentClient.phone = inputPhone.value; 
         currentClient.email = inputEmail.value;
         
         renderClientInfo();
         editClientModal.classList.remove('active');
     });
 
-    const removeDigits = function() { this.value = this.value.replace(/\d/g, ''); };
-    inputLastName.addEventListener('input', removeDigits);
-    inputFirstName.addEventListener('input', removeDigits);
-    inputMiddleName.addEventListener('input', removeDigits);
-    inputPhone.addEventListener('input', function() { this.value = this.value.replace(/[a-zA-Zа-яА-Я]/g, ''); });
+    // --- УМНАЯ ЕДИНАЯ МАСКИРОВКА ВВОДА ---
+    const onlyLetters = function() { 
+        this.value = this.value.replace(/[^a-zA-Zа-яА-ЯёЁ\s\-]/g, ''); 
+    };
+    
+    inputLastName.addEventListener('input', onlyLetters);
+    inputFirstName.addEventListener('input', onlyLetters);
+    inputMiddleName.addEventListener('input', onlyLetters);
+    
+    const onPhoneInput = function (e) {
+        let input = e.target;
+        let inputNumbersValue = input.value.replace(/\D/g, '').substring(0, 11);
+        let selectionStart = input.selectionStart;
+        let formattedInputValue = "";
+
+        if (!inputNumbersValue) {
+            return input.value = "";
+        }
+
+        if (input.value.length != selectionStart) {
+            if (e.data && /\D/g.test(e.data)) {
+                input.value = inputNumbersValue;
+            }
+            return;
+        }
+
+        formattedInputValue = '+' + inputNumbersValue[0];
+        
+        if (inputNumbersValue.length > 1) {
+            formattedInputValue += ' (' + inputNumbersValue.substring(1, 4);
+        }
+        if (inputNumbersValue.length >= 5) {
+            formattedInputValue += ') ' + inputNumbersValue.substring(4, 7);
+        }
+        if (inputNumbersValue.length >= 8) {
+            formattedInputValue += '-' + inputNumbersValue.substring(7, 9);
+        }
+        if (inputNumbersValue.length >= 10) {
+            formattedInputValue += '-' + inputNumbersValue.substring(9, 11);
+        }
+        
+        input.value = formattedInputValue;
+    };
+
+    const onPhoneKeyDown = function (e) {
+        let inputValue = e.target.value.replace(/\D/g, '');
+        if (e.keyCode == 8 && inputValue.length == 1) {
+            e.target.value = "";
+        }
+    };
+
+    inputPhone.addEventListener('input', onPhoneInput);
+    inputPhone.addEventListener('keydown', onPhoneKeyDown);
 
     // --- Логика Модалки Создания Расчета ---
     openCalcModalBtn.addEventListener('click', () => selectCalcModal.classList.add('active'));
@@ -195,20 +245,15 @@ document.addEventListener('DOMContentLoaded', () => {
     calcOptionBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             const type = btn.dataset.type;
-            
-            // Клик по созданию НОВОГО расчета переводит на формы
             if (type === 'frame') window.location.href = `../calc-frame/index.html?clientId=${currentClient.id}`;
             else if (type === 'foundation') window.location.href = `../calc-foundation/index.html?clientId=${currentClient.id}`;
             else if (type === 'roof') window.location.href = `../calc-roof/index.html?clientId=${currentClient.id}`;
-            
             selectCalcModal.classList.remove('active');
         });
     });
 
-    window.addEventListener('click', (e) => {
-        if (e.target === editClientModal) editClientModal.classList.remove('active');
-        if (e.target === selectCalcModal) selectCalcModal.classList.remove('active');
-    });
+    // Обработчик window.addEventListener('click'...) ПОЛНОСТЬЮ УДАЛЕН отсюда!
+    // Теперь окна не будут закрываться при клике мимо них.
 
     // Первичная отрисовка
     renderClientInfo();

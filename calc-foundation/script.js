@@ -1,16 +1,27 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // --- 1. ИНИЦИАЛИЗАЦИЯ ДАННЫХ КЛИЕНТА (Mock) ---
+    // --- 1. ИНИЦИАЛИЗАЦИЯ ДАННЫХ И УМНАЯ КНОПКА "НАЗАД" ---
     const urlParams = new URLSearchParams(window.location.search);
-    const clientId = urlParams.get('clientId');
+    const clientId = urlParams.get('clientId') || '1';
+    const calcId = urlParams.get('calcId');
     const backBtn = document.querySelector('.btn-back');
 
-    if (clientId) {
-        backBtn.href = `../client-card/index.html?id=${clientId}`;
+    if (backBtn) {
+        backBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (window.history.length > 1 && document.referrer) {
+                window.history.back();
+            } else {
+                if (calcId) {
+                    window.location.href = `../calculation/index.html?clientId=${clientId}&calcId=${calcId}`;
+                } else {
+                    window.location.href = `../client-card/index.html?id=${clientId}`;
+                }
+            }
+        });
     }
 
     const form = document.getElementById('calc-foundation-form');
     const clearBtn = document.getElementById('clear-calc-btn');
-    const saveAddressBtn = document.getElementById('save-address-btn');
     const addressInput = document.getElementById('object-address');
 
     const foundationTypeSelect = document.getElementById('foundation-type');
@@ -111,7 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
     form.addEventListener('submit', (e) => {
         e.preventDefault();
 
-        // 1. Проверка адреса
+        // 1. Проверка адреса (обязательно проверяем перед расчетом)
         if (addressInput.value.trim() === '') {
             alert('Пожалуйста, введите адрес объекта строительства.');
             addressInput.focus();
@@ -137,36 +148,17 @@ document.addEventListener('DOMContentLoaded', () => {
         // 4. Проверка дополнительных материалов
         if (!validateNumber('sand-cushion', 'Песчаная подушка')) return;
 
-        // Если все проверки пройдены, переходим на страницу результатов
+        // Переходим на страницу результатов (смета)
         window.location.href = '../calculation/index.html';
     });
 
     clearBtn.addEventListener('click', () => {
         if(confirm('Вы уверены, что хотите сбросить все введенные данные?')) {
             form.reset(); 
-            // Сбрасываем видимость секций
             foundationTypeSelect.dispatchEvent(new Event('change')); 
             toggleRebar.dispatchEvent(new Event('change'));
-            
             document.querySelectorAll('.custom-select').forEach(select => select.selectedIndex = 0);
             setTimeout(() => textInputs.forEach(input => updateLabelState(input)), 10);
         }
-    });
-
-    saveAddressBtn.addEventListener('click', () => {
-        const address = addressInput.value.trim();
-        if (address === '') {
-            alert('Пожалуйста, введите адрес объекта.');
-            return;
-        }
-        const originalText = saveAddressBtn.textContent;
-        saveAddressBtn.textContent = 'Сохранено!';
-        saveAddressBtn.style.backgroundColor = '#10B981';
-        saveAddressBtn.style.color = '#fff';
-        setTimeout(() => {
-            saveAddressBtn.textContent = originalText;
-            saveAddressBtn.style.backgroundColor = ''; 
-            saveAddressBtn.style.color = '';
-        }, 2000);
     });
 });

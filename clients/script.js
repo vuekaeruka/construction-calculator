@@ -13,7 +13,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('search-input');
     const logoutBtn = document.getElementById('logout-btn');
 
-    // Элементы Фильтров
     const filterBtn = document.getElementById('filter-btn');
     const filterDropdown = document.getElementById('filter-dropdown');
     const filterBadge = document.getElementById('filter-badge');
@@ -22,20 +21,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const statusCheckboxes = document.querySelectorAll('.status-filter');
     const projectsSelect = document.getElementById('projects-filter');
     
-    // Элементы модального окна создания
     const modalOverlay = document.getElementById('create-modal');
     const createClientForm = document.getElementById('create-client-form');
     
-    // Поля ввода
-    const fullnameInput = document.getElementById('fullname');
+    const lastnameInput = document.getElementById('lastname');
+    const firstnameInput = document.getElementById('firstname');
+    const middlenameInput = document.getElementById('middlename');
     const phoneInput = document.getElementById('phone');
     const emailInput = document.getElementById('email');
 
-    // --- Логика редиректа на страницу логина ---
+    // --- Логика редиректа ---
     if (logoutBtn) {
-        logoutBtn.addEventListener('click', () => {
-            window.location.href = '../login/index.html';
-        });
+        logoutBtn.addEventListener('click', () => { window.location.href = '../login/index.html'; });
     }
 
     // --- Логика рендеринга таблицы ---
@@ -48,12 +45,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         data.forEach(client => {
             const tr = document.createElement('tr');
-            
-            // Делаем всю строку кликабельной для перехода в карточку
             tr.style.cursor = 'pointer';
-            tr.onclick = () => {
-                window.location.href = `../client-card/index.html?id=${client.id}`;
-            };
+            tr.onclick = () => { window.location.href = `../client-card/index.html?id=${client.id}`; };
 
             const statusBadge = client.status === 'active'
                 ? '<span class="badge active">В работе</span>'
@@ -75,21 +68,16 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    // --- Ядро: Общая функция поиска и фильтрации ---
+    // --- Фильтры ---
     const applySearchAndFilters = () => {
         const query = searchInput.value.toLowerCase().trim();
-
-        const activeStatuses = Array.from(statusCheckboxes)
-            .filter(cb => cb.checked)
-            .map(cb => cb.value);
-
+        const activeStatuses = Array.from(statusCheckboxes).filter(cb => cb.checked).map(cb => cb.value);
         const projectFilterValue = projectsSelect.value;
         
         const isFilterModified = activeStatuses.length < 2 || projectFilterValue !== 'all';
         filterBadge.style.display = isFilterModified ? 'inline-block' : 'none';
 
         const filteredData = clientsData.filter(client => {
-            // Ищем только по ФИО
             const matchesSearch = client.fullName.toLowerCase().includes(query);
             const matchesStatus = activeStatuses.includes(client.status);
             
@@ -102,64 +90,47 @@ document.addEventListener('DOMContentLoaded', () => {
         renderTable(filteredData);
     };
 
-    // --- Управление Dropdown Фильтра ---
-    filterBtn.addEventListener('click', (e) => {
-        e.stopPropagation(); 
-        filterDropdown.classList.toggle('active');
-    });
-
-    document.addEventListener('click', (e) => {
-        if (!filterDropdown.contains(e.target) && e.target !== filterBtn) {
-            filterDropdown.classList.remove('active');
-        }
-    });
-
-    applyFiltersBtn.addEventListener('click', () => {
-        applySearchAndFilters();
-        filterDropdown.classList.remove('active');
-    });
-
-    resetFiltersBtn.addEventListener('click', () => {
-        statusCheckboxes.forEach(cb => cb.checked = true);
-        projectsSelect.value = 'all';
-        applySearchAndFilters();
-    });
-
+    filterBtn.addEventListener('click', (e) => { e.stopPropagation(); filterDropdown.classList.toggle('active'); });
+    document.addEventListener('click', (e) => { if (!filterDropdown.contains(e.target) && e.target !== filterBtn) filterDropdown.classList.remove('active'); });
+    applyFiltersBtn.addEventListener('click', () => { applySearchAndFilters(); filterDropdown.classList.remove('active'); });
+    resetFiltersBtn.addEventListener('click', () => { statusCheckboxes.forEach(cb => cb.checked = true); projectsSelect.value = 'all'; applySearchAndFilters(); });
     searchInput.addEventListener('input', applySearchAndFilters);
 
-    // --- Управление Модальным окном создания ---
     document.getElementById('open-modal-btn').addEventListener('click', () => modalOverlay.classList.add('active'));
     document.getElementById('close-modal-btn').addEventListener('click', () => modalOverlay.classList.remove('active'));
     document.getElementById('cancel-modal-btn').addEventListener('click', () => modalOverlay.classList.remove('active'));
 
-    // --- ВАЛИДАЦИЯ И ОБРАБОТКА ФОРМЫ ---
-    
-    // Вспомогательная функция для проверки
+    // --- ВАЛИДАЦИЯ ---
     const validateForm = () => {
-        const fullname = fullnameInput.value.trim();
+        const lastName = lastnameInput.value.trim();
+        const firstName = firstnameInput.value.trim();
+        const middleName = middlenameInput.value.trim();
         const phone = phoneInput.value.trim();
         const email = emailInput.value.trim();
 
-        // 1. Проверка ФИО: запрещены цифры, лимит уже стоит в HTML (maxlength="50")
-        const hasDigits = /\d/.test(fullname);
-        if (hasDigits || fullname === '') {
-            alert('Пожалуйста, введите корректное ФИО. Использование цифр недопустимо.');
-            fullnameInput.focus();
+        const nameRegex = /^[a-zA-Zа-яА-ЯёЁ\s\-]+$/;
+        
+        if (!lastName || !firstName) {
+            alert('Поля "Фамилия" и "Имя" обязательны для заполнения.');
+            if (!lastName) lastnameInput.focus(); else firstnameInput.focus();
             return false;
         }
 
-        // 2. Проверка телефона: разрешены +, -, скобки, пробелы и цифры. Длина от 7 до 18. Буквы запрещены.
-        const phoneRegex = /^[\+\(\)\- \d]{7,18}$/;
-        if (!phoneRegex.test(phone) || /[a-zA-Zа-яА-Я]/.test(phone)) {
-            alert('Введите корректный номер телефона. Разрешены только цифры и символы + ( ) -');
+        if (!nameRegex.test(lastName) || !nameRegex.test(firstName) || (middleName && !nameRegex.test(middleName))) {
+            alert('Пожалуйста, используйте только буквы, пробелы и дефисы в полях ФИО.');
+            return false;
+        }
+
+        const rawPhoneDigits = phone.replace(/\D/g, '');
+        if (rawPhoneDigits.length < 11) {
+            alert('Введите корректный номер телефона (не менее 11 цифр).');
             phoneInput.focus();
             return false;
         }
 
-        // 3. Проверка Email: обязательно наличие @ и точки после неё
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
-            alert('Введите корректный email адрес (например: example@mail.ru).');
+            alert('Введите корректный email адрес.');
             emailInput.focus();
             return false;
         }
@@ -168,27 +139,67 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     createClientForm.addEventListener('submit', (e) => {
-        e.preventDefault(); // Останавливаем стандартную отправку формы
-        
-        // Если валидация не пройдена, прерываем выполнение
-        if (!validateForm()) {
-            return; 
-        }
-
-        // Если всё окей — редирект в карточку нового клиента
+        e.preventDefault(); 
+        if (!validateForm()) return; 
         window.location.href = '../client-card/index.html?id=new'; 
     });
 
-    // Ограничение ввода в реальном времени
-    fullnameInput.addEventListener('input', function() {
-        // Удаляем цифры прямо во время ввода
-        this.value = this.value.replace(/\d/g, '');
-    });
+    // --- УМНАЯ ЕДИНАЯ МАСКИРОВКА ВВОДА ---
+    
+    const onlyLetters = function() {
+        this.value = this.value.replace(/[^a-zA-Zа-яА-ЯёЁ\s\-]/g, '');
+    };
+    lastnameInput.addEventListener('input', onlyLetters);
+    firstnameInput.addEventListener('input', onlyLetters);
+    middlenameInput.addEventListener('input', onlyLetters);
 
-    phoneInput.addEventListener('input', function() {
-        // Удаляем буквы во время ввода
-        this.value = this.value.replace(/[a-zA-Zа-яА-Я]/g, '');
-    });
+    const onPhoneInput = function (e) {
+        let input = e.target;
+        // Оставляем только цифры и сразу обрубаем всё, что длиннее 11 символов
+        let inputNumbersValue = input.value.replace(/\D/g, '').substring(0, 11); 
+        let selectionStart = input.selectionStart;
+        let formattedInputValue = "";
+
+        if (!inputNumbersValue) {
+            return input.value = "";
+        }
+
+        if (input.value.length != selectionStart) {
+            if (e.data && /\D/g.test(e.data)) {
+                input.value = inputNumbersValue;
+            }
+            return;
+        }
+
+        // Строгий формат: +X (XXX) XXX-XX-XX
+        formattedInputValue = '+' + inputNumbersValue[0];
+        
+        if (inputNumbersValue.length > 1) {
+            formattedInputValue += ' (' + inputNumbersValue.substring(1, 4);
+        }
+        if (inputNumbersValue.length >= 5) {
+            formattedInputValue += ') ' + inputNumbersValue.substring(4, 7);
+        }
+        if (inputNumbersValue.length >= 8) {
+            formattedInputValue += '-' + inputNumbersValue.substring(7, 9);
+        }
+        if (inputNumbersValue.length >= 10) {
+            // Теперь здесь жестко substring(9, 11), хвост не пройдет
+            formattedInputValue += '-' + inputNumbersValue.substring(9, 11);
+        }
+        
+        input.value = formattedInputValue;
+    };
+
+    const onPhoneKeyDown = function (e) {
+        let inputValue = e.target.value.replace(/\D/g, '');
+        if (e.keyCode == 8 && inputValue.length == 1) {
+            e.target.value = "";
+        }
+    };
+
+    phoneInput.addEventListener('input', onPhoneInput);
+    phoneInput.addEventListener('keydown', onPhoneKeyDown);
 
     // Инициализация
     renderTable(clientsData);

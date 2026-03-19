@@ -40,6 +40,24 @@ The content is organized as follows:
 </file_summary>
 
 <directory_structure>
+calc-foundation/index.html
+calc-foundation/script.js
+calc-foundation/style.css
+calc-frame/index.html
+calc-frame/script.js
+calc-frame/style.css
+calc-roof/index.html
+calc-roof/script.js
+calc-roof/style.css
+calculation/index.html
+calculation/script.js
+calculation/style.css
+client-card/index.html
+client-card/script.js
+client-card/style.css
+clients/index.html
+clients/script.js
+clients/style.css
 construction-calculator/.git/COMMIT_EDITMSG
 construction-calculator/.git/config
 construction-calculator/.git/description
@@ -88,28 +106,13 @@ construction-calculator/.git/refs/heads/frontend
 construction-calculator/.git/refs/heads/main
 construction-calculator/.git/refs/remotes/origin/frontend
 construction-calculator/.git/refs/remotes/origin/HEAD
-construction-calculator/calc-foundation/index.html
-construction-calculator/calc-foundation/script.js
-construction-calculator/calc-foundation/style.css
-construction-calculator/calc-frame/index.html
-construction-calculator/calc-frame/script.js
-construction-calculator/calc-frame/style.css
-construction-calculator/calc-roof/index.html
-construction-calculator/calc-roof/script.js
-construction-calculator/calc-roof/style.css
-construction-calculator/calculation/index.html
-construction-calculator/calculation/script.js
-construction-calculator/calculation/style.css
-construction-calculator/client-card/index.html
-construction-calculator/client-card/script.js
-construction-calculator/client-card/style.css
-construction-calculator/clients/index.html
-construction-calculator/clients/script.js
-construction-calculator/clients/style.css
-construction-calculator/login/index.html
-construction-calculator/login/script.js
-construction-calculator/login/style.css
-construction-calculator/README.md
+construction-calculator/repomix-output.xml
+login/index.html
+login/script.js
+login/style.css
+pic/logo.png
+pic/view.png
+README.md
 </directory_structure>
 
 <files>
@@ -145,7 +148,7 @@ Unnamed repository; edit this file 'description' to name the repository.
 
 <file path="construction-calculator/.git/gk/config">
 [branch "frontend"]
-	gk-last-accessed = 2026-03-12T13:50:11.078Z
+	gk-last-accessed = 2026-03-19T17:49:49.516Z
 	gk-last-modified = 2026-03-01T19:38:13.421Z
 </file>
 
@@ -1120,7 +1123,7 @@ c07892c0caf0b6d96e626c0b51703702051e5a1c
 ref: refs/remotes/origin/main
 </file>
 
-<file path="construction-calculator/calc-foundation/index.html">
+<file path="calc-foundation/index.html">
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -1149,7 +1152,7 @@ ref: refs/remotes/origin/main
     <main class="container">
         <header class="page-header">
             <div class="header-left">
-                <a href="../client-card/index.html" class="btn-back" title="Вернуться в карточку клиента">
+                <a href="../client-card/index.html" class="btn-back" title="Вернуться назад">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="19" y1="12" x2="5" y2="12"></line>
                         <polyline points="12 19 5 12 12 5"></polyline>
@@ -1172,12 +1175,9 @@ ref: refs/remotes/origin/main
 
         <form id="calc-foundation-form" class="calc-form" novalidate>
             <div class="form-section address-section">
-                <div class="input-row">
-                    <div class="input-group" style="flex: 1;">
-                        <input type="text" id="object-address" placeholder=" " required>
-                        <label for="object-address">Ввести адрес объекта строительства</label>
-                    </div>
-                    <button type="button" class="btn-primary btn-sm" id="save-address-btn">Сохранить</button>
+                <div class="input-group">
+                    <input type="text" id="object-address" placeholder=" " required>
+                    <label for="object-address">Ввести адрес объекта строительства</label>
                 </div>
             </div>
 
@@ -1305,20 +1305,31 @@ ref: refs/remotes/origin/main
 </html>
 </file>
 
-<file path="construction-calculator/calc-foundation/script.js">
+<file path="calc-foundation/script.js">
 document.addEventListener('DOMContentLoaded', () => {
-    // --- 1. ИНИЦИАЛИЗАЦИЯ ДАННЫХ КЛИЕНТА (Mock) ---
+    // --- 1. ИНИЦИАЛИЗАЦИЯ ДАННЫХ И УМНАЯ КНОПКА "НАЗАД" ---
     const urlParams = new URLSearchParams(window.location.search);
-    const clientId = urlParams.get('clientId');
+    const clientId = urlParams.get('clientId') || '1';
+    const calcId = urlParams.get('calcId');
     const backBtn = document.querySelector('.btn-back');
 
-    if (clientId) {
-        backBtn.href = `../client-card/index.html?id=${clientId}`;
+    if (backBtn) {
+        backBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (window.history.length > 1 && document.referrer) {
+                window.history.back();
+            } else {
+                if (calcId) {
+                    window.location.href = `../calculation/index.html?clientId=${clientId}&calcId=${calcId}`;
+                } else {
+                    window.location.href = `../client-card/index.html?id=${clientId}`;
+                }
+            }
+        });
     }
 
     const form = document.getElementById('calc-foundation-form');
     const clearBtn = document.getElementById('clear-calc-btn');
-    const saveAddressBtn = document.getElementById('save-address-btn');
     const addressInput = document.getElementById('object-address');
 
     const foundationTypeSelect = document.getElementById('foundation-type');
@@ -1419,7 +1430,7 @@ document.addEventListener('DOMContentLoaded', () => {
     form.addEventListener('submit', (e) => {
         e.preventDefault();
 
-        // 1. Проверка адреса
+        // 1. Проверка адреса (обязательно проверяем перед расчетом)
         if (addressInput.value.trim() === '') {
             alert('Пожалуйста, введите адрес объекта строительства.');
             addressInput.focus();
@@ -1445,42 +1456,23 @@ document.addEventListener('DOMContentLoaded', () => {
         // 4. Проверка дополнительных материалов
         if (!validateNumber('sand-cushion', 'Песчаная подушка')) return;
 
-        // Если все проверки пройдены, переходим на страницу результатов
+        // Переходим на страницу результатов (смета)
         window.location.href = '../calculation/index.html';
     });
 
     clearBtn.addEventListener('click', () => {
         if(confirm('Вы уверены, что хотите сбросить все введенные данные?')) {
             form.reset(); 
-            // Сбрасываем видимость секций
             foundationTypeSelect.dispatchEvent(new Event('change')); 
             toggleRebar.dispatchEvent(new Event('change'));
-            
             document.querySelectorAll('.custom-select').forEach(select => select.selectedIndex = 0);
             setTimeout(() => textInputs.forEach(input => updateLabelState(input)), 10);
         }
     });
-
-    saveAddressBtn.addEventListener('click', () => {
-        const address = addressInput.value.trim();
-        if (address === '') {
-            alert('Пожалуйста, введите адрес объекта.');
-            return;
-        }
-        const originalText = saveAddressBtn.textContent;
-        saveAddressBtn.textContent = 'Сохранено!';
-        saveAddressBtn.style.backgroundColor = '#10B981';
-        saveAddressBtn.style.color = '#fff';
-        setTimeout(() => {
-            saveAddressBtn.textContent = originalText;
-            saveAddressBtn.style.backgroundColor = ''; 
-            saveAddressBtn.style.color = '';
-        }, 2000);
-    });
 });
 </file>
 
-<file path="construction-calculator/calc-foundation/style.css">
+<file path="calc-foundation/style.css">
 :root {
     --bg-main: #0A0A0A;
     --surface-main: rgba(26, 26, 26, 0.4);
@@ -1650,7 +1642,7 @@ body {
 .form-actions { display: flex; justify-content: flex-end; padding-top: 24px; border-top: 1px solid var(--border-color); margin-top: 16px; }
 </file>
 
-<file path="construction-calculator/calc-frame/index.html">
+<file path="calc-frame/index.html">
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -1700,14 +1692,11 @@ body {
             </div>
         </div>
 
-        <form id="calc-frame-form" class="calc-form">
+        <form id="calc-frame-form" class="calc-form" novalidate>
             <div class="form-section address-section">
-                <div class="input-row">
-                    <div class="input-group" style="flex: 1;">
-                        <input type="text" id="object-address" placeholder=" " required>
-                        <label for="object-address">Ввести адрес объекта строительства</label>
-                    </div>
-                    <button type="button" class="btn-primary btn-sm" id="save-address-btn">Сохранить</button>
+                <div class="input-group">
+                    <input type="text" id="object-address" placeholder=" " required>
+                    <label for="object-address">Ввести адрес объекта строительства</label>
                 </div>
             </div>
 
@@ -1728,10 +1717,6 @@ body {
                         <div class="input-group">
                             <input type="number" id="perimeter" placeholder=" " min="10" max="500" step="0.1" required>
                             <label for="perimeter">Периметр внешних стен, м</label>
-                        </div>
-                        <div class="input-group">
-                            <input type="number" id="glazing" placeholder=" " min="0" max="200" step="0.1">
-                            <label for="glazing">Площадь остекления, м²</label>
                         </div>
                         
                         <div class="input-group select-group">
@@ -1800,25 +1785,50 @@ body {
                         </label>
                         
                         <div class="collapsible-content" id="doors-windows-content">
-                            <h4 class="subsection-title">Наружные двери</h4>
-                            <div class="dimensions-row">
-                                <div class="input-group"><input type="number" id="ext-door-h" placeholder=" " min="0.5" max="5" step="0.01"><label for="ext-door-h">Высота, м</label></div>
-                                <div class="input-group"><input type="number" id="ext-door-w" placeholder=" " min="0.5" max="5" step="0.01"><label for="ext-door-w">Ширина, м</label></div>
-                                <div class="input-group"><input type="number" id="ext-door-q" placeholder=" " min="1" max="50"><label for="ext-door-q">Кол-во</label></div>
+                            <div class="proem-section" id="doors-section">
+                                <h4 class="subsection-title">Дверные проемы</h4>
+                                <div class="proem-rows-container" data-proem-type="door">
+                                    <div class="proem-row initial-row">
+                                        <div class="input-group">
+                                            <input type="number" name="door-height[]" placeholder=" " min="0.5" max="5" step="0.01">
+                                            <label>Высота, м</label>
+                                        </div>
+                                        <div class="input-group">
+                                            <input type="number" name="door-width[]" placeholder=" " min="0.5" max="5" step="0.01">
+                                            <label>Ширина, м</label>
+                                        </div>
+                                        <div class="input-group">
+                                            <input type="number" name="door-quantity[]" placeholder=" " min="1" max="100">
+                                            <label>Кол-во</label>
+                                        </div>
+                                        <button type="button" class="icon-btn add-proem" title="Добавить еще один проем">
+                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
 
-                            <h4 class="subsection-title">Внутренние двери</h4>
-                            <div class="dimensions-row">
-                                <div class="input-group"><input type="number" id="int-door-h" placeholder=" " min="0.5" max="5" step="0.01"><label for="int-door-h">Высота, м</label></div>
-                                <div class="input-group"><input type="number" id="int-door-w" placeholder=" " min="0.5" max="5" step="0.01"><label for="int-door-w">Ширина, м</label></div>
-                                <div class="input-group"><input type="number" id="int-door-q" placeholder=" " min="1" max="100"><label for="int-door-q">Кол-во</label></div>
-                            </div>
-
-                            <h4 class="subsection-title">Окна</h4>
-                            <div class="dimensions-row">
-                                <div class="input-group"><input type="number" id="win-h" placeholder=" " min="0.3" max="5" step="0.01"><label for="win-h">Высота, м</label></div>
-                                <div class="input-group"><input type="number" id="win-w" placeholder=" " min="0.3" max="5" step="0.01"><label for="win-w">Ширина, м</label></div>
-                                <div class="input-group"><input type="number" id="win-q" placeholder=" " min="1" max="100"><label for="win-q">Кол-во</label></div>
+                            <div class="proem-section" id="windows-section">
+                                <h4 class="subsection-title">Оконные проемы</h4>
+                                <div class="proem-rows-container" data-proem-type="window">
+                                    <div class="proem-row initial-row">
+                                        <div class="input-group">
+                                            <input type="number" name="window-height[]" placeholder=" " min="0.3" max="5" step="0.01">
+                                            <label>Высота, м</label>
+                                        </div>
+                                        <div class="input-group">
+                                            <input type="number" name="window-width[]" placeholder=" " min="0.3" max="5" step="0.01">
+                                            <label>Ширина, м</label>
+                                        </div>
+                                        <div class="input-group">
+                                            <input type="number" name="window-quantity[]" placeholder=" " min="1" max="100">
+                                            <label>Кол-во</label>
+                                        </div>
+                                        <button type="button" class="icon-btn add-proem" title="Добавить еще один проем">
+                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1870,11 +1880,31 @@ body {
 </html>
 </file>
 
-<file path="construction-calculator/calc-frame/script.js">
+<file path="calc-frame/script.js">
 document.addEventListener('DOMContentLoaded', () => {
+    // --- 1. ИНИЦИАЛИЗАЦИЯ ДАННЫХ И УМНАЯ КНОПКА "НАЗАД" ---
+    const urlParams = new URLSearchParams(window.location.search);
+    const clientId = urlParams.get('clientId') || '1';
+    const calcId = urlParams.get('calcId');
+    const backBtn = document.querySelector('.btn-back');
+
+    if (backBtn) {
+        backBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (window.history.length > 1 && document.referrer) {
+                window.history.back();
+            } else {
+                if (calcId) {
+                    window.location.href = `../calculation/index.html?clientId=${clientId}&calcId=${calcId}`;
+                } else {
+                    window.location.href = `../client-card/index.html?id=${clientId}`;
+                }
+            }
+        });
+    }
+
     const form = document.getElementById('calc-frame-form');
     const clearBtn = document.getElementById('clear-calc-btn');
-    const saveAddressBtn = document.getElementById('save-address-btn');
     const addressInput = document.getElementById('object-address');
 
     const toggleDoorsWindows = document.getElementById('toggle-doors-windows');
@@ -1885,7 +1915,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const textInputs = document.querySelectorAll('.input-group input');
 
-    // --- 1. Управление лейблами и ограничение ввода ---
+    // --- 2. Управление лейблами и ограничение ввода ---
     const updateLabelState = (input) => {
         const group = input.closest('.input-group');
         if (input.value.trim() !== '') {
@@ -1926,16 +1956,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // --- 2. Раскрывающиеся секции ---
+    // --- 3. Раскрывающиеся секции ---
     toggleDoorsWindows.addEventListener('change', (e) => {
         if (e.target.checked) {
             doorsWindowsContent.classList.add('active');
         } else {
             doorsWindowsContent.classList.remove('active');
-            doorsWindowsContent.querySelectorAll('input').forEach(input => {
-                input.value = '';
-                updateLabelState(input);
-            });
+            resetDynamicRows();
         }
     });
 
@@ -1951,7 +1978,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // --- 3. Кнопки и ВАЛИДАЦИЯ ПРИ ОТПРАВКЕ ---
+    // --- 4. Кнопки и ВАЛИДАЦИЯ ПРИ ОТПРАВКЕ ---
     
     // Вспомогательная функция проверки рядов (Двери/Окна)
     const validateDimensionsRow = (hId, wId, qId, name) => {
@@ -1972,23 +1999,17 @@ document.addEventListener('DOMContentLoaded', () => {
     form.addEventListener('submit', (e) => {
         e.preventDefault();
 
+        // 1. Проверка адреса перед расчетом
+        if (addressInput.value.trim() === '') {
+            alert('Пожалуйста, введите адрес объекта строительства.');
+            addressInput.focus();
+            return;
+        }
+
         // Валидация блока "Двери и Окна"
         if (toggleDoorsWindows.checked) {
-            // Проверяем, чтобы не оставили полупустые строки
-            const errorMsg = validateDimensionsRow('ext-door-h', 'ext-door-w', 'ext-door-q', 'Наружные двери') ||
-                             validateDimensionsRow('int-door-h', 'int-door-w', 'int-door-q', 'Внутренние двери') ||
-                             validateDimensionsRow('win-h', 'win-w', 'win-q', 'Окна');
-            
-            if (errorMsg) {
-                alert(errorMsg);
-                return; // Останавливаем отправку
-            }
-            
-            // Проверяем, чтобы вообще хоть что-то было заполнено, раз включили флаг
-            const anyFilled = ['ext-door-q', 'int-door-q', 'win-q'].some(id => document.getElementById(id).value);
-            if (!anyFilled) {
-                alert('Вы включили флаг "Учесть двери и окна", но не заполнили ни одного элемента.');
-                return;
+            if (!validateAllDynamicRows()) {
+                return; // Останавливаем отправку, если валидация провалена
             }
         }
 
@@ -2011,31 +2032,140 @@ document.addEventListener('DOMContentLoaded', () => {
             form.reset(); 
             doorsWindowsContent.classList.remove('active');
             floorsContent.classList.remove('active');
+            resetDynamicRows(); // Сброс проемов до начального состояния
             document.querySelectorAll('.custom-select').forEach(select => select.selectedIndex = 0);
             setTimeout(() => textInputs.forEach(input => updateLabelState(input)), 10);
         }
     });
 
-    saveAddressBtn.addEventListener('click', () => {
-        const address = addressInput.value.trim();
-        if (address === '') {
-            alert('Пожалуйста, введите адрес объекта.');
-            return;
+    // --- 5. ДИНАМИЧЕСКИЕ ПРОЕМЫ: ЛОГИКА ДОБАВЛЕНИЯ/УДАЛЕНИЯ ---
+    
+    // Функция получения HTML-шаблона для новой строки проема
+    const getProemRowTemplate = (type) => {
+        // SVG иконки удаления (минус)
+        const removeIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>`;
+
+        return `
+            <div class="input-group">
+                <input type="number" name="${type}-height[]" placeholder=" " min="0.3" max="5" step="0.01">
+                <label>Высота, м</label>
+            </div>
+            <div class="input-group">
+                <input type="number" name="${type}-width[]" placeholder=" " min="0.3" max="5" step="0.01">
+                <label>Ширина, м</label>
+            </div>
+            <div class="input-group">
+                <input type="number" name="${type}-quantity[]" placeholder=" " min="1" max="100">
+                <label>Кол-во</label>
+            </div>
+            <button type="button" class="icon-btn remove-proem" title="Удалить этот проем">
+                ${removeIcon}
+            </button>
+        `;
+    };
+
+    // Слушаем клики по кнопкам добавить (+) и удалить (-)
+    doorsWindowsContent.addEventListener('click', (e) => {
+        const target = e.target.closest('button');
+        if (!target) return;
+
+        // ЛОГИКА ДОБАВЛЕНИЯ (+)
+        if (target.classList.contains('add-proem')) {
+            const container = target.closest('.proem-rows-container');
+            const type = container.dataset.proemType; // 'door' или 'window'
+            
+            const newRow = document.createElement('div');
+            newRow.className = 'proem-row';
+            newRow.innerHTML = getProemRowTemplate(type);
+            
+            container.appendChild(newRow);
+            
+            // Навешиваем слушатели на новые инпуты для управления лейблами
+            newRow.querySelectorAll('input').forEach(input => {
+                input.addEventListener('input', () => updateLabelState(input));
+                input.addEventListener('focus', () => input.closest('.input-group').classList.add('is-focused'));
+                input.addEventListener('blur', () => {
+                    input.closest('.input-group').classList.remove('is-focused');
+                    updateLabelState(input);
+                });
+            });
         }
-        const originalText = saveAddressBtn.textContent;
-        saveAddressBtn.textContent = 'Сохранено!';
-        saveAddressBtn.style.backgroundColor = '#10B981';
-        saveAddressBtn.style.color = '#fff';
-        setTimeout(() => {
-            saveAddressBtn.textContent = originalText;
-            saveAddressBtn.style.backgroundColor = ''; 
-            saveAddressBtn.style.color = '';
-        }, 2000);
+
+        // ЛОГИКА УДАЛЕНИЯ (-)
+        if (target.classList.contains('remove-proem')) {
+            const row = target.closest('.proem-row');
+            row.remove();
+        }
     });
+
+    // Функция валидации всех динамических проемов
+    const validateAllDynamicRows = () => {
+        const proemSections = doorsWindowsContent.querySelectorAll('.proem-section');
+        let isValid = true;
+        let proemTypeName = '';
+
+        for (const section of proemSections) {
+            const title = section.querySelector('.subsection-title').textContent;
+            const rows = section.querySelectorAll('.proem-row');
+            proemTypeName = (title === 'Дверные проемы') ? 'Дверь' : 'Окно';
+
+            for (const row of rows) {
+                const inputs = row.querySelectorAll('input');
+                const h = inputs[0].value;
+                const w = inputs[1].value;
+                const q = inputs[2].value;
+
+                // Считаем, сколько полей из 3-х заполнено
+                const filledCount = (h ? 1 : 0) + (w ? 1 : 0) + (q ? 1 : 0);
+
+                // Если заполнено 1 или 2 поля, но не все 3 — это ошибка
+                if (filledCount > 0 && filledCount < 3) {
+                    alert(`Пожалуйста, заполните все параметры (Высота, Ширина, Кол-во) для всех проемов в разделе "${title}".`);
+                    inputs[filledCount === 1 ? (h?1:0) : (h?(w?2:1):0)].focus(); // Фокус на первое пустое поле
+                    isValid = false;
+                    break;
+                }
+            }
+            if (!isValid) break; // Прерываем цикл разделов
+        }
+
+        // Проверяем, заполнена ли хоть одна строка во всей секции «Учесть...»
+        if (isValid) {
+            const anyInputsFilled = ['door', 'window'].some(type => {
+                return Array.from(document.querySelectorAll(`input[name^="${type}"]`)).some(input => input.value);
+            });
+
+            if (!anyInputsFilled) {
+                alert('Вы включили флаг "Учесть двери и окна", но не заполнили ни одного элемента.');
+                isValid = false;
+            }
+        }
+
+        return isValid;
+    };
+
+    // Функция сброса динамических рядов до начального состояния
+    const resetDynamicRows = () => {
+        const containers = doorsWindowsContent.querySelectorAll('.proem-rows-container');
+        containers.forEach(container => {
+            // Удаляем все ряды, кроме первого (initial-row)
+            const rows = container.querySelectorAll('.proem-row');
+            rows.forEach((row, index) => {
+                if (index === 0) {
+                    row.querySelectorAll('input').forEach(input => {
+                        input.value = '';
+                        updateLabelState(input);
+                    });
+                } else {
+                    row.remove();
+                }
+            });
+        });
+    };
 });
 </file>
 
-<file path="construction-calculator/calc-frame/style.css">
+<file path="calc-frame/style.css">
 :root {
     --bg-main: #0A0A0A;
     --surface-main: rgba(26, 26, 26, 0.4);
@@ -2186,9 +2316,6 @@ body {
 .custom-select:focus { border-color: var(--accent); }
 .custom-select option { background: var(--bg-main); color: var(--text-primary); }
 
-/* Ряды для габаритов (высота, ширина, кол-во) */
-.dimensions-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
-
 /* Toggle Switch (Переключатели) */
 .toggle-switch-wrapper { display: flex; align-items: center; cursor: pointer; gap: 12px; margin-bottom: 8px; }
 .toggle-title { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
@@ -2206,9 +2333,67 @@ body {
 
 /* Подвал формы */
 .form-actions { display: flex; justify-content: flex-end; padding-top: 24px; border-top: 1px solid var(--border-color); margin-top: 16px; }
+
+
+/* ==========================================================================
+   --- ДИНАМИЧЕСКИЕ ПРОЕМЫ (Двери и Окна) ---
+   ========================================================================== */
+
+.proem-section {
+    margin-bottom: 24px;
+}
+
+.proem-row {
+    display: flex;
+    gap: 16px; /* Расстояние между полями ввода */
+    align-items: flex-end; /* Выравниваем поля и кнопку по нижней линии инпута */
+    margin-bottom: 16px;
+}
+
+/* Инпуты делят ширину строки поровну */
+.proem-row .input-group {
+    flex: 1;
+    min-width: 0; /* Фикс для flexbox, чтобы инпуты не вылезали за контейнер */
+}
+
+/* Стили для кнопок Плюс (+) и Минус (-) */
+.icon-btn {
+    border: none;
+    background: transparent;
+    padding: 8px;
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Кнопка должна стоять на одной линии с линией подчеркивания инпута */
+    margin-bottom: 4px; 
+}
+
+/* Зеленый цвет для плюсика */
+.add-proem {
+    color: #10B981; 
+}
+.add-proem:hover {
+    background-color: rgba(16, 185, 129, 0.1);
+}
+
+/* Красный цвет для минуса */
+.remove-proem {
+    color: var(--accent); /* Используем ваш красный из переменных */
+}
+.remove-proem:hover {
+    background-color: rgba(239, 68, 68, 0.1);
+}
+
+/* Настройки иконки внутри кнопки */
+.icon-btn svg {
+    stroke-width: 2.5;
+}
 </file>
 
-<file path="construction-calculator/calc-roof/index.html">
+<file path="calc-roof/index.html">
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -2260,12 +2445,9 @@ body {
 
         <form id="calc-roof-form" class="calc-form" novalidate>
             <div class="form-section address-section">
-                <div class="input-row">
-                    <div class="input-group" style="flex: 1;">
-                        <input type="text" id="object-address" placeholder=" " required>
-                        <label for="object-address">Ввести адрес объекта строительства</label>
-                    </div>
-                    <button type="button" class="btn-primary btn-sm" id="save-address-btn">Сохранить</button>
+                <div class="input-group">
+                    <input type="text" id="object-address" placeholder=" " required>
+                    <label for="object-address">Ввести адрес объекта строительства</label>
                 </div>
             </div>
 
@@ -2378,15 +2560,27 @@ body {
 </html>
 </file>
 
-<file path="construction-calculator/calc-roof/script.js">
+<file path="calc-roof/script.js">
 document.addEventListener('DOMContentLoaded', () => {
-    // --- 1. ИНИЦИАЛИЗАЦИЯ ДАННЫХ КЛИЕНТА (Mock) ---
+    // --- 1. ИНИЦИАЛИЗАЦИЯ ДАННЫХ И УМНАЯ КНОПКА "НАЗАД" ---
     const urlParams = new URLSearchParams(window.location.search);
-    const clientId = urlParams.get('clientId');
+    const clientId = urlParams.get('clientId') || '1';
+    const calcId = urlParams.get('calcId');
     const backBtn = document.querySelector('.btn-back');
 
-    if (clientId) {
-        backBtn.href = `../client-card/index.html?id=${clientId}`;
+    if (backBtn) {
+        backBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (window.history.length > 1 && document.referrer) {
+                window.history.back();
+            } else {
+                if (calcId) {
+                    window.location.href = `../calculation/index.html?clientId=${clientId}&calcId=${calcId}`;
+                } else {
+                    window.location.href = `../client-card/index.html?id=${clientId}`;
+                }
+            }
+        });
     }
 
     // Моковая "База данных"
@@ -2406,7 +2600,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 2. ЭЛЕМЕНТЫ ФОРМЫ ---
     const form = document.getElementById('calc-roof-form');
     const clearBtn = document.getElementById('clear-calc-btn');
-    const saveAddressBtn = document.getElementById('save-address-btn');
     const addressInput = document.getElementById('object-address');
 
     const toggleInsulation = document.getElementById('toggle-insulation');
@@ -2496,7 +2689,7 @@ document.addEventListener('DOMContentLoaded', () => {
     form.addEventListener('submit', (e) => {
         e.preventDefault();
 
-        // 1. Проверка адреса
+        // 1. Проверка адреса перед расчетом
         if (addressInput.value.trim() === '') {
             alert('Пожалуйста, введите адрес объекта строительства.');
             addressInput.focus();
@@ -2527,27 +2720,10 @@ document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => textInputs.forEach(input => updateLabelState(input)), 10);
         }
     });
-
-    saveAddressBtn.addEventListener('click', () => {
-        const address = addressInput.value.trim();
-        if (address === '') {
-            alert('Пожалуйста, введите адрес объекта.');
-            return;
-        }
-        const originalText = saveAddressBtn.textContent;
-        saveAddressBtn.textContent = 'Сохранено!';
-        saveAddressBtn.style.backgroundColor = '#10B981';
-        saveAddressBtn.style.color = '#fff';
-        setTimeout(() => {
-            saveAddressBtn.textContent = originalText;
-            saveAddressBtn.style.backgroundColor = ''; 
-            saveAddressBtn.style.color = '';
-        }, 2000);
-    });
 });
 </file>
 
-<file path="construction-calculator/calc-roof/style.css">
+<file path="calc-roof/style.css">
 :root {
     --bg-main: #0A0A0A;
     --surface-main: rgba(26, 26, 26, 0.4);
@@ -2655,7 +2831,7 @@ body {
 .form-actions { display: flex; justify-content: flex-end; padding-top: 24px; border-top: 1px solid var(--border-color); margin-top: 16px; }
 </file>
 
-<file path="construction-calculator/calculation/index.html">
+<file path="calculation/index.html">
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -2775,7 +2951,7 @@ body {
 </html>
 </file>
 
-<file path="construction-calculator/calculation/script.js">
+<file path="calculation/script.js">
 document.addEventListener('DOMContentLoaded', () => {
     const urlParams = new URLSearchParams(window.location.search);
     const clientId = urlParams.get('clientId') || '1';
@@ -2990,7 +3166,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </file>
 
-<file path="construction-calculator/calculation/style.css">
+<file path="calculation/style.css">
 :root {
     --bg-main: #0A0A0A;
     --surface-main: rgba(26, 26, 26, 0.4);
@@ -3109,13 +3285,19 @@ body { background-color: var(--bg-main); color: var(--text-primary); font-family
 .calc-option-btn:hover svg { color: var(--accent); }
 </file>
 
-<file path="construction-calculator/client-card/index.html">
+<file path="README.md">
+# construction-calculator
+</file>
+
+<file path="client-card/index.html">
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Карточка клиента | Строительный калькулятор</title>
+    <link rel="icon" href="../pic/view.png" type="image/png">
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
@@ -3124,7 +3306,9 @@ body { background-color: var(--bg-main); color: var(--text-primary); font-family
 <body>
     <header class="navbar">
         <div class="navbar-container">
-            <div class="logo">Логотип</div>
+            <div class="logo">
+                <img src="../pic/logo.png" alt="Строительный калькулятор" class="logo-image">
+            </div>
             <div class="user-profile">
                 <div class="user-info-text">
                     <span class="user-name">Менеджер</span>
@@ -3141,7 +3325,7 @@ body { background-color: var(--bg-main); color: var(--text-primary); font-family
                 <a href="../clients/index.html" class="btn-back" title="Вернуться к списку клиентов">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="19" y1="12" x2="5" y2="12"></line>
-                        <polyline points="12 19 5 12 12 5"></polyline>
+                        <polyline points="12 19 5 12 5"></polyline>
                     </svg>
                 </a>
                 <h1 class="page-title">Карточка клиента</h1>
@@ -3233,14 +3417,15 @@ body { background-color: var(--bg-main); color: var(--text-primary); font-family
                     <label for="edit-middlename">Отчество</label>
                 </div>
                 <div class="input-group">
-                    <input type="tel" id="edit-phone" placeholder=" " required>
+                    <input type="tel" id="edit-phone" placeholder=" " required maxlength="18">
                     <label for="edit-phone">Телефон</label>
                 </div>
                 <div class="input-group">
-                    <input type="email" id="edit-email" placeholder=" " required>
+                    <input type="email" id="edit-email" placeholder=" " required maxlength="100">
                     <label for="edit-email">E-mail</label>
                 </div>
                 <div class="modal-actions">
+                    <button type="button" class="btn-secondary" id="cancel-edit-modal-btn">Отмена</button>
                     <button type="submit" class="btn-primary">Сохранить</button>
                 </div>
             </form>
@@ -3275,7 +3460,7 @@ body { background-color: var(--bg-main); color: var(--text-primary); font-family
 </html>
 </file>
 
-<file path="construction-calculator/client-card/script.js">
+<file path="client-card/script.js">
 document.addEventListener('DOMContentLoaded', () => {
     // --- Mock Data ---
     const currentClient = {
@@ -3287,7 +3472,6 @@ document.addEventListener('DOMContentLoaded', () => {
         email: 'test@example.com'
     };
 
-    // Моковые данные уже созданных расчетов
     let clientCalculations = [
         { id: 101, name: 'Расчет №101', type: 'Каркас', date: '02.02.2026', status: 'active', address: 'г. Ульяновск, ул. Тестовая, д. 35' },
         { id: 102, name: 'Расчет №102', type: 'Фундамент', date: '03.02.2026', status: 'inactive', address: 'г. Ульяновск, ул. Тестовая, д. 35' },
@@ -3303,6 +3487,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const editClientModal = document.getElementById('edit-client-modal');
     const editClientForm = document.getElementById('edit-client-form');
     const closeEditModalBtn = document.getElementById('close-edit-modal-btn');
+    const cancelEditModalBtn = document.getElementById('cancel-edit-modal-btn'); // Новая кнопка
     
     const inputLastName = document.getElementById('edit-lastname');
     const inputFirstName = document.getElementById('edit-firstname');
@@ -3325,7 +3510,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const renderTable = () => {
         tableBody.innerHTML = '';
-        
         if (clientCalculations.length === 0) {
             tableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-secondary); padding: 32px;">Нет сохраненных расчетов</td></tr>`;
             return;
@@ -3333,14 +3517,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         clientCalculations.forEach(calc => {
             const tr = document.createElement('tr');
-            tr.style.cursor = 'pointer'; // Делаем строку визуально кликабельной
+            tr.style.cursor = 'pointer'; 
             
             let statusBadge = '';
             if (calc.status === 'active') statusBadge = '<span class="badge active">Актуален</span>';
             else if (calc.status === 'inactive') statusBadge = '<span class="badge inactive">Не актуален</span>';
             else if (calc.status === 'contract') statusBadge = '<span class="badge contract">Заключен договор</span>';
 
-            // ИМЕННО ЗДЕСЬ мы формируем ссылку на страницу результатов расчета
             const calcUrl = `../calculation/index.html?clientId=${currentClient.id}&calcId=${calc.id}`;
 
             tr.innerHTML = `
@@ -3365,7 +3548,6 @@ document.addEventListener('DOMContentLoaded', () => {
             tableBody.appendChild(tr);
         });
 
-        // Обработчики для кнопок внутри строки (чтобы не срабатывал переход по строке)
         document.querySelectorAll('.icon-btn.copy').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation(); 
@@ -3384,7 +3566,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    // --- Логика копирования текста ---
     document.querySelectorAll('.copy-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             const targetId = btn.dataset.copyTarget;
@@ -3394,7 +3575,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const originalHTML = btn.innerHTML;
                 btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
                 btn.classList.add('success');
-                
                 setTimeout(() => {
                     btn.innerHTML = originalHTML;
                     btn.classList.remove('success');
@@ -3410,12 +3590,14 @@ document.addEventListener('DOMContentLoaded', () => {
         inputMiddleName.value = currentClient.middleName || '';
         inputPhone.value = currentClient.phone || '';
         inputEmail.value = currentClient.email || '';
-        
         editClientModal.classList.add('active');
     });
 
     closeEditModalBtn.addEventListener('click', () => editClientModal.classList.remove('active'));
+    // Закрытие по новой кнопке "Отмена"
+    cancelEditModalBtn.addEventListener('click', () => editClientModal.classList.remove('active'));
     
+    // --- ВАЛИДАЦИЯ ФОРМЫ ---
     const validateEditForm = () => {
         const lastName = inputLastName.value.trim();
         const firstName = inputFirstName.value.trim();
@@ -3423,15 +3605,20 @@ document.addEventListener('DOMContentLoaded', () => {
         const phone = inputPhone.value.trim();
         const email = inputEmail.value.trim();
 
-        const hasDigits = /\d/;
-        if (hasDigits.test(lastName) || hasDigits.test(firstName) || hasDigits.test(middleName) || !lastName || !firstName) {
-            alert('Пожалуйста, введите корректные ФИО. Использование цифр недопустимо, поля "Имя" и "Фамилия" обязательны.');
+        const nameRegex = /^[a-zA-Zа-яА-ЯёЁ\s\-]+$/;
+        if (!lastName || !firstName) {
+            alert('Поля "Фамилия" и "Имя" обязательны для заполнения.');
+            if (!lastName) inputLastName.focus(); else inputFirstName.focus();
+            return false;
+        }
+        if (!nameRegex.test(lastName) || !nameRegex.test(firstName) || (middleName && !nameRegex.test(middleName))) {
+            alert('Пожалуйста, используйте только буквы, пробелы и дефисы в полях ФИО.');
             return false;
         }
 
-        const phoneRegex = /^[\+\(\)\- \d]{7,18}$/;
-        if (!phoneRegex.test(phone) || /[a-zA-Zа-яА-Я]/.test(phone)) {
-            alert('Введите корректный номер телефона. Разрешены только цифры и символы + ( ) -');
+        const rawPhoneDigits = phone.replace(/\D/g, '');
+        if (rawPhoneDigits.length < 11) {
+            alert('Введите корректный номер телефона (не менее 11 цифр).');
             inputPhone.focus();
             return false;
         }
@@ -3453,18 +3640,66 @@ document.addEventListener('DOMContentLoaded', () => {
         currentClient.lastName = inputLastName.value;
         currentClient.firstName = inputFirstName.value;
         currentClient.middleName = inputMiddleName.value;
-        currentClient.phone = inputPhone.value;
+        currentClient.phone = inputPhone.value; 
         currentClient.email = inputEmail.value;
         
         renderClientInfo();
         editClientModal.classList.remove('active');
     });
 
-    const removeDigits = function() { this.value = this.value.replace(/\d/g, ''); };
-    inputLastName.addEventListener('input', removeDigits);
-    inputFirstName.addEventListener('input', removeDigits);
-    inputMiddleName.addEventListener('input', removeDigits);
-    inputPhone.addEventListener('input', function() { this.value = this.value.replace(/[a-zA-Zа-яА-Я]/g, ''); });
+    // --- УМНАЯ ЕДИНАЯ МАСКИРОВКА ВВОДА ---
+    const onlyLetters = function() { 
+        this.value = this.value.replace(/[^a-zA-Zа-яА-ЯёЁ\s\-]/g, ''); 
+    };
+    
+    inputLastName.addEventListener('input', onlyLetters);
+    inputFirstName.addEventListener('input', onlyLetters);
+    inputMiddleName.addEventListener('input', onlyLetters);
+    
+    const onPhoneInput = function (e) {
+        let input = e.target;
+        let inputNumbersValue = input.value.replace(/\D/g, '').substring(0, 11);
+        let selectionStart = input.selectionStart;
+        let formattedInputValue = "";
+
+        if (!inputNumbersValue) {
+            return input.value = "";
+        }
+
+        if (input.value.length != selectionStart) {
+            if (e.data && /\D/g.test(e.data)) {
+                input.value = inputNumbersValue;
+            }
+            return;
+        }
+
+        formattedInputValue = '+' + inputNumbersValue[0];
+        
+        if (inputNumbersValue.length > 1) {
+            formattedInputValue += ' (' + inputNumbersValue.substring(1, 4);
+        }
+        if (inputNumbersValue.length >= 5) {
+            formattedInputValue += ') ' + inputNumbersValue.substring(4, 7);
+        }
+        if (inputNumbersValue.length >= 8) {
+            formattedInputValue += '-' + inputNumbersValue.substring(7, 9);
+        }
+        if (inputNumbersValue.length >= 10) {
+            formattedInputValue += '-' + inputNumbersValue.substring(9, 11);
+        }
+        
+        input.value = formattedInputValue;
+    };
+
+    const onPhoneKeyDown = function (e) {
+        let inputValue = e.target.value.replace(/\D/g, '');
+        if (e.keyCode == 8 && inputValue.length == 1) {
+            e.target.value = "";
+        }
+    };
+
+    inputPhone.addEventListener('input', onPhoneInput);
+    inputPhone.addEventListener('keydown', onPhoneKeyDown);
 
     // --- Логика Модалки Создания Расчета ---
     openCalcModalBtn.addEventListener('click', () => selectCalcModal.classList.add('active'));
@@ -3473,20 +3708,15 @@ document.addEventListener('DOMContentLoaded', () => {
     calcOptionBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             const type = btn.dataset.type;
-            
-            // Клик по созданию НОВОГО расчета переводит на формы
             if (type === 'frame') window.location.href = `../calc-frame/index.html?clientId=${currentClient.id}`;
             else if (type === 'foundation') window.location.href = `../calc-foundation/index.html?clientId=${currentClient.id}`;
             else if (type === 'roof') window.location.href = `../calc-roof/index.html?clientId=${currentClient.id}`;
-            
             selectCalcModal.classList.remove('active');
         });
     });
 
-    window.addEventListener('click', (e) => {
-        if (e.target === editClientModal) editClientModal.classList.remove('active');
-        if (e.target === selectCalcModal) selectCalcModal.classList.remove('active');
-    });
+    // Обработчик window.addEventListener('click'...) ПОЛНОСТЬЮ УДАЛЕН отсюда!
+    // Теперь окна не будут закрываться при клике мимо них.
 
     // Первичная отрисовка
     renderClientInfo();
@@ -3494,7 +3724,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </file>
 
-<file path="construction-calculator/client-card/style.css">
+<file path="client-card/style.css">
 :root {
     --bg-main: #0A0A0A;
     --surface-main: rgba(26, 26, 26, 0.4);
@@ -3539,7 +3769,20 @@ body {
     justify-content: space-between;
     align-items: center;
 }
-.logo { font-weight: 800; font-size: 20px; letter-spacing: -0.02em; }
+
+.logo {
+    display: flex;
+    align-items: center;
+    font-weight: 800;
+    font-size: 20px;
+    letter-spacing: -0.02em;
+}
+.logo-image {
+    height: 30px; /* Твой запрос: лого 30px */
+    width: auto;
+    display: block;
+}
+
 .user-profile { display: flex; align-items: center; gap: 12px; }
 .user-info-text { display: flex; flex-direction: column; align-items: flex-end;}
 .user-name { color: var(--text-primary); font-size: 14px; font-weight: 500;}
@@ -3555,21 +3798,30 @@ body {
     align-items: center;
     margin-bottom: 32px;
 }
-.header-left { display: flex; align-items: center; gap: 16px; }
+
+.header-left { 
+    display: flex; 
+    align-items: center; 
+    gap: 16px; 
+}
+
 .btn-back {
     color: var(--text-secondary);
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
+    width: 40px; /* Размер 40px возвращен */
+    height: 40px; /* Исправлено: теперь 40px вместо 4px */
     border-radius: var(--radius-md);
     background: var(--surface-main);
     border: 1px solid var(--border-color);
     transition: var(--transition);
+    flex-shrink: 0;
+    text-decoration: none;
 }
 .btn-back:hover { color: var(--text-primary); border-color: var(--border-light); background: var(--surface-hover); }
-.page-title { font-size: 32px; font-weight: 800; letter-spacing: -0.02em; }
+
+.page-title { font-size: 32px; font-weight: 800; letter-spacing: -0.02em; line-height: 1; }
 
 /* Кнопки */
 .btn-primary { background-color: var(--accent); color: #FFFFFF; border: none; border-radius: var(--radius-sm); padding: 10px 20px; font-size: 14px; font-weight: 700; font-family: var(--font-family); cursor: pointer; transition: var(--transition); }
@@ -3689,7 +3941,7 @@ body {
 .input-group input:focus + label, .input-group input:not(:placeholder-shown) + label { top: -12px; font-size: 11px; color: var(--accent); }
 .modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 12px; }
 
-/* Сетка выбора конструктивного элемента (Рис. 9) */
+/* Сетка выбора конструктивного элемента */
 .calc-options-grid { display: flex; flex-direction: column; gap: 16px; }
 .calc-option-btn { background: var(--surface-main); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 24px; color: var(--text-primary); font-family: var(--font-family); font-size: 16px; font-weight: 600; cursor: pointer; transition: var(--transition); display: flex; align-items: center; gap: 16px; justify-content: flex-start; }
 .calc-option-btn svg { color: var(--text-secondary); transition: var(--transition); }
@@ -3697,13 +3949,15 @@ body {
 .calc-option-btn:hover svg { color: var(--accent); }
 </file>
 
-<file path="construction-calculator/clients/index.html">
+<file path="clients/index.html">
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Клиенты | Строительный калькулятор</title>
+    <link rel="icon" href="../pic/view.png" type="image/png">
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
@@ -3712,7 +3966,9 @@ body {
 <body>
     <header class="navbar">
         <div class="navbar-container">
-            <div class="logo">Логотип</div>
+            <div class="logo">
+                <img src="../pic/logo.png" alt="Строительный калькулятор" class="logo-image">
+            </div>
             <div class="user-profile">
                 <span class="user-name">Менеджер</span>
                 <div class="avatar">М</div>
@@ -3802,11 +4058,19 @@ body {
             </div>
             <form class="modal-form" id="create-client-form" novalidate>
                 <div class="input-group">
-                    <input type="text" id="fullname" placeholder=" " required maxlength="50">
-                    <label for="fullname">ФИО клиента</label>
+                    <input type="text" id="lastname" placeholder=" " required maxlength="50">
+                    <label for="lastname">Фамилия</label>
                 </div>
                 <div class="input-group">
-                    <input type="tel" id="phone" placeholder=" " required>
+                    <input type="text" id="firstname" placeholder=" " required maxlength="50">
+                    <label for="firstname">Имя</label>
+                </div>
+                <div class="input-group">
+                    <input type="text" id="middlename" placeholder=" " maxlength="50">
+                    <label for="middlename">Отчество</label>
+                </div>
+                <div class="input-group">
+                    <input type="tel" id="phone" placeholder=" " required maxlength="18">
                     <label for="phone">Телефон</label>
                 </div>
                 <div class="input-group">
@@ -3825,7 +4089,7 @@ body {
 </html>
 </file>
 
-<file path="construction-calculator/clients/script.js">
+<file path="clients/script.js">
 document.addEventListener('DOMContentLoaded', () => {
     // --- Состояние приложения (Mock Data) ---
     let clientsData = [
@@ -3841,7 +4105,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('search-input');
     const logoutBtn = document.getElementById('logout-btn');
 
-    // Элементы Фильтров
     const filterBtn = document.getElementById('filter-btn');
     const filterDropdown = document.getElementById('filter-dropdown');
     const filterBadge = document.getElementById('filter-badge');
@@ -3850,20 +4113,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const statusCheckboxes = document.querySelectorAll('.status-filter');
     const projectsSelect = document.getElementById('projects-filter');
     
-    // Элементы модального окна создания
     const modalOverlay = document.getElementById('create-modal');
     const createClientForm = document.getElementById('create-client-form');
     
-    // Поля ввода
-    const fullnameInput = document.getElementById('fullname');
+    const lastnameInput = document.getElementById('lastname');
+    const firstnameInput = document.getElementById('firstname');
+    const middlenameInput = document.getElementById('middlename');
     const phoneInput = document.getElementById('phone');
     const emailInput = document.getElementById('email');
 
-    // --- Логика редиректа на страницу логина ---
+    // --- Логика редиректа ---
     if (logoutBtn) {
-        logoutBtn.addEventListener('click', () => {
-            window.location.href = '../login/index.html';
-        });
+        logoutBtn.addEventListener('click', () => { window.location.href = '../login/index.html'; });
     }
 
     // --- Логика рендеринга таблицы ---
@@ -3876,12 +4137,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         data.forEach(client => {
             const tr = document.createElement('tr');
-            
-            // Делаем всю строку кликабельной для перехода в карточку
             tr.style.cursor = 'pointer';
-            tr.onclick = () => {
-                window.location.href = `../client-card/index.html?id=${client.id}`;
-            };
+            tr.onclick = () => { window.location.href = `../client-card/index.html?id=${client.id}`; };
 
             const statusBadge = client.status === 'active'
                 ? '<span class="badge active">В работе</span>'
@@ -3903,21 +4160,16 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    // --- Ядро: Общая функция поиска и фильтрации ---
+    // --- Фильтры ---
     const applySearchAndFilters = () => {
         const query = searchInput.value.toLowerCase().trim();
-
-        const activeStatuses = Array.from(statusCheckboxes)
-            .filter(cb => cb.checked)
-            .map(cb => cb.value);
-
+        const activeStatuses = Array.from(statusCheckboxes).filter(cb => cb.checked).map(cb => cb.value);
         const projectFilterValue = projectsSelect.value;
         
         const isFilterModified = activeStatuses.length < 2 || projectFilterValue !== 'all';
         filterBadge.style.display = isFilterModified ? 'inline-block' : 'none';
 
         const filteredData = clientsData.filter(client => {
-            // Ищем только по ФИО
             const matchesSearch = client.fullName.toLowerCase().includes(query);
             const matchesStatus = activeStatuses.includes(client.status);
             
@@ -3930,64 +4182,47 @@ document.addEventListener('DOMContentLoaded', () => {
         renderTable(filteredData);
     };
 
-    // --- Управление Dropdown Фильтра ---
-    filterBtn.addEventListener('click', (e) => {
-        e.stopPropagation(); 
-        filterDropdown.classList.toggle('active');
-    });
-
-    document.addEventListener('click', (e) => {
-        if (!filterDropdown.contains(e.target) && e.target !== filterBtn) {
-            filterDropdown.classList.remove('active');
-        }
-    });
-
-    applyFiltersBtn.addEventListener('click', () => {
-        applySearchAndFilters();
-        filterDropdown.classList.remove('active');
-    });
-
-    resetFiltersBtn.addEventListener('click', () => {
-        statusCheckboxes.forEach(cb => cb.checked = true);
-        projectsSelect.value = 'all';
-        applySearchAndFilters();
-    });
-
+    filterBtn.addEventListener('click', (e) => { e.stopPropagation(); filterDropdown.classList.toggle('active'); });
+    document.addEventListener('click', (e) => { if (!filterDropdown.contains(e.target) && e.target !== filterBtn) filterDropdown.classList.remove('active'); });
+    applyFiltersBtn.addEventListener('click', () => { applySearchAndFilters(); filterDropdown.classList.remove('active'); });
+    resetFiltersBtn.addEventListener('click', () => { statusCheckboxes.forEach(cb => cb.checked = true); projectsSelect.value = 'all'; applySearchAndFilters(); });
     searchInput.addEventListener('input', applySearchAndFilters);
 
-    // --- Управление Модальным окном создания ---
     document.getElementById('open-modal-btn').addEventListener('click', () => modalOverlay.classList.add('active'));
     document.getElementById('close-modal-btn').addEventListener('click', () => modalOverlay.classList.remove('active'));
     document.getElementById('cancel-modal-btn').addEventListener('click', () => modalOverlay.classList.remove('active'));
 
-    // --- ВАЛИДАЦИЯ И ОБРАБОТКА ФОРМЫ ---
-    
-    // Вспомогательная функция для проверки
+    // --- ВАЛИДАЦИЯ ---
     const validateForm = () => {
-        const fullname = fullnameInput.value.trim();
+        const lastName = lastnameInput.value.trim();
+        const firstName = firstnameInput.value.trim();
+        const middleName = middlenameInput.value.trim();
         const phone = phoneInput.value.trim();
         const email = emailInput.value.trim();
 
-        // 1. Проверка ФИО: запрещены цифры, лимит уже стоит в HTML (maxlength="50")
-        const hasDigits = /\d/.test(fullname);
-        if (hasDigits || fullname === '') {
-            alert('Пожалуйста, введите корректное ФИО. Использование цифр недопустимо.');
-            fullnameInput.focus();
+        const nameRegex = /^[a-zA-Zа-яА-ЯёЁ\s\-]+$/;
+        
+        if (!lastName || !firstName) {
+            alert('Поля "Фамилия" и "Имя" обязательны для заполнения.');
+            if (!lastName) lastnameInput.focus(); else firstnameInput.focus();
             return false;
         }
 
-        // 2. Проверка телефона: разрешены +, -, скобки, пробелы и цифры. Длина от 7 до 18. Буквы запрещены.
-        const phoneRegex = /^[\+\(\)\- \d]{7,18}$/;
-        if (!phoneRegex.test(phone) || /[a-zA-Zа-яА-Я]/.test(phone)) {
-            alert('Введите корректный номер телефона. Разрешены только цифры и символы + ( ) -');
+        if (!nameRegex.test(lastName) || !nameRegex.test(firstName) || (middleName && !nameRegex.test(middleName))) {
+            alert('Пожалуйста, используйте только буквы, пробелы и дефисы в полях ФИО.');
+            return false;
+        }
+
+        const rawPhoneDigits = phone.replace(/\D/g, '');
+        if (rawPhoneDigits.length < 11) {
+            alert('Введите корректный номер телефона (не менее 11 цифр).');
             phoneInput.focus();
             return false;
         }
 
-        // 3. Проверка Email: обязательно наличие @ и точки после неё
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
-            alert('Введите корректный email адрес (например: example@mail.ru).');
+            alert('Введите корректный email адрес.');
             emailInput.focus();
             return false;
         }
@@ -3996,34 +4231,74 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     createClientForm.addEventListener('submit', (e) => {
-        e.preventDefault(); // Останавливаем стандартную отправку формы
-        
-        // Если валидация не пройдена, прерываем выполнение
-        if (!validateForm()) {
-            return; 
-        }
-
-        // Если всё окей — редирект в карточку нового клиента
+        e.preventDefault(); 
+        if (!validateForm()) return; 
         window.location.href = '../client-card/index.html?id=new'; 
     });
 
-    // Ограничение ввода в реальном времени
-    fullnameInput.addEventListener('input', function() {
-        // Удаляем цифры прямо во время ввода
-        this.value = this.value.replace(/\d/g, '');
-    });
+    // --- УМНАЯ ЕДИНАЯ МАСКИРОВКА ВВОДА ---
+    
+    const onlyLetters = function() {
+        this.value = this.value.replace(/[^a-zA-Zа-яА-ЯёЁ\s\-]/g, '');
+    };
+    lastnameInput.addEventListener('input', onlyLetters);
+    firstnameInput.addEventListener('input', onlyLetters);
+    middlenameInput.addEventListener('input', onlyLetters);
 
-    phoneInput.addEventListener('input', function() {
-        // Удаляем буквы во время ввода
-        this.value = this.value.replace(/[a-zA-Zа-яА-Я]/g, '');
-    });
+    const onPhoneInput = function (e) {
+        let input = e.target;
+        // Оставляем только цифры и сразу обрубаем всё, что длиннее 11 символов
+        let inputNumbersValue = input.value.replace(/\D/g, '').substring(0, 11); 
+        let selectionStart = input.selectionStart;
+        let formattedInputValue = "";
+
+        if (!inputNumbersValue) {
+            return input.value = "";
+        }
+
+        if (input.value.length != selectionStart) {
+            if (e.data && /\D/g.test(e.data)) {
+                input.value = inputNumbersValue;
+            }
+            return;
+        }
+
+        // Строгий формат: +X (XXX) XXX-XX-XX
+        formattedInputValue = '+' + inputNumbersValue[0];
+        
+        if (inputNumbersValue.length > 1) {
+            formattedInputValue += ' (' + inputNumbersValue.substring(1, 4);
+        }
+        if (inputNumbersValue.length >= 5) {
+            formattedInputValue += ') ' + inputNumbersValue.substring(4, 7);
+        }
+        if (inputNumbersValue.length >= 8) {
+            formattedInputValue += '-' + inputNumbersValue.substring(7, 9);
+        }
+        if (inputNumbersValue.length >= 10) {
+            // Теперь здесь жестко substring(9, 11), хвост не пройдет
+            formattedInputValue += '-' + inputNumbersValue.substring(9, 11);
+        }
+        
+        input.value = formattedInputValue;
+    };
+
+    const onPhoneKeyDown = function (e) {
+        let inputValue = e.target.value.replace(/\D/g, '');
+        if (e.keyCode == 8 && inputValue.length == 1) {
+            e.target.value = "";
+        }
+    };
+
+    phoneInput.addEventListener('input', onPhoneInput);
+    phoneInput.addEventListener('keydown', onPhoneKeyDown);
 
     // Инициализация
     renderTable(clientsData);
 });
 </file>
 
-<file path="construction-calculator/clients/style.css">
+<file path="clients/style.css">
 :root {
     --bg-main: #0A0A0A;
     --surface-main: rgba(26, 26, 26, 0.4);
@@ -4040,11 +4315,13 @@ document.addEventListener('DOMContentLoaded', () => {
     --transition: all 0.3s ease;
     --font-family: 'Inter', sans-serif;
 }
+
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
+
 body {
     background-color: var(--bg-main);
     color: var(--text-primary);
@@ -4052,6 +4329,7 @@ body {
     -webkit-font-smoothing: antialiased;
     min-height: 100vh;
 }
+
 /* Навигация */
 .navbar {
     background: rgba(10, 10, 10, 0.8);
@@ -4062,6 +4340,7 @@ body {
     top: 0;
     z-index: 10;
 }
+
 .navbar-container {
     max-width: 1400px;
     margin: 0 auto;
@@ -4070,20 +4349,32 @@ body {
     justify-content: space-between;
     align-items: center;
 }
+
 .logo {
+    display: flex;
+    align-items: center;
     font-weight: 800;
     font-size: 20px;
     letter-spacing: -0.02em;
 }
+
+.logo-image {
+    height: 60px;
+    width: auto;
+    display: block;
+}
+
 .user-profile {
     display: flex;
     align-items: center;
     gap: 12px;
 }
+
 .user-name {
     color: var(--text-secondary);
     font-size: 14px;
 }
+
 .avatar {
     width: 32px;
     height: 32px;
@@ -4096,12 +4387,14 @@ body {
     font-weight: 700;
     font-size: 14px;
 }
+
 /* Основной контент */
 .container {
     max-width: 1400px;
     margin: 0 auto;
     padding: 40px 24px;
 }
+
 .page-header {
     display: flex;
     justify-content: space-between;
@@ -4110,21 +4403,25 @@ body {
     flex-wrap: wrap;
     gap: 24px;
 }
+
 .page-title {
     font-size: 32px;
     font-weight: 800;
     letter-spacing: -0.02em;
 }
+
 /* Панель управления (Поиск и Фильтры) */
 .controls-bar {
     display: flex;
     gap: 12px;
     align-items: center;
 }
+
 .search-wrapper {
     position: relative;
     width: 300px;
 }
+
 .search-icon {
     position: absolute;
     left: 14px;
@@ -4132,6 +4429,7 @@ body {
     transform: translateY(-50%);
     color: var(--text-secondary);
 }
+
 .search-input {
     width: 100%;
     background: var(--surface-main);
@@ -4144,13 +4442,16 @@ body {
     transition: var(--transition);
     outline: none;
 }
+
 .search-input:focus {
     border-color: var(--border-light);
     background: rgba(26, 26, 26, 0.6);
 }
+
 .search-input::placeholder {
     color: var(--text-secondary);
 }
+
 /* Кнопки */
 .btn-primary {
     background-color: var(--accent);
@@ -4165,10 +4466,12 @@ body {
     transition: var(--transition);
     white-space: nowrap;
 }
+
 .btn-primary:hover {
     background-color: var(--accent-hover);
     box-shadow: 0 0 15px rgba(239, 68, 68, 0.3);
 }
+
 .btn-secondary {
     background-color: transparent;
     color: var(--text-primary);
@@ -4184,13 +4487,16 @@ body {
     align-items: center;
     gap: 8px;
 }
+
 .btn-secondary:hover {
     background-color: var(--surface-hover);
 }
+
 /* --- Стили для Dropdown Фильтров --- */
 .filter-wrapper {
     position: relative;
 }
+
 .filter-badge {
     width: 8px;
     height: 8px;
@@ -4199,6 +4505,7 @@ body {
     margin-left: 4px;
     box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
 }
+
 .filter-dropdown {
     position: absolute;
     top: calc(100% + 8px);
@@ -4217,14 +4524,17 @@ body {
     transform: translateY(-10px);
     transition: var(--transition);
 }
+
 .filter-dropdown.active {
     opacity: 1;
     visibility: visible;
     transform: translateY(0);
 }
+
 .filter-group {
     margin-bottom: 20px;
 }
+
 .filter-title {
     font-size: 12px;
     color: var(--text-secondary);
@@ -4233,6 +4543,7 @@ body {
     margin-bottom: 12px;
     font-weight: 700;
 }
+
 /* Кастомные чекбоксы */
 .custom-checkbox {
     display: flex;
@@ -4246,9 +4557,11 @@ body {
     user-select: none;
     transition: var(--transition);
 }
+
 .custom-checkbox:hover {
     color: var(--accent);
 }
+
 .custom-checkbox input {
     position: absolute;
     opacity: 0;
@@ -4256,6 +4569,7 @@ body {
     height: 0;
     width: 0;
 }
+
 .checkmark {
     position: absolute;
     top: 50%;
@@ -4268,13 +4582,16 @@ body {
     border-radius: 4px;
     transition: var(--transition);
 }
+
 .custom-checkbox:hover input ~ .checkmark {
     border-color: var(--border-light);
 }
+
 .custom-checkbox input:checked ~ .checkmark {
     background-color: var(--accent);
     border-color: var(--accent);
 }
+
 .checkmark:after {
     content: "";
     position: absolute;
@@ -4287,9 +4604,11 @@ body {
     border-width: 0 2px 2px 0;
     transform: rotate(45deg);
 }
+
 .custom-checkbox input:checked ~ .checkmark:after {
     display: block;
 }
+
 /* Кастомный Select */
 .custom-select {
     width: 100%;
@@ -4309,13 +4628,16 @@ body {
     cursor: pointer;
     transition: var(--transition);
 }
+
 .custom-select:focus {
     border-color: var(--accent);
 }
+
 .custom-select option {
     background: var(--bg-main);
     color: var(--text-primary);
 }
+
 .filter-actions {
     display: flex;
     gap: 10px;
@@ -4323,11 +4645,13 @@ body {
     padding-top: 16px;
     margin-top: 8px;
 }
+
 .btn-sm {
     padding: 8px 16px;
     flex: 1;
     justify-content: center;
 }
+
 /* Таблица */
 .table-card {
     background: var(--surface-main);
@@ -4337,14 +4661,17 @@ body {
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
 }
+
 .table-responsive {
     overflow-x: auto;
 }
+
 .data-table {
     width: 100%;
     border-collapse: collapse;
     text-align: left;
 }
+
 .data-table th {
     padding: 16px 24px;
     font-size: 12px;
@@ -4355,6 +4682,7 @@ body {
     border-bottom: 1px solid var(--border-light);
     background: rgba(0, 0, 0, 0.2);
 }
+
 .data-table td {
     padding: 16px 24px;
     font-size: 14px;
@@ -4362,24 +4690,30 @@ body {
     color: var(--text-primary);
     vertical-align: middle;
 }
+
 .data-table tr {
     transition: var(--transition);
 }
+
 .data-table tbody tr:hover {
     background: var(--surface-hover);
 }
+
 .data-table tbody tr:last-child td {
     border-bottom: none;
 }
+
 .text-right {
     text-align: right;
 }
+
 .sub-text {
     display: block;
     color: var(--text-secondary);
     font-size: 12px;
     margin-top: 4px;
 }
+
 /* Бейджи статусов */
 .badge {
     display: inline-flex;
@@ -4388,25 +4722,30 @@ body {
     font-size: 12px;
     font-weight: 600;
 }
+
 .badge.active {
     background: rgba(16, 185, 129, 0.1);
     color: #10B981;
     border: 1px solid rgba(16, 185, 129, 0.2);
 }
+
 .badge.inactive {
     background: rgba(161, 161, 170, 0.1);
     color: #A1A1AA;
     border: 1px solid rgba(161, 161, 170, 0.2);
 }
+
 .link-action {
     color: var(--accent);
     text-decoration: none;
     font-weight: 500;
     transition: var(--transition);
 }
+
 .link-action:hover {
     text-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
 }
+
 /* Модальное окно */
 .modal-overlay {
     position: fixed;
@@ -4425,10 +4764,12 @@ body {
     visibility: hidden;
     transition: var(--transition);
 }
+
 .modal-overlay.active {
     opacity: 1;
     visibility: visible;
 }
+
 .modal-card {
     background: var(--surface-modal);
     border: 1px solid var(--border-color);
@@ -4440,15 +4781,18 @@ body {
     transition: var(--transition);
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 }
+
 .modal-overlay.active .modal-card {
     transform: scale(1);
 }
+
 .modal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 24px;
 }
+
 .btn-close {
     background: none;
     border: none;
@@ -4458,18 +4802,22 @@ body {
     line-height: 1;
     transition: var(--transition);
 }
+
 .btn-close:hover {
     color: var(--text-primary);
 }
+
 .modal-form {
     display: flex;
     flex-direction: column;
     gap: 20px;
 }
+
 .input-group {
     position: relative;
     width: 100%;
 }
+
 .input-group input {
     width: 100%;
     background: transparent;
@@ -4482,6 +4830,7 @@ body {
     transition: var(--transition);
     outline: none;
 }
+
 .input-group label {
     position: absolute;
     left: 0;
@@ -4491,16 +4840,19 @@ body {
     pointer-events: none;
     transition: var(--transition);
 }
+
 .input-group input:focus,
 .input-group input:not(:placeholder-shown) {
     border-bottom-color: var(--accent);
 }
+
 .input-group input:focus + label,
 .input-group input:not(:placeholder-shown) + label {
     top: -12px;
     font-size: 11px;
     color: var(--accent);
 }
+
 .modal-actions {
     display: flex;
     justify-content: flex-end;
@@ -4509,13 +4861,15 @@ body {
 }
 </file>
 
-<file path="construction-calculator/login/index.html">
+<file path="login/index.html">
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Вход | Строительный калькулятор</title>
+    <link rel="icon" href="../pic/view.png" type="image/png">
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
@@ -4523,6 +4877,10 @@ body {
 </head>
 <body>
     <main class="login-wrapper">
+        <div class="login-logo">
+            <img src="../pic/logo.png" alt="Строительный калькулятор" class="logo-image">
+        </div>
+        
         <div class="login-card">
             <h1 class="login-title">Вход</h1>
             <form id="login-form" class="login-form">
@@ -4549,7 +4907,7 @@ body {
 </html>
 </file>
 
-<file path="construction-calculator/login/script.js">
+<file path="login/script.js">
 document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('login-form');
     const passwordInput = document.getElementById('password');
@@ -4574,136 +4932,163 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </file>
 
-<file path="construction-calculator/login/style.css">
+<file path="login/style.css">
 /* Базовые настройки и переменные (изолированный скоуп Login) */
 :root {
---bg-main: #0A0A0A;
---surface-main: rgba(26, 26, 26, 0.65);
---text-primary: #FFFFFF;
---text-secondary: #A1A1AA;
---accent: #EF4444;
---accent-hover: #DC2626;
---border-color: rgba(255, 255, 255, 0.05);
---border-focus: rgba(239, 68, 68, 0.5);
---radius-sm: 4px;
---radius-md: 6px;
---transition: all 0.3s ease;
---font-family: 'Inter', sans-serif;
+    --bg-main: #0A0A0A;
+    --surface-main: rgba(26, 26, 26, 0.65);
+    --text-primary: #FFFFFF;
+    --text-secondary: #A1A1AA;
+    --accent: #EF4444;
+    --accent-hover: #DC2626;
+    --border-color: rgba(255, 255, 255, 0.05);
+    --border-focus: rgba(239, 68, 68, 0.5);
+    --radius-sm: 4px;
+    --radius-md: 6px;
+    --transition: all 0.3s ease;
+    --font-family: 'Inter', sans-serif;
 }
+
 * {
-margin: 0;
-padding: 0;
-box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
+
 body {
-background-color: var(--bg-main);
-color: var(--text-primary);
-font-family: var(--font-family);
--webkit-font-smoothing: antialiased;
-min-height: 100vh;
-display: flex;
-justify-content: center;
-align-items: center;
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    font-family: var(--font-family);
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
+
 .login-wrapper {
-width: 100%;
-max-width: 420px;
-padding: 20px;
+    width: 100%;
+    max-width: 420px;
+    padding: 20px;
+    /* Выстраиваем элементы по вертикали и центрируем */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
+
+/* Стили для логотипа на странице входа */
+.login-logo {
+    margin-bottom: 32px;
+}
+
+.login-logo .logo-image {
+    height: 48px; /* Делаем логотип крупным и заметным */
+    width: auto;
+    display: block;
+}
+
 .login-card {
-background: var(--surface-main);
-backdrop-filter: blur(10px);
--webkit-backdrop-filter: blur(10px);
-border: 1px solid var(--border-color);
-border-radius: var(--radius-md);
-padding: 48px 40px;
-box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    background: var(--surface-main);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 48px 40px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    width: 100%; /* Чтобы карточка занимала всю ширину враппера */
 }
+
 .login-title {
-font-size: 28px;
-font-weight: 800;
-text-align: center;
-margin-bottom: 32px;
-letter-spacing: -0.02em;
+    font-size: 28px;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 32px;
+    letter-spacing: -0.02em;
 }
+
 .login-form {
-display: flex;
-flex-direction: column;
-gap: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
 }
+
 /* Плавающие лейблы */
 .input-group {
-position: relative;
-width: 100%;
+    position: relative;
+    width: 100%;
 }
+
 .input-group input {
-width: 100%;
-background: transparent;
-border: none;
-border-bottom: 1px solid var(--border-color);
-padding: 12px 0;
-color: var(--text-primary);
-font-size: 16px;
-font-family: var(--font-family);
-transition: var(--transition);
-outline: none;
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--border-color);
+    padding: 12px 0;
+    color: var(--text-primary);
+    font-size: 16px;
+    font-family: var(--font-family);
+    transition: var(--transition);
+    outline: none;
 }
+
 .input-group label {
-position: absolute;
-left: 0;
-top: 12px;
-color: var(--text-secondary);
-font-size: 16px;
-pointer-events: none;
-transition: var(--transition);
+    position: absolute;
+    left: 0;
+    top: 12px;
+    color: var(--text-secondary);
+    font-size: 16px;
+    pointer-events: none;
+    transition: var(--transition);
 }
+
 .input-group input:focus,
 .input-group input:not(:placeholder-shown) {
-border-bottom-color: var(--accent);
+    border-bottom-color: var(--accent);
 }
+
 .input-group input:focus + label,
 .input-group input:not(:placeholder-shown) + label {
-top: -12px;
-font-size: 12px;
-color: var(--accent);
+    top: -12px;
+    font-size: 12px;
+    color: var(--accent);
 }
-.toggle-password {
-position: absolute;
-right: 0;
-top: 12px;
-background: none;
-border: none;
-color: var(--text-secondary);
-cursor: pointer;
-transition: var(--transition);
-display: flex;
-align-items: center;
-justify-content: center;
-}
-.toggle-password:hover {
-color: var(--text-primary);
-}
-.btn-primary {
-background-color: var(--accent);
-color: #FFFFFF;
-border: none;
-border-radius: var(--radius-sm);
-padding: 16px;
-font-size: 16px;
-font-weight: 700;
-font-family: var(--font-family);
-cursor: pointer;
-transition: var(--transition);
-margin-top: 8px;
-}
-.btn-primary:hover {
-background-color: var(--accent-hover);
-box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
-}
-</file>
 
-<file path="construction-calculator/README.md">
-# construction-calculator
+.toggle-password {
+    position: absolute;
+    right: 0;
+    top: 12px;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.toggle-password:hover {
+    color: var(--text-primary);
+}
+
+.btn-primary {
+    background-color: var(--accent);
+    color: #FFFFFF;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    font-size: 16px;
+    font-weight: 700;
+    font-family: var(--font-family);
+    cursor: pointer;
+    transition: var(--transition);
+    margin-top: 8px;
+}
+
+.btn-primary:hover {
+    background-color: var(--accent-hover);
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+}
 </file>
 
 </files>

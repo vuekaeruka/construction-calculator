@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Карточка клиента | Строительный калькулятор</title>
+    <link rel="icon" href="../pic/view.png" type="image/png">
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
@@ -12,7 +14,9 @@
 <body>
     <header class="navbar">
         <div class="navbar-container">
-            <div class="logo">Логотип</div>
+            <div class="logo">
+                <img src="../pic/logo.png" alt="Строительный калькулятор" class="logo-image">
+            </div>
             <div class="user-profile">
                 <div class="user-info-text">
                     <span class="user-name">Менеджер</span>
@@ -29,7 +33,7 @@
                 <a href="../clients/index.html" class="btn-back" title="Вернуться к списку клиентов">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="19" y1="12" x2="5" y2="12"></line>
-                        <polyline points="12 19 5 12 12 5"></polyline>
+                        <polyline points="12 19 5 12 5"></polyline>
                     </svg>
                 </a>
                 <h1 class="page-title">Карточка клиента</h1>
@@ -121,14 +125,15 @@
                     <label for="edit-middlename">Отчество</label>
                 </div>
                 <div class="input-group">
-                    <input type="tel" id="edit-phone" placeholder=" " required>
+                    <input type="tel" id="edit-phone" placeholder=" " required maxlength="18">
                     <label for="edit-phone">Телефон</label>
                 </div>
                 <div class="input-group">
-                    <input type="email" id="edit-email" placeholder=" " required>
+                    <input type="email" id="edit-email" placeholder=" " required maxlength="100">
                     <label for="edit-email">E-mail</label>
                 </div>
                 <div class="modal-actions">
+                    <button type="button" class="btn-secondary" id="cancel-edit-modal-btn">Отмена</button>
                     <button type="submit" class="btn-primary">Сохранить</button>
                 </div>
             </form>

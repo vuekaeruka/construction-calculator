@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Клиенты | Строительный калькулятор</title>
+    <link rel="icon" href="../pic/view.png" type="image/png">
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
@@ -12,7 +14,9 @@
 <body>
     <header class="navbar">
         <div class="navbar-container">
-            <div class="logo">Логотип</div>
+            <div class="logo">
+                <img src="../pic/logo.png" alt="Строительный калькулятор" class="logo-image">
+            </div>
             <div class="user-profile">
                 <span class="user-name">Менеджер</span>
                 <div class="avatar">М</div>
@@ -102,11 +106,19 @@
             </div>
             <form class="modal-form" id="create-client-form" novalidate>
                 <div class="input-group">
-                    <input type="text" id="fullname" placeholder=" " required maxlength="50">
-                    <label for="fullname">ФИО клиента</label>
+                    <input type="text" id="lastname" placeholder=" " required maxlength="50">
+                    <label for="lastname">Фамилия</label>
                 </div>
                 <div class="input-group">
-                    <input type="tel" id="phone" placeholder=" " required>
+                    <input type="text" id="firstname" placeholder=" " required maxlength="50">
+                    <label for="firstname">Имя</label>
+                </div>
+                <div class="input-group">
+                    <input type="text" id="middlename" placeholder=" " maxlength="50">
+                    <label for="middlename">Отчество</label>
+                </div>
+                <div class="input-group">
+                    <input type="tel" id="phone" placeholder=" " required maxlength="18">
                     <label for="phone">Телефон</label>
                 </div>
                 <div class="input-group">

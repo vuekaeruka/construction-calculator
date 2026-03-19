@@ -14,11 +14,13 @@
     --transition: all 0.3s ease;
     --font-family: 'Inter', sans-serif;
 }
+
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
+
 body {
     background-color: var(--bg-main);
     color: var(--text-primary);
@@ -26,6 +28,7 @@ body {
     -webkit-font-smoothing: antialiased;
     min-height: 100vh;
 }
+
 /* Навигация */
 .navbar {
     background: rgba(10, 10, 10, 0.8);
@@ -36,6 +39,7 @@ body {
     top: 0;
     z-index: 10;
 }
+
 .navbar-container {
     max-width: 1400px;
     margin: 0 auto;
@@ -44,20 +48,32 @@ body {
     justify-content: space-between;
     align-items: center;
 }
+
 .logo {
+    display: flex;
+    align-items: center;
     font-weight: 800;
     font-size: 20px;
     letter-spacing: -0.02em;
 }
+
+.logo-image {
+    height: 60px;
+    width: auto;
+    display: block;
+}
+
 .user-profile {
     display: flex;
     align-items: center;
     gap: 12px;
 }
+
 .user-name {
     color: var(--text-secondary);
     font-size: 14px;
 }
+
 .avatar {
     width: 32px;
     height: 32px;
@@ -70,12 +86,14 @@ body {
     font-weight: 700;
     font-size: 14px;
 }
+
 /* Основной контент */
 .container {
     max-width: 1400px;
     margin: 0 auto;
     padding: 40px 24px;
 }
+
 .page-header {
     display: flex;
     justify-content: space-between;
@@ -84,21 +102,25 @@ body {
     flex-wrap: wrap;
     gap: 24px;
 }
+
 .page-title {
     font-size: 32px;
     font-weight: 800;
     letter-spacing: -0.02em;
 }
+
 /* Панель управления (Поиск и Фильтры) */
 .controls-bar {
     display: flex;
     gap: 12px;
     align-items: center;
 }
+
 .search-wrapper {
     position: relative;
     width: 300px;
 }
+
 .search-icon {
     position: absolute;
     left: 14px;
@@ -106,6 +128,7 @@ body {
     transform: translateY(-50%);
     color: var(--text-secondary);
 }
+
 .search-input {
     width: 100%;
     background: var(--surface-main);
@@ -118,13 +141,16 @@ body {
     transition: var(--transition);
     outline: none;
 }
+
 .search-input:focus {
     border-color: var(--border-light);
     background: rgba(26, 26, 26, 0.6);
 }
+
 .search-input::placeholder {
     color: var(--text-secondary);
 }
+
 /* Кнопки */
 .btn-primary {
     background-color: var(--accent);
@@ -139,10 +165,12 @@ body {
     transition: var(--transition);
     white-space: nowrap;
 }
+
 .btn-primary:hover {
     background-color: var(--accent-hover);
     box-shadow: 0 0 15px rgba(239, 68, 68, 0.3);
 }
+
 .btn-secondary {
     background-color: transparent;
     color: var(--text-primary);
@@ -158,13 +186,16 @@ body {
     align-items: center;
     gap: 8px;
 }
+
 .btn-secondary:hover {
     background-color: var(--surface-hover);
 }
+
 /* --- Стили для Dropdown Фильтров --- */
 .filter-wrapper {
     position: relative;
 }
+
 .filter-badge {
     width: 8px;
     height: 8px;
@@ -173,6 +204,7 @@ body {
     margin-left: 4px;
     box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
 }
+
 .filter-dropdown {
     position: absolute;
     top: calc(100% + 8px);
@@ -191,14 +223,17 @@ body {
     transform: translateY(-10px);
     transition: var(--transition);
 }
+
 .filter-dropdown.active {
     opacity: 1;
     visibility: visible;
     transform: translateY(0);
 }
+
 .filter-group {
     margin-bottom: 20px;
 }
+
 .filter-title {
     font-size: 12px;
     color: var(--text-secondary);
@@ -207,6 +242,7 @@ body {
     margin-bottom: 12px;
     font-weight: 700;
 }
+
 /* Кастомные чекбоксы */
 .custom-checkbox {
     display: flex;
@@ -220,9 +256,11 @@ body {
     user-select: none;
     transition: var(--transition);
 }
+
 .custom-checkbox:hover {
     color: var(--accent);
 }
+
 .custom-checkbox input {
     position: absolute;
     opacity: 0;
@@ -230,6 +268,7 @@ body {
     height: 0;
     width: 0;
 }
+
 .checkmark {
     position: absolute;
     top: 50%;
@@ -242,13 +281,16 @@ body {
     border-radius: 4px;
     transition: var(--transition);
 }
+
 .custom-checkbox:hover input ~ .checkmark {
     border-color: var(--border-light);
 }
+
 .custom-checkbox input:checked ~ .checkmark {
     background-color: var(--accent);
     border-color: var(--accent);
 }
+
 .checkmark:after {
     content: "";
     position: absolute;
@@ -261,9 +303,11 @@ body {
     border-width: 0 2px 2px 0;
     transform: rotate(45deg);
 }
+
 .custom-checkbox input:checked ~ .checkmark:after {
     display: block;
 }
+
 /* Кастомный Select */
 .custom-select {
     width: 100%;
@@ -283,13 +327,16 @@ body {
     cursor: pointer;
     transition: var(--transition);
 }
+
 .custom-select:focus {
     border-color: var(--accent);
 }
+
 .custom-select option {
     background: var(--bg-main);
     color: var(--text-primary);
 }
+
 .filter-actions {
     display: flex;
     gap: 10px;
@@ -297,11 +344,13 @@ body {
     padding-top: 16px;
     margin-top: 8px;
 }
+
 .btn-sm {
     padding: 8px 16px;
     flex: 1;
     justify-content: center;
 }
+
 /* Таблица */
 .table-card {
     background: var(--surface-main);
@@ -311,14 +360,17 @@ body {
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
 }
+
 .table-responsive {
     overflow-x: auto;
 }
+
 .data-table {
     width: 100%;
     border-collapse: collapse;
     text-align: left;
 }
+
 .data-table th {
     padding: 16px 24px;
     font-size: 12px;
@@ -329,6 +381,7 @@ body {
     border-bottom: 1px solid var(--border-light);
     background: rgba(0, 0, 0, 0.2);
 }
+
 .data-table td {
     padding: 16px 24px;
     font-size: 14px;
@@ -336,24 +389,30 @@ body {
     color: var(--text-primary);
     vertical-align: middle;
 }
+
 .data-table tr {
     transition: var(--transition);
 }
+
 .data-table tbody tr:hover {
     background: var(--surface-hover);
 }
+
 .data-table tbody tr:last-child td {
     border-bottom: none;
 }
+
 .text-right {
     text-align: right;
 }
+
 .sub-text {
     display: block;
     color: var(--text-secondary);
     font-size: 12px;
     margin-top: 4px;
 }
+
 /* Бейджи статусов */
 .badge {
     display: inline-flex;
@@ -362,25 +421,30 @@ body {
     font-size: 12px;
     font-weight: 600;
 }
+
 .badge.active {
     background: rgba(16, 185, 129, 0.1);
     color: #10B981;
     border: 1px solid rgba(16, 185, 129, 0.2);
 }
+
 .badge.inactive {
     background: rgba(161, 161, 170, 0.1);
     color: #A1A1AA;
     border: 1px solid rgba(161, 161, 170, 0.2);
 }
+
 .link-action {
     color: var(--accent);
     text-decoration: none;
     font-weight: 500;
     transition: var(--transition);
 }
+
 .link-action:hover {
     text-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
 }
+
 /* Модальное окно */
 .modal-overlay {
     position: fixed;
@@ -399,10 +463,12 @@ body {
     visibility: hidden;
     transition: var(--transition);
 }
+
 .modal-overlay.active {
     opacity: 1;
     visibility: visible;
 }
+
 .modal-card {
     background: var(--surface-modal);
     border: 1px solid var(--border-color);
@@ -414,15 +480,18 @@ body {
     transition: var(--transition);
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 }
+
 .modal-overlay.active .modal-card {
     transform: scale(1);
 }
+
 .modal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 24px;
 }
+
 .btn-close {
     background: none;
     border: none;
@@ -432,18 +501,22 @@ body {
     line-height: 1;
     transition: var(--transition);
 }
+
 .btn-close:hover {
     color: var(--text-primary);
 }
+
 .modal-form {
     display: flex;
     flex-direction: column;
     gap: 20px;
 }
+
 .input-group {
     position: relative;
     width: 100%;
 }
+
 .input-group input {
     width: 100%;
     background: transparent;
@@ -456,6 +529,7 @@ body {
     transition: var(--transition);
     outline: none;
 }
+
 .input-group label {
     position: absolute;
     left: 0;
@@ -465,16 +539,19 @@ body {
     pointer-events: none;
     transition: var(--transition);
 }
+
 .input-group input:focus,
 .input-group input:not(:placeholder-shown) {
     border-bottom-color: var(--accent);
 }
+
 .input-group input:focus + label,
 .input-group input:not(:placeholder-shown) + label {
     top: -12px;
     font-size: 11px;
     color: var(--accent);
 }
+
 .modal-actions {
     display: flex;
     justify-content: flex-end;
