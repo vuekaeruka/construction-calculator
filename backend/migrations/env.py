@@ -4,7 +4,6 @@ from alembic import context
 import os
 import sys
 
-
 from src.models.base import BaseSQLModels
 from src.models import *
 
