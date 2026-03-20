@@ -11,7 +11,7 @@ class Client(BaseSQLModels):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     email: Mapped[str] = mapped_column(String(255), unique=True)
-    phone_number: Mapped[str] = mapped_column(String(30), unique=True)
+    phone_number: Mapped[str] = mapped_column(String(11), unique=True)
     last_name: Mapped[str] = mapped_column(String(255))
     first_name: Mapped[str] = mapped_column(String(255))
     patronymic: Mapped[str] = mapped_column(String(255))
