@@ -15,15 +15,9 @@ class Client(BaseSQLModels):
     last_name: Mapped[str] = mapped_column(String(255))
     first_name: Mapped[str] = mapped_column(String(255))
     patronymic: Mapped[str] = mapped_column(String(255))
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
 
     calculations: Mapped[List['Calculation']] = relationship(
         'Calculation',
         lazy='selectin', 
         back_populates='client'
     )
-
-@event.listens_for(Client, "before_update")
-def set_expiration_on_update(mapper, connection, target):
-    target.updated_at = datetime.now()

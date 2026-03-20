@@ -31,6 +31,12 @@ class Calculation(BaseSQLModels):
         lazy='joined', 
         back_populates='calculations'
     )
+    elements: Mapped[list['CalcElement']] = relationship(
+        'CalcElement',
+        back_populates='calculation',
+        cascade="all, delete-orphan",
+        lazy='selectin'
+    )
     
 # Events
 @event.listens_for(Calculation, "before_insert")
@@ -67,6 +73,22 @@ class CalcElement(BaseSQLModels):
     construct_element_id: Mapped[int] = mapped_column(Integer, ForeignKey("construct_elements.id"))
     price: Mapped[Decimal] = mapped_column(Numeric(10, 2))
 
+    calculation: Mapped['Calculation'] = relationship(
+        'Calculation',
+        back_populates='elements',
+        lazy='joined'
+    )
+    construct_element: Mapped['ConstructElement'] = relationship(
+        'ConstructElement',
+        lazy='joined'
+    )
+    subelements: Mapped[list['CalcSubElement']] = relationship(
+        'CalcSubElement',
+        back_populates='element',
+        cascade="all, delete-orphan",
+        lazy='selectin'
+    )
+
 class CalcSubElement(BaseSQLModels):
 
     __tablename__ = "calculation_subelements"
@@ -75,6 +97,22 @@ class CalcSubElement(BaseSQLModels):
     calculation_element_id: Mapped[int] = mapped_column(Integer, ForeignKey("calculation_elements.id"))
     construct_subelement_id: Mapped[int] = mapped_column(Integer, ForeignKey("construct_subelements.id"))
     price: Mapped[Decimal] = mapped_column(Numeric(10, 2))
+
+    element: Mapped['CalcElement'] = relationship(
+        'CalcElement',
+        back_populates='subelements',
+        lazy='joined'
+    )
+    construct_subelement: Mapped['ConstructSubElement'] = relationship(
+        'ConstructSubElement',
+        lazy='joined'
+    )
+    positions: Mapped[list['CalcPosition']] = relationship(
+        'CalcPosition',
+        back_populates='subelement',
+        cascade="all, delete-orphan",
+        lazy='selectin'
+    )
 
 class CalcPosition(BaseSQLModels):
 
@@ -85,3 +123,13 @@ class CalcPosition(BaseSQLModels):
     material_id: Mapped[int] = mapped_column(Integer, ForeignKey("materials.id"))
     quantity: Mapped[Decimal] = mapped_column(Numeric(10, 2))
     price: Mapped[Decimal] = mapped_column(Numeric(10, 2))
+
+    subelement: Mapped['CalcSubElement'] = relationship(
+        'CalcSubElement',
+        back_populates='positions',
+        lazy='joined'
+    )
+    material: Mapped['Material'] = relationship(
+        'Material',
+        lazy='joined'
+    )

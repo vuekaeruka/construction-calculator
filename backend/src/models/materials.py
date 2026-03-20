@@ -22,6 +22,11 @@ class Material(BaseSQLModels):
         lazy='joined',
         back_populates='materials'
     )
+    positions: Mapped[list['CalcPosition']] = relationship(
+        'CalcPosition',
+        back_populates='material',
+        lazy='selectin'
+    )
 
 class MaterialCategory(BaseSQLModels):
 
