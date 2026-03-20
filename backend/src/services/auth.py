@@ -78,7 +78,7 @@ class AuthService:
 
     def _generate_payload(self, user_id: int, expires_time: datetime, token_type: TokenType) -> dict:
         payload = {
-            "sub": user_id,
+            "sub": str(user_id),
             "type": token_type,
             "exp": expires_time,          
         }
@@ -95,4 +95,4 @@ class AuthService:
                 raise HTTPException(status_code=401)
             return data
         except Exception as e:
-            raise HTTPException(status_code=401, detail=e)
+            raise HTTPException(status_code=401, detail="Invalid token")
