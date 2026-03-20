@@ -51,7 +51,7 @@ body {
     letter-spacing: -0.02em;
 }
 .logo-image {
-    height: 30px; /* Твой запрос: лого 30px */
+    height: 60px;
     width: auto;
     display: block;
 }
@@ -83,8 +83,8 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 40px; /* Размер 40px возвращен */
-    height: 40px; /* Исправлено: теперь 40px вместо 4px */
+    width: 40px; 
+    height: 40px; 
     border-radius: var(--radius-md);
     background: var(--surface-main);
     border: 1px solid var(--border-color);
