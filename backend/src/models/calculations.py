@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import Integer, String, DateTime, Numeric, ForeignKey, event
+from sqlalchemy import Integer, String, DateTime, Numeric, Text, ForeignKey, event
 from datetime import datetime, timedelta
 from decimal import Decimal
 
@@ -13,6 +13,7 @@ class Calculation(BaseSQLModels):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     client_id: Mapped[int] = mapped_column(Integer, ForeignKey("clients.id"))
     manager_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
+    address: Mapped[str] = mapped_column(Text)
     status: Mapped[CalcStatus] = mapped_column(String(50), default=CalcStatus.RELEVANT.value)
     price: Mapped[Decimal] = mapped_column(Numeric(10, 2))
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
@@ -33,7 +34,6 @@ class Calculation(BaseSQLModels):
     )
     elements: Mapped[list['CalcElement']] = relationship(
         'CalcElement',
-        back_populates='calculation',
         cascade="all, delete-orphan",
         lazy='selectin'
     )
@@ -73,18 +73,12 @@ class CalcElement(BaseSQLModels):
     construct_element_id: Mapped[int] = mapped_column(Integer, ForeignKey("construct_elements.id"))
     price: Mapped[Decimal] = mapped_column(Numeric(10, 2))
 
-    calculation: Mapped['Calculation'] = relationship(
-        'Calculation',
-        back_populates='elements',
-        lazy='joined'
-    )
     construct_element: Mapped['ConstructElement'] = relationship(
         'ConstructElement',
         lazy='joined'
     )
     subelements: Mapped[list['CalcSubElement']] = relationship(
         'CalcSubElement',
-        back_populates='element',
         cascade="all, delete-orphan",
         lazy='selectin'
     )
@@ -98,18 +92,12 @@ class CalcSubElement(BaseSQLModels):
     construct_subelement_id: Mapped[int] = mapped_column(Integer, ForeignKey("construct_subelements.id"))
     price: Mapped[Decimal] = mapped_column(Numeric(10, 2))
 
-    element: Mapped['CalcElement'] = relationship(
-        'CalcElement',
-        back_populates='subelements',
-        lazy='joined'
-    )
-    construct_subelement: Mapped['ConstructSubElement'] = relationship(
+    construct_sub_element: Mapped['ConstructSubElement'] = relationship(
         'ConstructSubElement',
         lazy='joined'
     )
     positions: Mapped[list['CalcPosition']] = relationship(
         'CalcPosition',
-        back_populates='subelement',
         cascade="all, delete-orphan",
         lazy='selectin'
     )
@@ -119,16 +107,11 @@ class CalcPosition(BaseSQLModels):
     __tablename__ = "calculation_positions"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    subelement_id: Mapped[int] = mapped_column(Integer, ForeignKey("calculation_subelements.id"))
+    calculation_subelement_id: Mapped[int] = mapped_column(Integer, ForeignKey("calculation_subelements.id"))
     material_id: Mapped[int] = mapped_column(Integer, ForeignKey("materials.id"))
     quantity: Mapped[Decimal] = mapped_column(Numeric(10, 2))
     price: Mapped[Decimal] = mapped_column(Numeric(10, 2))
 
-    subelement: Mapped['CalcSubElement'] = relationship(
-        'CalcSubElement',
-        back_populates='positions',
-        lazy='joined'
-    )
     material: Mapped['Material'] = relationship(
         'Material',
         lazy='joined'

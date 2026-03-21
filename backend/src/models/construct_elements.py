@@ -25,6 +25,6 @@ class ConstructSubElement(BaseSQLModels):
 
     subelements: Mapped[list['CalcSubElement']] = relationship(
         'CalcSubElement',
-        back_populates='construct_subelement',
+        back_populates='construct_sub_element',
         lazy='selectin'
     )

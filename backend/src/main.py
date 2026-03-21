@@ -12,7 +12,7 @@ app.include_router(router=construct_elements_router)
 app.include_router(router=construct_sub_elements_router)
 app.include_router(router=material_categories_router)
 app.include_router(router=material_router)
-#app.include_router(router=calculations_router)
+app.include_router(router=calculations_router)
 
 app.add_middleware(
     CORSMiddleware,
