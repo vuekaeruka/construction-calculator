@@ -8,21 +8,25 @@ from src.utils.enums import CalcStatus, Element, SubElement
 
 
 class CalcPositionSchema(BaseSchema):
+    id: int
     material: MaterialSchema
     quantity: float
     price: float
 
 class CalcSubElementSchema(BaseSchema):
+    id: int
     sub_element_name: SubElement
     positions: List[CalcPositionSchema]
     price: float
 
 class CalcElementSchema(BaseSchema):
+    id: int
     element_name: Element
     subelements: List[CalcSubElementSchema]
     price: float
 
 class CalculationSchema(BaseSchema):
+    id: int
     client: ClientSchema
     address: str
     status: CalcStatus
@@ -34,6 +38,7 @@ class CalculationSchema(BaseSchema):
 
 
 class ShortCalculationSchema(BaseSchema):
+    id: int
     client_id: int
     address: str
     status: CalcStatus
@@ -64,5 +69,11 @@ class CalcElementCreateSchema(BaseSchema):
 
 class CalcSubElementCreateSchema(BaseSchema):
     calc_element_id: int
-    sub_element_name: Element
+    sub_element_name: SubElement
+    price: float
+
+class CalcPositionCreateSchema(BaseSchema):
+    calc_sub_element_id: int
+    material_id: int
+    quantity: float
     price: float

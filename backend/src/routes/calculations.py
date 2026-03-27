@@ -19,3 +19,7 @@ async def get_calculations(uow: UOWdep, filters: CalculationFilter = Depends()):
 @router.get('/{calculation_id}', status_code=200, response_model=CalculationSchema)
 async def get_calculation(uow: UOWdep, calculation_id: int):
     return await CalculationService.get_calculation_filter_by(uow, calculation_id)
+
+@router.delete('/{calculation_id}', status_code=204)
+async def delete_calculation(uow: UOWdep, calculation_id: int):
+    await CalculationService.delete_calculation(uow, calculation_id)

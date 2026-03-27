@@ -7,8 +7,8 @@ __pycache__/
 
 
 # Alembic
-#backend/migrations/
-#backend/alembic.ini
+/backend/migrations/
+/backend/alembic.ini
 
 # SQLite
 #backend/*.db

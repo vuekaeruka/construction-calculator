@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import Integer, String, Numeric, ForeignKey
+from sqlalchemy import Integer, String, Float, ForeignKey
 from typing import List
 
 from src.models.base import BaseSQLModels
@@ -12,9 +12,9 @@ class Material(BaseSQLModels):
     category_id: Mapped[int] = mapped_column(Integer, ForeignKey("material_categories.id"))
     name: Mapped[str] = mapped_column(String(255))
     unit: Mapped[str] = mapped_column(String(50))
-    unit_value: Mapped[float] = mapped_column(Numeric(10, 2))
-    cost_price: Mapped[float] = mapped_column(Numeric(10, 2))
-    market_price: Mapped[float] = mapped_column(Numeric(10, 2))
+    unit_value: Mapped[float] = mapped_column(Float)
+    cost_price: Mapped[float] = mapped_column(Float)
+    market_price: Mapped[float] = mapped_column(Float)
 
     category: Mapped['MaterialCategory'] = relationship(
         'MaterialCategory',

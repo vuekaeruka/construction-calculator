@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import Integer, String, DateTime, Numeric, Text, ForeignKey, event
+from sqlalchemy import Integer, String, DateTime, Float, Text, ForeignKey
 from datetime import datetime, timedelta
 
 from src.models.base import BaseSQLModels
@@ -13,10 +13,10 @@ class Calculation(BaseSQLModels):
     client_id: Mapped[int] = mapped_column(Integer, ForeignKey("clients.id"))
     address: Mapped[str] = mapped_column(Text)
     status: Mapped[CalcStatus] = mapped_column(String(50), default=CalcStatus.RELEVANT.value)
-    price: Mapped[float] = mapped_column(Numeric(10, 2))
+    price: Mapped[float] = mapped_column(Float)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
-    expires_at: Mapped[datetime] = mapped_column(DateTime)
+    expires_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now() + timedelta(days=CALC_LIFETIME_DAYS))
 
     client: Mapped['Client'] = relationship(
         'Client', 
@@ -29,33 +29,6 @@ class Calculation(BaseSQLModels):
         cascade="all, delete-orphan",
         lazy='selectin'
     )
-    
-# Events
-@event.listens_for(Calculation, "before_insert")
-def set_expiration_on_create(mapper, connection, target):
-    now = datetime.now()
-    target.created_at = now
-    target.updated_at = now
-    target.expires_at = now + timedelta(days=CALC_LIFETIME_DAYS)
-
-
-@event.listens_for(Calculation, "before_update")
-def set_expiration_on_update(mapper, connection, target):
-    now = datetime.now()
-    target.updated_at = now
-    target.expires_at = now + timedelta(days=CALC_LIFETIME_DAYS)
-
-# Properties
-@property
-def is_expired(self) -> bool:
-    return datetime.now() > self.expires_at
-
-@property
-def actual_status(self):
-    if self.is_expired:
-        return CalcStatus.NOT_RELEVANT.value
-    return self.status
-
 
 class CalcElement(BaseSQLModels):
 
@@ -64,7 +37,7 @@ class CalcElement(BaseSQLModels):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     calculation_id: Mapped[int] = mapped_column(Integer, ForeignKey("calculations.id"))
     element_name: Mapped[Element] = mapped_column(String(255))
-    price: Mapped[float] = mapped_column(Numeric(10, 2))
+    price: Mapped[float] = mapped_column(Float)
 
     subelements: Mapped[list['CalcSubElement']] = relationship(
         'CalcSubElement',
@@ -79,7 +52,7 @@ class CalcSubElement(BaseSQLModels):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     calc_element_id: Mapped[int] = mapped_column(Integer, ForeignKey("calculation_elements.id"))
     sub_element_name: Mapped[SubElement] = mapped_column(String(255))
-    price: Mapped[float] = mapped_column(Numeric(10, 2))
+    price: Mapped[float] = mapped_column(Float)
 
     positions: Mapped[list['CalcPosition']] = relationship(
         'CalcPosition',
@@ -94,8 +67,8 @@ class CalcPosition(BaseSQLModels):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     calc_sub_element_id: Mapped[int] = mapped_column(Integer, ForeignKey("calculation_subelements.id"))
     material_id: Mapped[int] = mapped_column(Integer, ForeignKey("materials.id"))
-    quantity: Mapped[float] = mapped_column(Numeric(10, 2))
-    price: Mapped[float] = mapped_column(Numeric(10, 2))
+    quantity: Mapped[float] = mapped_column(Float)
+    price: Mapped[float] = mapped_column(Float)
 
     material: Mapped['Material'] = relationship(
         'Material',
