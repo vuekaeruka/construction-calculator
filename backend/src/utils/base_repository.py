@@ -42,19 +42,19 @@ class SQLAlchemyRepository(AbstractRepository):
 
         except IntegrityError as e:
             await self.session.rollback()
-            raise Exception("Нарушение целостности данных.", e.params, e.orig)
-        
+            raise Exception(f"Нарушение целостности данных: {str(e)}") from e
+
         except OperationalError as e:
             await self.session.rollback()
-            raise Exception("Ошибка работы с базой данных.", e.params, e.orig)
+            raise Exception(f"Ошибка работы с базой данных: {str(e)}") from e
 
         except ProgrammingError as e:
             await self.session.rollback()
-            raise Exception("Ошибка синтаксиса SQL.", e.params, e.orig)
+            raise Exception(f"Ошибка синтаксиса SQL: {str(e)}") from e
 
         except SQLAlchemyError as e:
             await self.session.rollback()
-            raise Exception("Непредвиденная ошибка базы данных.", e.params, e.orig)
+            raise Exception(f"Непредвиденная ошибка базы данных: {str(e)}") from e
 
     async def create(self, entity):
         stmt = insert(self.entity).values(**entity.__dict__).returning(self.entity)

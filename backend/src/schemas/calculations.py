@@ -2,12 +2,10 @@ from typing import Optional, List
 from datetime import datetime
 
 from src.schemas.base_schema import BaseSchema
-from src.schemas.users import UserSchema
 from src.schemas.clients import ClientSchema
-from src.schemas.construct_sub_elements import ConstructSubElementSchema
-from src.schemas.construct_elements import ConstructElementSchema
 from src.schemas.materials import MaterialSchema
-from src.utils.enums import CalcStatus
+from src.utils.enums import CalcStatus, Element, SubElement
+
 
 class CalcPositionSchema(BaseSchema):
     material: MaterialSchema
@@ -15,18 +13,17 @@ class CalcPositionSchema(BaseSchema):
     price: float
 
 class CalcSubElementSchema(BaseSchema):
-    construct_sub_element: ConstructSubElementSchema
+    sub_element_name: SubElement
     positions: List[CalcPositionSchema]
     price: float
 
 class CalcElementSchema(BaseSchema):
-    construct_element: ConstructElementSchema
+    element_name: Element
     subelements: List[CalcSubElementSchema]
     price: float
 
 class CalculationSchema(BaseSchema):
     client: ClientSchema
-    manager: UserSchema
     address: str
     status: CalcStatus
     price: float
@@ -35,9 +32,9 @@ class CalculationSchema(BaseSchema):
     expires_at: datetime
     elements: List[CalcElementSchema]
 
+
 class ShortCalculationSchema(BaseSchema):
     client_id: int
-    manager_id: int
     address: str
     status: CalcStatus
     price: float
@@ -47,11 +44,25 @@ class ShortCalculationSchema(BaseSchema):
 
 class CalculationFilter(BaseSchema):
     client_id: Optional[int] = None
-    manager_id: Optional[int] = None
     address: Optional[str] = None
     status: Optional[CalcStatus] = None
     price: Optional[float] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
     expires_at: Optional[datetime] = None
-    
+
+
+class CalculationCreateSchema(BaseSchema):
+    client_id: int
+    address: str
+    price: float
+
+class CalcElementCreateSchema(BaseSchema):
+    calculation_id: int
+    element_name: Element
+    price: float
+
+class CalcSubElementCreateSchema(BaseSchema):
+    calc_element_id: int
+    sub_element_name: Element
+    price: float

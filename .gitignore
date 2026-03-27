@@ -1,6 +1,11 @@
 # PyCache
 __pycache__/
 
+# Bat CLI
+/migr.bat
+/run.bat
+
+
 # Alembic
 #backend/migrations/
 #backend/alembic.ini

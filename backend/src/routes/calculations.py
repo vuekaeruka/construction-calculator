@@ -8,9 +8,9 @@ from src.dependencies import UOWdep
 
 router = APIRouter(prefix='/calculations', tags=['Calculations'])
 
-@router.post('/', status_code=201, response_model=CalculationSchema)
+@router.post('/frame', status_code=201, response_model=CalculationSchema)
 async def create_calculation(uow: UOWdep, data: FrameSchema):
-    return {'status': 'success'}
+    return await CalculationService.create_calculation_frame(uow, data)
 
 @router.get('/', status_code=200, response_model=List[ShortCalculationSchema])
 async def get_calculations(uow: UOWdep, filters: CalculationFilter = Depends()):

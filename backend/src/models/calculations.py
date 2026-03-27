@@ -1,10 +1,9 @@
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import Integer, String, DateTime, Numeric, Text, ForeignKey, event
 from datetime import datetime, timedelta
-from decimal import Decimal
 
 from src.models.base import BaseSQLModels
-from src.utils.enums import CalcStatus, CALC_LIFETIME_DAYS
+from src.utils.enums import CalcStatus, CALC_LIFETIME_DAYS, Element, SubElement
 
 class Calculation(BaseSQLModels):
 
@@ -12,20 +11,13 @@ class Calculation(BaseSQLModels):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     client_id: Mapped[int] = mapped_column(Integer, ForeignKey("clients.id"))
-    manager_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
     address: Mapped[str] = mapped_column(Text)
     status: Mapped[CalcStatus] = mapped_column(String(50), default=CalcStatus.RELEVANT.value)
-    price: Mapped[Decimal] = mapped_column(Numeric(10, 2))
+    price: Mapped[float] = mapped_column(Numeric(10, 2))
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
     expires_at: Mapped[datetime] = mapped_column(DateTime)
 
-    manager: Mapped['User'] = relationship(
-        'User', 
-        foreign_keys=[manager_id], 
-        lazy='joined', 
-        back_populates='calculations'
-    )
     client: Mapped['Client'] = relationship(
         'Client', 
         foreign_keys=[client_id], 
@@ -64,19 +56,16 @@ def actual_status(self):
         return CalcStatus.NOT_RELEVANT.value
     return self.status
 
+
 class CalcElement(BaseSQLModels):
 
     __tablename__ = "calculation_elements"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     calculation_id: Mapped[int] = mapped_column(Integer, ForeignKey("calculations.id"))
-    construct_element_id: Mapped[int] = mapped_column(Integer, ForeignKey("construct_elements.id"))
-    price: Mapped[Decimal] = mapped_column(Numeric(10, 2))
+    element_name: Mapped[Element] = mapped_column(String(255))
+    price: Mapped[float] = mapped_column(Numeric(10, 2))
 
-    construct_element: Mapped['ConstructElement'] = relationship(
-        'ConstructElement',
-        lazy='joined'
-    )
     subelements: Mapped[list['CalcSubElement']] = relationship(
         'CalcSubElement',
         cascade="all, delete-orphan",
@@ -88,14 +77,10 @@ class CalcSubElement(BaseSQLModels):
     __tablename__ = "calculation_subelements"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    calculation_element_id: Mapped[int] = mapped_column(Integer, ForeignKey("calculation_elements.id"))
-    construct_subelement_id: Mapped[int] = mapped_column(Integer, ForeignKey("construct_subelements.id"))
-    price: Mapped[Decimal] = mapped_column(Numeric(10, 2))
+    calc_element_id: Mapped[int] = mapped_column(Integer, ForeignKey("calculation_elements.id"))
+    sub_element_name: Mapped[SubElement] = mapped_column(String(255))
+    price: Mapped[float] = mapped_column(Numeric(10, 2))
 
-    construct_sub_element: Mapped['ConstructSubElement'] = relationship(
-        'ConstructSubElement',
-        lazy='joined'
-    )
     positions: Mapped[list['CalcPosition']] = relationship(
         'CalcPosition',
         cascade="all, delete-orphan",
@@ -107,10 +92,10 @@ class CalcPosition(BaseSQLModels):
     __tablename__ = "calculation_positions"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    calculation_subelement_id: Mapped[int] = mapped_column(Integer, ForeignKey("calculation_subelements.id"))
+    calc_sub_element_id: Mapped[int] = mapped_column(Integer, ForeignKey("calculation_subelements.id"))
     material_id: Mapped[int] = mapped_column(Integer, ForeignKey("materials.id"))
-    quantity: Mapped[Decimal] = mapped_column(Numeric(10, 2))
-    price: Mapped[Decimal] = mapped_column(Numeric(10, 2))
+    quantity: Mapped[float] = mapped_column(Numeric(10, 2))
+    price: Mapped[float] = mapped_column(Numeric(10, 2))
 
     material: Mapped['Material'] = relationship(
         'Material',

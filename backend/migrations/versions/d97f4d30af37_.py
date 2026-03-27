@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: f89cd69c695b
+Revision ID: d97f4d30af37
 Revises: 
-Create Date: 2026-03-14 00:10:45.463622
+Create Date: 2026-03-24 01:14:18.507973
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'f89cd69c695b'
+revision: str = 'd97f4d30af37'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -23,25 +23,13 @@ def upgrade() -> None:
     op.create_table('clients',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('email', sa.String(length=255), nullable=False),
-    sa.Column('phone_number', sa.String(length=30), nullable=False),
+    sa.Column('phone_number', sa.String(length=11), nullable=False),
     sa.Column('last_name', sa.String(length=255), nullable=False),
     sa.Column('first_name', sa.String(length=255), nullable=False),
     sa.Column('patronymic', sa.String(length=255), nullable=False),
-    sa.Column('created_at', sa.DateTime(), nullable=False),
-    sa.Column('updated_at', sa.DateTime(), nullable=False),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email'),
     sa.UniqueConstraint('phone_number')
-    )
-    op.create_table('construct_elements',
-    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('name', sa.String(length=255), nullable=False),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_table('construct_subelements',
-    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('name', sa.String(length=255), nullable=False),
-    sa.PrimaryKeyConstraint('id')
     )
     op.create_table('material_categories',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
@@ -53,24 +41,20 @@ def upgrade() -> None:
     sa.Column('last_name', sa.String(length=255), nullable=False),
     sa.Column('first_name', sa.String(length=255), nullable=False),
     sa.Column('login', sa.String(length=50), nullable=False),
-    sa.Column('password', sa.String(length=50), nullable=False),
-    sa.Column('created_at', sa.DateTime(), nullable=False),
-    sa.Column('updated_at', sa.DateTime(), nullable=False),
+    sa.Column('password', sa.String(length=255), nullable=False),
     sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('login'),
-    sa.UniqueConstraint('password')
+    sa.UniqueConstraint('login')
     )
     op.create_table('calculations',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('client_id', sa.Integer(), nullable=False),
-    sa.Column('manager_id', sa.Integer(), nullable=False),
+    sa.Column('address', sa.Text(), nullable=False),
     sa.Column('status', sa.String(length=50), nullable=False),
     sa.Column('price', sa.Numeric(precision=10, scale=2), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.Column('updated_at', sa.DateTime(), nullable=False),
     sa.Column('expires_at', sa.DateTime(), nullable=False),
     sa.ForeignKeyConstraint(['client_id'], ['clients.id'], ),
-    sa.ForeignKeyConstraint(['manager_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('materials',
@@ -78,6 +62,7 @@ def upgrade() -> None:
     sa.Column('category_id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=255), nullable=False),
     sa.Column('unit', sa.String(length=50), nullable=False),
+    sa.Column('unit_value', sa.Numeric(precision=10, scale=2), nullable=False),
     sa.Column('cost_price', sa.Numeric(precision=10, scale=2), nullable=False),
     sa.Column('market_price', sa.Numeric(precision=10, scale=2), nullable=False),
     sa.ForeignKeyConstraint(['category_id'], ['material_categories.id'], ),
@@ -86,29 +71,27 @@ def upgrade() -> None:
     op.create_table('calculation_elements',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('calculation_id', sa.Integer(), nullable=False),
-    sa.Column('construct_element_id', sa.Integer(), nullable=False),
+    sa.Column('element_name', sa.String(length=255), nullable=False),
     sa.Column('price', sa.Numeric(precision=10, scale=2), nullable=False),
     sa.ForeignKeyConstraint(['calculation_id'], ['calculations.id'], ),
-    sa.ForeignKeyConstraint(['construct_element_id'], ['construct_elements.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('calculation_subelements',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('calculation_element_id', sa.Integer(), nullable=False),
-    sa.Column('construct_subelement_id', sa.Integer(), nullable=False),
+    sa.Column('calc_element_id', sa.Integer(), nullable=False),
+    sa.Column('sub_element_name', sa.String(length=255), nullable=False),
     sa.Column('price', sa.Numeric(precision=10, scale=2), nullable=False),
-    sa.ForeignKeyConstraint(['calculation_element_id'], ['calculation_elements.id'], ),
-    sa.ForeignKeyConstraint(['construct_subelement_id'], ['construct_subelements.id'], ),
+    sa.ForeignKeyConstraint(['calc_element_id'], ['calculation_elements.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('calculation_positions',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('subelement_id', sa.Integer(), nullable=False),
+    sa.Column('calc_sub_element_id', sa.Integer(), nullable=False),
     sa.Column('material_id', sa.Integer(), nullable=False),
     sa.Column('quantity', sa.Numeric(precision=10, scale=2), nullable=False),
     sa.Column('price', sa.Numeric(precision=10, scale=2), nullable=False),
+    sa.ForeignKeyConstraint(['calc_sub_element_id'], ['calculation_subelements.id'], ),
     sa.ForeignKeyConstraint(['material_id'], ['materials.id'], ),
-    sa.ForeignKeyConstraint(['subelement_id'], ['calculation_subelements.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     # ### end Alembic commands ###
@@ -123,7 +106,5 @@ def downgrade() -> None:
     op.drop_table('calculations')
     op.drop_table('users')
     op.drop_table('material_categories')
-    op.drop_table('construct_subelements')
-    op.drop_table('construct_elements')
     op.drop_table('clients')
     # ### end Alembic commands ###

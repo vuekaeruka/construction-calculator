@@ -1,6 +1,5 @@
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import Integer, String, Numeric, ForeignKey
-from decimal import Decimal
 from typing import List
 
 from src.models.base import BaseSQLModels
@@ -13,8 +12,9 @@ class Material(BaseSQLModels):
     category_id: Mapped[int] = mapped_column(Integer, ForeignKey("material_categories.id"))
     name: Mapped[str] = mapped_column(String(255))
     unit: Mapped[str] = mapped_column(String(50))
-    cost_price: Mapped[Decimal] = mapped_column(Numeric(10, 2))
-    market_price: Mapped[Decimal] = mapped_column(Numeric(10, 2))
+    unit_value: Mapped[float] = mapped_column(Numeric(10, 2))
+    cost_price: Mapped[float] = mapped_column(Numeric(10, 2))
+    market_price: Mapped[float] = mapped_column(Numeric(10, 2))
 
     category: Mapped['MaterialCategory'] = relationship(
         'MaterialCategory',

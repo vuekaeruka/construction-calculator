@@ -11,8 +11,6 @@ class IUnitOfWork(ABC):
     calc_sub_elements: Type[CalcSubElementRepository]
     calc_positions: Type[CalcPositionRepository]
     clients: Type[ClientRepository]
-    construct_elements: Type[ConstructElementRepository]
-    construct_sub_elements: Type[ConstructSubElementRepository]
     materials: Type[MaterialRepository]
     material_categories: Type[MaterialCategoryRepository]
     users: Type[UserRepository]
@@ -45,8 +43,6 @@ class UnitOfWork(IUnitOfWork):
         self.calc_sub_elements = CalcSubElementRepository(self.session)
         self.calc_positions = CalcPositionRepository(self.session)
         self.clients = ClientRepository(self.session)
-        self.construct_elements = ConstructElementRepository(self.session)
-        self.construct_sub_elements = ConstructSubElementRepository(self.session)
         self.materials = MaterialRepository(self.session)
         self.material_categories = MaterialCategoryRepository(self.session)
         self.users = UserRepository(self.session)

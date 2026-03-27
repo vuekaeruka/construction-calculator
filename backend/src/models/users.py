@@ -13,10 +13,5 @@ class User(BaseSQLModels):
     last_name: Mapped[str] = mapped_column(String(255))
     first_name: Mapped[str] = mapped_column(String(255))
     login: Mapped[str] = mapped_column(String(50), unique=True)
-    password: Mapped[str] = mapped_column(String(255), unique=True)
+    password: Mapped[str] = mapped_column(String(255))
     
-    calculations: Mapped[List['Calculation']] = relationship(
-        'Calculation',
-        lazy='selectin', 
-        back_populates='manager'
-    )
