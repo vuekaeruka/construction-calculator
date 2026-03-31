@@ -1,5 +1,4 @@
 from typing import Optional, List
-from pydantic import BaseModel, Field
 
 from src.schemas.base_schema import BaseSchema
 
@@ -11,6 +10,7 @@ class InitFrame(BaseSchema):
     int_wall_length: float      # Длина внутренних стен
     int_wall_thickness: int     # Толщина внутренних стен
     ext_wall_thickness: int     # Толщина внешней стены
+    floor_slab_thickness: int   # Толщина перекрытия
     
 # Обшивка внешних стен
 class ExtWallCladding(BaseSchema):
@@ -31,8 +31,7 @@ class Opening(BaseSchema):
     quantity: int   # Количество
 
 # Перекрытие (плита между этажами) (пол-потолок)
-class FloorSlab(BaseSchema):
-    thickness: float                                # Толщина перекрытия
+class FloorSlab(BaseSchema):                          # Толщина перекрытия
     osb_id: Optional[int] = None                    # ОСБ - material_id
     steam_water_proofing_id: Optional[int] = None   # Паро-гидроизоляция - material_id
     wind_protection_id: Optional[int] = None        # Ветрозащита - material_id
@@ -40,9 +39,6 @@ class FloorSlab(BaseSchema):
 
 # Конечная схема каркаса
 class FrameSchema(BaseSchema):
-    client_id: int
-    address: str
-
     init_frame: InitFrame                                 # Исходные данные
     ext_wall_cladding: ExtWallCladding                    # Обшивка внешних стен
     int_wall_cladding: Optional[IntWallCladding] = None   # Обшивка внутренних стен

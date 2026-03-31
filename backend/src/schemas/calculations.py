@@ -5,7 +5,9 @@ from src.schemas.base_schema import BaseSchema
 from src.schemas.clients import ClientSchema
 from src.schemas.materials import MaterialSchema
 from src.utils.enums import CalcStatus, Element, SubElement
-
+from src.schemas.frame import FrameSchema
+from src.schemas.roof import RoofSchema
+from src.schemas.foundation import FoundationSchema
 
 class CalcPositionSchema(BaseSchema):
     id: int
@@ -15,7 +17,7 @@ class CalcPositionSchema(BaseSchema):
 
 class CalcSubElementSchema(BaseSchema):
     id: int
-    sub_element_name: SubElement
+    sub_element_name: str
     positions: List[CalcPositionSchema]
     price: float
 
@@ -35,7 +37,6 @@ class CalculationSchema(BaseSchema):
     updated_at: datetime
     expires_at: datetime
     elements: List[CalcElementSchema]
-
 
 class ShortCalculationSchema(BaseSchema):
     id: int
@@ -57,6 +58,21 @@ class CalculationFilter(BaseSchema):
     expires_at: Optional[datetime] = None
 
 
+class CalculationRequestPOSTSchema(BaseSchema):
+    client_id: int
+    address: str
+    frame: Optional[FrameSchema] = None
+    roof: Optional[RoofSchema] = None
+    foundation: Optional[FoundationSchema] = None
+
+class CalculationRequestPUTSchema(BaseSchema):
+    client_id: Optional[int] = None
+    address: Optional[str] = None
+    status: Optional[CalcStatus] = None
+    frame: Optional[FrameSchema] = None
+    roof: Optional[RoofSchema] = None
+    foundation: Optional[FoundationSchema] = None
+
 class CalculationCreateSchema(BaseSchema):
     client_id: int
     address: str
@@ -69,7 +85,7 @@ class CalcElementCreateSchema(BaseSchema):
 
 class CalcSubElementCreateSchema(BaseSchema):
     calc_element_id: int
-    sub_element_name: SubElement
+    sub_element_name: str
     price: float
 
 class CalcPositionCreateSchema(BaseSchema):
