@@ -1,9 +1,12 @@
 from fastapi import HTTPException
 import math
 from datetime import datetime, timedelta
+from typing import Optional
 
 from src.utils.unit_of_work import IUnitOfWork
 from src.schemas.frame import FrameSchema
+from src.schemas.roof import RoofSchema
+from src.schemas.foundation import FoundationSchema
 from src.schemas.calculations import (CalculationFilter,
                                       CalculationRequestPOSTSchema,
                                       CalculationRequestPUTSchema,
@@ -12,9 +15,79 @@ from src.schemas.calculations import (CalculationFilter,
                                       CalcSubElementCreateSchema, 
                                       CalcPositionCreateSchema
                                     )
-from src.utils.enums import Element, SubElement, CALC_LIFETIME_DAYS
+from src.utils.enums import Element, SubElement, RoofType, CALC_LIFETIME_DAYS
 
-class CalcFrame:
+# Класс для наследования общих формул
+class Calc:
+    def board_volume(self, sub_element_area: float, type: str, sub_element_thickness: Optional[float] = None):
+        if type == 'roof':
+            sub_element_board_volume = sub_element_area * 0.09 * 1.05
+        elif type == 'frame':
+            sub_element_board_volume = sub_element_area * (sub_element_thickness/1000) * 0.18 * 1.05
+        return sub_element_board_volume    
+
+    def osb_area(self, sub_element_area: float, type: str):
+        if type in {'int', 'roof'}:
+            sub_element_osb_area = sub_element_area * 1.12
+        elif type in {'ext', 'floor'}:
+            sub_element_osb_area = sub_element_area * 2 * 1.12
+        return sub_element_osb_area
+
+    def insulation_volume(self, sub_element_area: float, sub_element_insulation_thickness: float):
+        sub_element_insulation_volume = sub_element_area * (sub_element_insulation_thickness/1000) * 1.05
+        return sub_element_insulation_volume
+    
+    def steam_water_proofing_area(self, sub_element_area: float):
+        sub_element_steam_water_proofing_area = sub_element_area * 1.1
+        return sub_element_steam_water_proofing_area
+    
+    def wind_protection_area(self, sub_element_area: float):
+        sub_element_wind_protection_area = sub_element_area * 1.1
+        return sub_element_wind_protection_area
+        
+    @staticmethod
+    def quantity(sub_element_value, material_unit_value):
+        sub_element_material_quantity = sub_element_value / material_unit_value
+        return math.ceil(sub_element_material_quantity)
+    
+    @staticmethod
+    def price(sub_element_material_quantity, material_market_price):
+        sub_element_material_price = sub_element_material_quantity * material_market_price
+        return sub_element_material_price
+
+class CalcFoundation:
+    def __init__(self, foundation: FoundationSchema):
+        ...
+
+class CalcRoof(Calc):
+    def __init__(self, roof: RoofSchema):
+        self.init = roof.init_roof
+        self.modification = roof.roof_modification or type("RoofModification", (), {"water_proofing_id": None,
+                                                                                    "insulation_id": None,
+                                                                                    "osb_id": None,
+                                                                                    "insulation_thickness": 0})()
+
+    def calculate_roof_sheet_area(self, roof_area: float):
+        roof_sheet_area = roof_area * 1.1
+        return roof_sheet_area
+
+    def calculate(self):
+        if self.init.roof_type == RoofType.SINGLE_SLOPE:
+            roof_area = self.init.slope_width * self.init.left_slope_length
+        elif self.init.roof_type == RoofType.DOUBLE_SLOPE:
+            roof_area = self.init.slope_width * (self.init.left_slope_length + self.init.right_slope_length)
+
+        return {
+            SubElement.ROOF: [
+                (self.board_volume(roof_area, type='roof'), 1),
+                (self.calculate_roof_sheet_area(roof_area), 10),
+                (self.insulation_volume(roof_area, self.modification.insulation_thickness), self.modification.insulation_id),
+                (self.osb_area(roof_area, type='roof'), self.modification.osb_id),
+                (self.steam_water_proofing_area(roof_area), self.modification.water_proofing_id)
+            ]
+        }
+
+class CalcFrame(Calc):
     def __init__(self, frame: FrameSchema):
         self.init = frame.init_frame
         self.windows = frame.windows or []
@@ -23,7 +96,7 @@ class CalcFrame:
         self.floor = frame.floor_slab or type("FloorSlab", (), {"osb_id": None,
                                                                 "steam_water_proofing_id": None,
                                                                 "wind_protection_id": None,
-                                                                "insulation_id": None})()
+                                                                "insulation_id": None,})()
         self.ext = frame.ext_wall_cladding
         self.int = frame.int_wall_cladding or type("IntWallCladding", (), {"osb_id": None})()
 
@@ -34,41 +107,6 @@ class CalcFrame:
         )
         return total_opening_area
 
-    def board_volume(self, sub_element_area: float, sub_element_thickness: float):
-        sub_element_board_volume = sub_element_area * (sub_element_thickness/1000) * 0.18 * 1.05
-        return sub_element_board_volume
-        
-    def insulation_volume(self, sub_element_area: float, sub_element_insulation_thickness: float):
-        sub_element_insulation_volume = sub_element_area * (sub_element_insulation_thickness/1000) * 1.05
-        return sub_element_insulation_volume
-    
-    def osb_area(self, sub_element_area: float, sub_element_type: str):
-        if sub_element_type == 'int':
-            sub_element_osb_area = sub_element_area * 1.12
-        elif sub_element_type in {'ext', 'floor'}:
-            sub_element_osb_area = sub_element_area * 2 * 1.12
-        else:
-            raise ValueError(f"Unknown element_type: {sub_element_type}")
-        return sub_element_osb_area
-    
-    def steam_water_proofing_area(self, sub_element_area: float):
-        sub_element_steam_water_proofing_area = sub_element_area * 1.1
-        return sub_element_steam_water_proofing_area
-
-    def wind_protection_area(self, sub_element_area: float):
-        sub_element_wind_protection_area = sub_element_area * 1.1
-        return sub_element_wind_protection_area
-    
-    @staticmethod
-    def quantity(sub_element_value, material_unit_value):
-        sub_element_material_quantity = sub_element_value / material_unit_value
-        return math.ceil(sub_element_material_quantity)
-    
-    @staticmethod
-    def price(sub_element_material_quantity, material_market_price):
-        sub_element_material_price = sub_element_material_quantity * material_market_price
-        return sub_element_material_price
-    
     def calculate(self):
         int_area = self.init.int_wall_length * self.init.wall_height * 2
         int_area -= self.openings_area(self.int_doors)
@@ -80,18 +118,18 @@ class CalcFrame:
 
         return {
             SubElement.INTERNAL_WALL: [
-                (self.board_volume(int_area, self.init.int_wall_thickness), 1),
+                (self.board_volume(int_area, 'frame', self.init.int_wall_thickness), 1),
                 (self.osb_area(int_area, "int"), self.int.osb_id),
             ],
             SubElement.EXTERNAL_WALL: [
-                (self.board_volume(ext_area, self.init.ext_wall_thickness), 1),
+                (self.board_volume(ext_area, 'frame', self.init.ext_wall_thickness), 1),
                 (self.insulation_volume(ext_area, self.ext.insulation_thickness), self.ext.insulation_id),
                 (self.osb_area(ext_area, "ext"), self.ext.osb_id),
                 (self.steam_water_proofing_area(ext_area), self.ext.steam_water_proofing_id),
                 (self.wind_protection_area(ext_area), self.ext.wind_protection_id),
             ],
             SubElement.FLOOR_SLAB: [
-                (self.board_volume(floor_area, self.init.floor_slab_thickness), 1),
+                (self.board_volume(floor_area, 'frame', self.init.floor_slab_thickness), 1),
                 (self.insulation_volume(floor_area, self.init.floor_slab_thickness), self.floor.insulation_id),
                 (self.osb_area(floor_area, "floor"), self.floor.osb_id),
                 (self.steam_water_proofing_area(floor_area), self.floor.steam_water_proofing_id),
@@ -101,7 +139,8 @@ class CalcFrame:
 
 class CalculationService:
     
-    async def create_calc_position(
+    @staticmethod
+    async def __create_calc_position(
         uow: IUnitOfWork,
         calc_sub_element_id: int,
         volume: float,
@@ -112,8 +151,8 @@ class CalculationService:
         material = await uow.materials.get_one_filter_by(id=material_id)
         if not material:
             raise HTTPException(status_code=404, detail='Material with id {material_id} not found')
-        quantity = CalcFrame.quantity(volume, material.unit_value)
-        price = CalcFrame.price(quantity, material.market_price)
+        quantity = Calc.quantity(volume, material.unit_value)
+        price = Calc.price(quantity, material.market_price)
         await uow.calc_positions.create(
             CalcPositionCreateSchema(
                 calc_sub_element_id=calc_sub_element_id,
@@ -125,11 +164,73 @@ class CalculationService:
         return price
     
     @staticmethod
+    async def __create_calc_element(
+        uow: IUnitOfWork,
+        calculation_id: int,
+        data: CalculationRequestPOSTSchema | CalculationRequestPUTSchema,
+        map: dict
+    ):
+        if data.construction_element.frame:
+            element_name = Element.FRAME
+        elif data.construction_element.roof:
+            element_name = Element.ROOF
+        elif data.construction_element.foundation:
+            element_name = Element.FOUNDATION
+
+        new_calc_element = await uow.calc_elements.create(
+            CalcElementCreateSchema(
+                calculation_id=calculation_id,
+                element_name=element_name,
+                price=0
+            )
+        )
+        element_total_price = 0
+
+        for sub_element_name, items in map.items():
+            new_calc_sub_element = await uow.calc_sub_elements.create(
+                CalcSubElementCreateSchema(
+                    calc_element_id=new_calc_element.id,
+                    sub_element_name=sub_element_name.value,
+                    price=0
+                )
+            )
+            sub_element_total_price = 0
+
+            for volume, material_id in items:
+                sub_element_total_price += await CalculationService.__create_calc_position(uow, new_calc_sub_element.id, volume, material_id)
+
+            await uow.calc_sub_elements.update(new_calc_sub_element.id, price=sub_element_total_price)
+
+            element_total_price += sub_element_total_price
+
+        await uow.calc_elements.update(new_calc_element.id, price=element_total_price)
+
+        return element_total_price
+    
+    @staticmethod
+    def __get_calc_map(data: CalculationRequestPOSTSchema | CalculationRequestPUTSchema):
+        if not data.construction_element:
+            return None
+        elif data.construction_element.frame:
+            return CalcFrame(data.construction_element.frame).calculate()
+        elif data.construction_element.roof:
+            return CalcRoof(data.construction_element.roof).calculate()
+        elif data.construction_element.foundation:
+            return CalcFoundation(data.construction_element.foundation).calculate()
+        else:
+            return None
+
+    @staticmethod
     async def create_calculation(uow: IUnitOfWork, data: CalculationRequestPOSTSchema):
         client_id = data.client_id
         address = data.address
 
-        frame_map = CalcFrame(data.frame).calculate() if data.frame else {}
+        if not any([data.construction_element and data.construction_element.frame, 
+                    data.construction_element and data.construction_element.roof, 
+                    data.construction_element and data.construction_element.foundation]):
+            raise HTTPException(status_code=400, detail='At least one of frame, roof or foundation data must be provided')
+        
+        calc_map = CalculationService.__get_calc_map(data)
 
         async with uow:
             new_calculation = await uow.calculations.create(
@@ -140,33 +241,7 @@ class CalculationService:
                 )
             )
 
-            new_calc_element = await uow.calc_elements.create(
-                CalcElementCreateSchema(
-                    calculation_id=new_calculation.id,
-                    element_name=Element.FRAME,
-                    price=0
-                )
-            )
-            element_total_price = 0
-
-            for sub_element_name, items in frame_map.items():
-                new_calc_sub_element = await uow.calc_sub_elements.create(
-                    CalcSubElementCreateSchema(
-                        calc_element_id=new_calc_element.id,
-                        sub_element_name=sub_element_name.value,
-                        price=0
-                    )
-                )
-                sub_element_total_price = 0
-
-                for volume, material_id in items:
-                    sub_element_total_price += await CalculationService.create_calc_position(uow, new_calc_sub_element.id, volume, material_id)
-
-                await uow.calc_sub_elements.update(new_calc_sub_element.id, price=sub_element_total_price)
-
-                element_total_price += sub_element_total_price
-
-            await uow.calc_elements.update(new_calc_element.id, price=element_total_price)
+            element_total_price = await CalculationService.__create_calc_element(uow, new_calculation.id, data=data, map=calc_map)
 
             new_upd_calculation = await uow.calculations.update(new_calculation.id, price=element_total_price)
             
@@ -190,11 +265,13 @@ class CalculationService:
     @staticmethod
     async def update_calculation(uow: IUnitOfWork, calculation_id: int, data: CalculationRequestPUTSchema):
         data_dict = data.clean_dict()
-        data_dict.pop('frame', None)
         data_dict.update({'updated_at': datetime.now()})
         data_dict.update({'expires_at': datetime.now() + timedelta(days=CALC_LIFETIME_DAYS)})
 
-        frame_map = CalcFrame(data.frame).calculate() if data.frame else {}
+        data_dict.pop('construction_element', None)
+        
+        calc_map = CalculationService.__get_calc_map(data)
+
         async with uow:
             calculation = await uow.calculations.get_one_filter_by(id=calculation_id)
             if not calculation:
@@ -202,36 +279,11 @@ class CalculationService:
             
             calculation_total_price = calculation.price
             
-            new_calc_element = await uow.calc_elements.create(
-                CalcElementCreateSchema(
-                    calculation_id=calculation_id,
-                    element_name=Element.FRAME,
-                    price=0
-                )
-            )
-            element_total_price = 0
-
-            for sub_element_name, items in frame_map.items():
-                new_calc_sub_element = await uow.calc_sub_elements.create(
-                    CalcSubElementCreateSchema(
-                        calc_element_id=new_calc_element.id,
-                        sub_element_name=sub_element_name.value,
-                        price=0
-                    )
-                )
-                sub_element_total_price = 0
-
-                for volume, material_id in items:
-                    sub_element_total_price += await CalculationService.create_calc_position(uow, new_calc_sub_element.id, volume, material_id)
-
-                await uow.calc_sub_elements.update(new_calc_sub_element.id, price=sub_element_total_price)
-
-                element_total_price += sub_element_total_price
-
-            await uow.calc_elements.update(new_calc_element.id, price=element_total_price)
+            if calc_map:
+                element_total_price = await CalculationService.__create_calc_element(uow, calculation_id, data=data, map=calc_map)
             
-            calculation_total_price += element_total_price
-            data_dict.update({'price': calculation_total_price})
+                calculation_total_price += element_total_price
+                data_dict.update({'price': calculation_total_price})
 
             upd_calculation = await uow.calculations.update(calculation_id, **data_dict)
             

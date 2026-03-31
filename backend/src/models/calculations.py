@@ -3,7 +3,7 @@ from sqlalchemy import Integer, String, DateTime, Float, Text, ForeignKey
 from datetime import datetime, timedelta
 
 from src.models.base import BaseSQLModels
-from src.utils.enums import CalcStatus, CALC_LIFETIME_DAYS, Element, SubElement
+from src.utils.enums import CalcStatus, CALC_LIFETIME_DAYS, Element
 
 class Calculation(BaseSQLModels):
 

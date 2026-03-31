@@ -19,6 +19,8 @@ class SubElement(StrEnum):
     INTERNAL_WALL = 'Внутренняя стена'
     FLOOR_SLAB = 'Перекрытие'
 
+    ROOF = 'Крыша'
+
 class RoofType(StrEnum):
     SINGLE_SLOPE = 'Односкатная'
     DOUBLE_SLOPE = 'Двускатная'

@@ -9,6 +9,7 @@ from src.schemas.frame import FrameSchema
 from src.schemas.roof import RoofSchema
 from src.schemas.foundation import FoundationSchema
 
+# Schemas for GET EP
 class CalcPositionSchema(BaseSchema):
     id: int
     material: MaterialSchema
@@ -48,6 +49,8 @@ class ShortCalculationSchema(BaseSchema):
     updated_at: datetime
     expires_at: datetime
 
+
+# Filter for GET all EP
 class CalculationFilter(BaseSchema):
     client_id: Optional[int] = None
     address: Optional[str] = None
@@ -58,21 +61,25 @@ class CalculationFilter(BaseSchema):
     expires_at: Optional[datetime] = None
 
 
-class CalculationRequestPOSTSchema(BaseSchema):
-    client_id: int
-    address: str
+# Schemas for POST and PUT EP
+class ConsructionElement(BaseSchema):
     frame: Optional[FrameSchema] = None
     roof: Optional[RoofSchema] = None
     foundation: Optional[FoundationSchema] = None
+
+class CalculationRequestPOSTSchema(BaseSchema):
+    client_id: int
+    address: str
+    construction_element: ConsructionElement
 
 class CalculationRequestPUTSchema(BaseSchema):
     client_id: Optional[int] = None
     address: Optional[str] = None
     status: Optional[CalcStatus] = None
-    frame: Optional[FrameSchema] = None
-    roof: Optional[RoofSchema] = None
-    foundation: Optional[FoundationSchema] = None
+    construction_element: Optional[ConsructionElement] = None
 
+
+# Schemas for database operations
 class CalculationCreateSchema(BaseSchema):
     client_id: int
     address: str
