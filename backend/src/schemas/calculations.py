@@ -1,10 +1,11 @@
 from typing import Optional, List
+from pydantic import computed_field
 from datetime import datetime
 
 from src.schemas.base_schema import BaseSchema
 from src.schemas.clients import ClientSchema
 from src.schemas.materials import MaterialSchema
-from src.utils.enums import CalcStatus, Element, SubElement
+from src.utils.enums import CalcStatus, Element
 from src.schemas.frame import FrameSchema
 from src.schemas.roof import RoofSchema
 from src.schemas.foundation import FoundationSchema
@@ -32,12 +33,20 @@ class CalculationSchema(BaseSchema):
     id: int
     client: ClientSchema
     address: str
-    status: CalcStatus
     price: float
     created_at: datetime
     updated_at: datetime
     expires_at: datetime
     elements: List[CalcElementSchema]
+
+    @computed_field
+    @property
+    def status(self) -> str:
+        if getattr(self, "_original_status", None) == CalcStatus.CONTRACT_SIGNED.value:
+            return CalcStatus.CONTRACT_SIGNED.value
+        if datetime.now() > self.expires_at:
+            return CalcStatus.EXPIRED.value
+        return CalcStatus.RELEVANT.value
 
 class ShortCalculationSchema(BaseSchema):
     id: int

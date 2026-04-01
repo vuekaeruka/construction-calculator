@@ -1,6 +1,8 @@
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import Integer, String, DateTime, Float, Text, ForeignKey
+from sqlalchemy import Integer, String, DateTime, Float, Text, ForeignKey, case, func
 from datetime import datetime, timedelta
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.ext.hybrid import hybrid_property
 
 from src.models.base import BaseSQLModels
 from src.utils.enums import CalcStatus, CALC_LIFETIME_DAYS, Element
@@ -12,7 +14,7 @@ class Calculation(BaseSQLModels):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     client_id: Mapped[int] = mapped_column(Integer, ForeignKey("clients.id", ondelete="CASCADE"))
     address: Mapped[str] = mapped_column(Text)
-    status: Mapped[CalcStatus] = mapped_column(String(50), default=CalcStatus.RELEVANT.value)
+    status: Mapped[CalcStatus] = mapped_column(String(50), default=CalcStatus.RELEVANT.value, index=True)
     price: Mapped[float] = mapped_column(Float)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)

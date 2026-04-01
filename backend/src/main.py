@@ -1,9 +1,16 @@
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
 
+from src.utils.sheduler import start_scheduler
 from src.routes import *
 
-app = FastAPI(title="Construction Calculator API", prefix='/api')
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    start_scheduler()
+    yield
+
+app = FastAPI(title="Construction Calculator API", lifespan=lifespan)
 
 app.include_router(router=clients_router)
 app.include_router(router=auth_router)

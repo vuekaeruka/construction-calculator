@@ -6,7 +6,7 @@ class TokenType(StrEnum):
 
 class CalcStatus(StrEnum):
     RELEVANT = 'Актуален'
-    NOT_RELEVANT = 'Не актуален'
+    EXPIRED = 'Не актуален'
     CONTRACT_SIGNED = 'Заключен договор'
 
 class Element(StrEnum):

@@ -16,7 +16,7 @@ from src.schemas.calculations import (CalculationFilter,
                                       CalcPositionCreateSchema,
                                       CalculationSchema
                                     )
-from src.utils.enums import Element, SubElement, RoofType, FoundationType, CALC_LIFETIME_DAYS
+from src.utils.enums import Element, SubElement, RoofType, FoundationType, CalcStatus, CALC_LIFETIME_DAYS
 
 # Класс для наследования общих формул
 class Calc:
@@ -327,6 +327,9 @@ class CalculationService:
             if not calculation:
                 raise HTTPException(status_code=404, detail='Calculation not found')
             
+            if calculation.status == CalcStatus.CONTRACT_SIGNED:
+                raise HTTPException(status_code=400, detail='Cannot update a calculation with signed contract')
+            
             calculation_total_price = calculation.price
             
             if calc_map:
@@ -364,6 +367,9 @@ class CalculationService:
             calculation = await uow.calculations.get_one_filter_by(id=calculation_id)
             if not calculation:
                 raise HTTPException(status_code=404, detail='Calculation not found')
+            
+            if calculation.status == CalcStatus.CONTRACT_SIGNED:
+                raise HTTPException(status_code=400, detail='Cannot update a calculation with signed contract')
 
             if calculation.expires_at >= datetime.now():
                 raise HTTPException(status_code=400, detail='Calculation has expired')
@@ -395,7 +401,8 @@ class CalculationService:
 
                 await uow.calculations.update(
                     calculation_id, 
-                    price=total_price, 
+                    price=total_price,
+                    status=CalcStatus.RELEVANT,
                     updated_at=datetime.now(), 
                     expires_at=datetime.now() + timedelta(days=CALC_LIFETIME_DAYS)
                 )
