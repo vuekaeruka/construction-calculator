@@ -8,6 +8,14 @@ class ClientService:
     @staticmethod
     async def create_client(uow: IUnitOfWork, data: ClientCreateSchema):
         async with uow:
+            existing_email = await uow.clients.get_one_filter_by(email=data.email)
+            if existing_email:
+                raise HTTPException(status_code=400, detail="Client with this email already exists")
+            
+            exiting_phone = await uow.clients.get_one_filter_by(phone=data.phone_number)
+            if exiting_phone:
+                raise HTTPException(status_code=400, detail="Client with this phone already exists")
+            
             new_client = await uow.clients.create(data)
             await uow.commit()
             return new_client
@@ -29,6 +37,16 @@ class ClientService:
     @staticmethod
     async def update_client(uow: IUnitOfWork, client_id: int, data: ClientUpdateSchema):
         async with uow:
+            if data.email:
+                existing_email = await uow.clients.get_one_filter_by(email=data.email)
+                if existing_email:
+                    raise HTTPException(status_code=400, detail="Client with this email already exists")
+            
+            if data.phone_number:
+                exiting_phone = await uow.clients.get_one_filter_by(phone=data.phone_number)
+                if exiting_phone:
+                    raise HTTPException(status_code=400, detail="Client with this phone already exists")
+
             upd_client = await uow.clients.update(entity_id=client_id, **data.clean_dict())
             if not upd_client:
                 raise HTTPException(status_code=404, detail='Client not found')

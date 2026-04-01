@@ -13,6 +13,10 @@ class AuthService:
         data.password = pwd_context.hash(data.password)
         async with uow:
             try:
+                existing_user = await uow.users.get_one_filter_by(login=data.login)
+                if existing_user:
+                    raise HTTPException(status_code=400, detail="User with this login already exists")
+
                 new_user = await uow.users.create(data)
                 await uow.commit()
                 
@@ -38,16 +42,16 @@ class AuthService:
             raise HTTPException(status_code=401)
         return user_id
     
-    def refresh_token(self, refresh_token: str) -> dict:
+    async def refresh_token(self, refresh_token: str) -> dict:
         payload = self._decode_jwt(refresh_token)
         if payload['type'] != TokenType.REFRESH:
-            raise HTTPException(status_code=401)
+            raise HTTPException(status_code=401, detail="Invalid token type")
         
         user_id = payload.get('sub')
         if not user_id:
             raise HTTPException(status_code=401)
         
-        tokens = self._generate_user_tokens(user_id)
+        tokens = self._generate_user_tokens(int(user_id))
         return tokens
     
     def _generate_user_tokens(self, user_id: int) -> dict:

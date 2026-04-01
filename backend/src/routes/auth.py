@@ -16,11 +16,5 @@ async def login(uow: UOWdep, username: str = Form(...), password: str = Form(...
     return await AuthService().login(uow, username, password)
 
 @router.post('/refresh', status_code=200)
-async def refresh(
-        uow: UOWdep,
-        response: Response, 
-        refresh_token: str = Cookie(None),
-        auth_service: AuthService = Depends(),
-
-    ):
-    return await AuthService().refresh_token(uow, user_id)
+async def refresh(uow: UOWdep,refresh_token: str = Cookie(None)):
+    return await AuthService().refresh_token(uow, refresh_token)

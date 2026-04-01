@@ -32,6 +32,12 @@ class UserService:
         async with uow:
             if data.password:
                 data.password = pwd_context.hash(data.password)
+            
+            if data.login:
+                existing_user = await uow.users.get_one_filter_by(login=data.login)
+                if existing_user:
+                    raise HTTPException(status_code=400, detail="User with this login already exists")
+            
             upd_user = await uow.users.update(entity_id=user_id, **data.clean_dict())
             if not upd_user:
                 raise HTTPException(status_code=404, detail='User not found')
