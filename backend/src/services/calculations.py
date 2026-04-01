@@ -336,7 +336,7 @@ class CalculationService:
                 data_dict.update({'price': calculation_total_price})
 
             upd_calculation = await uow.calculations.update(calculation_id, **data_dict)
-            
+            print(f'Calculation {CalculationSchema(**upd_calculation.__dict__)}')
             await uow.commit()
             return upd_calculation   
             
@@ -357,3 +357,49 @@ class CalculationService:
                 await uow.calc_elements.delete(calc_el.id)
             await uow.calculations.delete(calculation_id)
             await uow.commit()
+
+    @staticmethod
+    async def expire_calculation(uow: IUnitOfWork, calculation_id: int):
+        async with uow:
+            calculation = await uow.calculations.get_one_filter_by(id=calculation_id)
+            if not calculation:
+                raise HTTPException(status_code=404, detail='Calculation not found')
+
+            if calculation.expires_at >= datetime.now():
+                raise HTTPException(status_code=400, detail='Calculation has expired')
+            else:
+                calc_elements = await uow.calc_elements.get_all_filter_by(calculation_id=calculation_id)
+                total_price = 0
+
+                for calc_el in calc_elements:
+                    calc_sub_elements = await uow.calc_sub_elements.get_all_filter_by(calc_element_id=calc_el.id)
+                    element_total_price = 0
+
+                    for calc_sub_el in calc_sub_elements:
+                        calc_positions = await uow.calc_positions.get_all_filter_by(calc_sub_element_id=calc_sub_el.id)
+                        sub_element_total_price = 0
+
+                        for calc_pos in calc_positions:
+                            material = await uow.materials.get_one_filter_by(id=calc_pos.material_id)
+                            if not material:
+                                raise HTTPException(status_code=404, detail=f'Material with id {calc_pos.material_id} not found')
+                            price = Calc.price(calc_pos.quantity, material.market_price)
+                            sub_element_total_price += price
+                            await uow.calc_positions.update(calc_pos.id, price=price)
+
+                        element_total_price += sub_element_total_price
+                        await uow.calc_sub_elements.update(calc_sub_el.id, price=sub_element_total_price)
+
+                    total_price += element_total_price
+                    await uow.calc_elements.update(calc_el.id, price=element_total_price)
+
+                await uow.calculations.update(
+                    calculation_id, 
+                    price=total_price, 
+                    updated_at=datetime.now(), 
+                    expires_at=datetime.now() + timedelta(days=CALC_LIFETIME_DAYS)
+                )
+                await uow.commit()
+
+                upd_calculation = await uow.calculations.get_one_filter_by(id=calculation_id)
+                return upd_calculation
