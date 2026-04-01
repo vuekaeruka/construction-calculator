@@ -13,23 +13,26 @@ from src.schemas.calculations import (CalculationFilter,
                                       CalculationCreateSchema, 
                                       CalcElementCreateSchema, 
                                       CalcSubElementCreateSchema, 
-                                      CalcPositionCreateSchema
+                                      CalcPositionCreateSchema,
+                                      CalculationSchema
                                     )
-from src.utils.enums import Element, SubElement, RoofType, CALC_LIFETIME_DAYS
+from src.utils.enums import Element, SubElement, RoofType, FoundationType, CALC_LIFETIME_DAYS
 
 # Класс для наследования общих формул
 class Calc:
-    def board_volume(self, sub_element_area: float, type: str, sub_element_thickness: Optional[float] = None):
-        if type == 'roof':
+    def board_volume(self, sub_element_area: float, element_type: str, sub_element_thickness: Optional[float] = None):
+        if element_type == 'roof':
             sub_element_board_volume = sub_element_area * 0.09 * 1.05
-        elif type == 'frame':
+        elif element_type == 'frame':
             sub_element_board_volume = sub_element_area * (sub_element_thickness/1000) * 0.18 * 1.05
+        elif element_type == 'foundation':
+            sub_element_board_volume = sub_element_area * 0.1 * 1.05
         return sub_element_board_volume    
 
-    def osb_area(self, sub_element_area: float, type: str):
-        if type in {'int', 'roof'}:
+    def osb_area(self, sub_element_area: float, element_type: str):
+        if element_type in {'int', 'roof'}:
             sub_element_osb_area = sub_element_area * 1.12
-        elif type in {'ext', 'floor'}:
+        elif element_type in {'ext', 'floor'}:
             sub_element_osb_area = sub_element_area * 2 * 1.12
         return sub_element_osb_area
 
@@ -47,6 +50,7 @@ class Calc:
         
     @staticmethod
     def quantity(sub_element_value, material_unit_value):
+        print(f'Calculating quantity: sub_element_value={sub_element_value}, material_unit_value={material_unit_value}')
         sub_element_material_quantity = sub_element_value / material_unit_value
         return math.ceil(sub_element_material_quantity)
     
@@ -55,9 +59,33 @@ class Calc:
         sub_element_material_price = sub_element_material_quantity * material_market_price
         return sub_element_material_price
 
-class CalcFoundation:
+class CalcFoundation(Calc):
     def __init__(self, foundation: FoundationSchema):
-        ...
+        self.length = foundation.length
+        self.width = foundation.width
+        self.height = foundation.height
+        self.step_rebar = foundation.step_rebar
+        self.rebar_length = foundation.rebar_length
+        self.board_length = foundation.board_length
+        self.board_width = foundation.board_width
+
+    def concrete_volume(self):
+        concrete_volume = self.length * self.width * self.height * 1.05
+        return concrete_volume
+    
+    def rebar_total_length(self):
+        rebar_quantity_x = (self.length/self.step_rebar + 1) * 2
+        rebar_quantity_y = (self.width/self.step_rebar + 1) * 2
+        rebar_total_length = (rebar_quantity_x + rebar_quantity_y) * self.rebar_length * 1.05
+        return rebar_total_length
+    
+    def calculate(self):
+        formwork_area = (self.length + self.width) * 2 * self.height * 1.05
+        return {FoundationType.MONOLITHIC_PLATE: [
+            (self.board_volume(formwork_area, 'foundation'), 1),
+            (self.concrete_volume(), 11),
+            (self.rebar_total_length(), 12)
+        ]}
 
 class CalcRoof(Calc):
     def __init__(self, roof: RoofSchema):
@@ -67,25 +95,48 @@ class CalcRoof(Calc):
                                                                                     "osb_id": None,
                                                                                     "insulation_thickness": 0})()
 
-    def calculate_roof_sheet_area(self, roof_area: float):
-        roof_sheet_area = roof_area * 1.1
+    def calculate_roof_sheet_area(self, roof_area: float, roof_type: RoofType):
+        if roof_type == RoofType.DOUBLE_SLOPE:
+            roof_sheet_area = roof_area * 1.1
+        elif roof_type == RoofType.SINGLE_SLOPE:
+            roof_sheet_area = roof_area
         return roof_sheet_area
 
     def calculate(self):
-        if self.init.roof_type == RoofType.SINGLE_SLOPE:
+        roof_type = self.init.roof_type
+
+        if roof_type == RoofType.SINGLE_SLOPE:
             roof_area = self.init.slope_width * self.init.left_slope_length
-        elif self.init.roof_type == RoofType.DOUBLE_SLOPE:
+        elif roof_type == RoofType.DOUBLE_SLOPE:
             roof_area = self.init.slope_width * (self.init.left_slope_length + self.init.right_slope_length)
 
-        return {
-            SubElement.ROOF: [
+        if roof_type == RoofType.DOUBLE_SLOPE:
+            return [
                 (self.board_volume(roof_area, type='roof'), 1),
-                (self.calculate_roof_sheet_area(roof_area), 10),
+                (self.calculate_roof_sheet_area(roof_area, roof_type), 10),
                 (self.insulation_volume(roof_area, self.modification.insulation_thickness), self.modification.insulation_id),
                 (self.osb_area(roof_area, type='roof'), self.modification.osb_id),
                 (self.steam_water_proofing_area(roof_area), self.modification.water_proofing_id)
             ]
-        }
+
+        if roof_type == RoofType.DOUBLE_SLOPE:
+            return {RoofType.DOUBLE_SLOPE: [
+                (self.board_volume(roof_area, type='roof'), 1),
+                (self.calculate_roof_sheet_area(roof_area, RoofType.DOUBLE_SLOPE), 10),
+                (self.insulation_volume(roof_area, self.modification.insulation_thickness), self.modification.insulation_id),
+                (self.osb_area(roof_area, type='roof'), self.modification.osb_id),
+                (self.steam_water_proofing_area(roof_area), self.modification.water_proofing_id)
+                ]
+            }
+        elif roof_type == RoofType.SINGLE_SLOPE:
+            return {RoofType.SINGLE_SLOPE: [
+                (self.board_volume(roof_area, type='roof'), 1),
+                (self.calculate_roof_sheet_area(roof_area, RoofType.SINGLE_SLOPE), 10),
+                (self.insulation_volume(roof_area, self.modification.insulation_thickness), self.modification.insulation_id),
+                (self.osb_area(roof_area, type='roof'), self.modification.osb_id),
+                (self.steam_water_proofing_area(roof_area), self.modification.water_proofing_id)
+                ]
+            }
 
 class CalcFrame(Calc):
     def __init__(self, frame: FrameSchema):
@@ -140,30 +191,6 @@ class CalcFrame(Calc):
 class CalculationService:
     
     @staticmethod
-    async def __create_calc_position(
-        uow: IUnitOfWork,
-        calc_sub_element_id: int,
-        volume: float,
-        material_id: int
-    ):
-        if material_id is None:
-            return 0
-        material = await uow.materials.get_one_filter_by(id=material_id)
-        if not material:
-            raise HTTPException(status_code=404, detail='Material with id {material_id} not found')
-        quantity = Calc.quantity(volume, material.unit_value)
-        price = Calc.price(quantity, material.market_price)
-        await uow.calc_positions.create(
-            CalcPositionCreateSchema(
-                calc_sub_element_id=calc_sub_element_id,
-                material_id=material_id,
-                quantity=quantity,
-                price=price
-            )
-        )
-        return price
-    
-    @staticmethod
     async def __create_calc_element(
         uow: IUnitOfWork,
         calculation_id: int,
@@ -196,8 +223,31 @@ class CalculationService:
             )
             sub_element_total_price = 0
 
+            async def __create_calc_position(
+                uow: IUnitOfWork,
+                calc_sub_element_id: int,
+                volume: float,
+                material_id: int
+            ):
+                if material_id is None:
+                    return 0
+                material = await uow.materials.get_one_filter_by(id=material_id)
+                if not material:
+                    raise HTTPException(status_code=404, detail='Material with id {material_id} not found')
+                quantity = Calc.quantity(volume, material.unit_value)
+                price = Calc.price(quantity, material.market_price)
+                await uow.calc_positions.create(
+                    CalcPositionCreateSchema(
+                        calc_sub_element_id=calc_sub_element_id,
+                        material_id=material_id,
+                        quantity=quantity,
+                        price=price
+                    )
+                )
+                return price
+
             for volume, material_id in items:
-                sub_element_total_price += await CalculationService.__create_calc_position(uow, new_calc_sub_element.id, volume, material_id)
+                sub_element_total_price += await __create_calc_position(uow, new_calc_sub_element.id, volume, material_id)
 
             await uow.calc_sub_elements.update(new_calc_sub_element.id, price=sub_element_total_price)
 
@@ -288,7 +338,7 @@ class CalculationService:
             upd_calculation = await uow.calculations.update(calculation_id, **data_dict)
             
             await uow.commit()
-            return upd_calculation
+            return upd_calculation   
             
     @staticmethod
     async def delete_calculation(uow: IUnitOfWork, calculation_id: int):
@@ -307,4 +357,3 @@ class CalculationService:
                 await uow.calc_elements.delete(calc_el.id)
             await uow.calculations.delete(calculation_id)
             await uow.commit()
-        

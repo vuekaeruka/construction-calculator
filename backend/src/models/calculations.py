@@ -27,7 +27,7 @@ class Calculation(BaseSQLModels):
     elements: Mapped[list['CalcElement']] = relationship(
         'CalcElement',
         cascade="all, delete-orphan",
-        passive_deletes=True,  # Важно для ondelete="CASCADE"
+        passive_deletes=True,
         lazy='selectin'
     )
 
