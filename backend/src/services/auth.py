@@ -1,6 +1,5 @@
 from datetime import datetime
 from fastapi import HTTPException, Depends
-from fastapi.responses import JSONResponse
 from jwt import PyJWT
 
 from src.schemas.users import UserCreateSchema, UserLoginSchema
@@ -51,7 +50,6 @@ class AuthService:
         tokens = self._generate_user_tokens(user_id)
         return tokens
     
-
     def _generate_user_tokens(self, user_id: int) -> dict:
         access = self._generate_token(user_id, TokenType.ACCESS)
         refresh = self._generate_token(user_id, TokenType.REFRESH)

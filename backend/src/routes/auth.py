@@ -1,5 +1,5 @@
 from typing import List
-from fastapi import APIRouter, Depends, Form
+from fastapi import APIRouter, Form, Response, Cookie, Depends
 
 from src.services.auth import AuthService
 from src.schemas.users import UserCreateSchema, UserSchema, UserLoginSchema
@@ -15,6 +15,12 @@ async def register(uow: UOWdep, data: UserCreateSchema):
 async def login(uow: UOWdep, username: str = Form(...), password: str = Form(...)):
     return await AuthService().login(uow, username, password)
 
-"""@router.post('/refresh', status_code=200)
-async def refresh(uow: UOWdep):
-    ..."""
+@router.post('/refresh', status_code=200)
+async def refresh(
+        uow: UOWdep,
+        response: Response, 
+        refresh_token: str = Cookie(None),
+        auth_service: AuthService = Depends(),
+
+    ):
+    return await AuthService().refresh_token(uow, user_id)

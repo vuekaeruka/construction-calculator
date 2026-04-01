@@ -18,6 +18,7 @@ app.include_router(router=users_router)
 app.include_router(router=material_categories_router)
 app.include_router(router=material_router)
 app.include_router(router=calculations_router)
+app.include_router(router=email_router)
 
 app.add_middleware(
     CORSMiddleware,
