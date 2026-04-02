@@ -1,0 +1,398 @@
+/* Базовые настройки и переменные (изолированный скоуп Login) */
+:root {
+    --bg-main: #0A0A0A;
+    --surface-main: rgba(26, 26, 26, 0.65);
+    --text-primary: #FFFFFF;
+    --text-secondary: #A1A1AA;
+    --accent: #EF4444;
+    --accent-hover: #DC2626;
+    --border-color: rgba(255, 255, 255, 0.05);
+    --border-focus: rgba(239, 68, 68, 0.5);
+    --radius-sm: 4px;
+    --radius-md: 6px;
+    --transition: all 0.3s ease;
+    --font-family: 'Inter', sans-serif;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    font-family: var(--font-family);
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.login-wrapper {
+    width: 100%;
+    max-width: 420px;
+    padding: 20px;
+    /* Выстраиваем элементы по вертикали и центрируем */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Стили для логотипа на странице входа */
+.login-logo {
+    margin-bottom: 32px;
+}
+
+.login-logo .logo-image {
+    height: 48px; /* Делаем логотип крупным и заметным */
+    width: auto;
+    display: block;
+}
+
+.login-card {
+    background: var(--surface-main);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 48px 40px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    width: 100%; /* Чтобы карточка занимала всю ширину враппера */
+}
+
+.login-title {
+    font-size: 28px;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 32px;
+    letter-spacing: -0.02em;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* Плавающие лейблы */
+.input-group {
+    position: relative;
+    width: 100%;
+}
+
+.input-group input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--border-color);
+    padding: 12px 0;
+    color: var(--text-primary);
+    font-size: 16px;
+    font-family: var(--font-family);
+    transition: var(--transition);
+    outline: none;
+}
+
+.input-group label {
+    position: absolute;
+    left: 0;
+    top: 12px;
+    color: var(--text-secondary);
+    font-size: 16px;
+    pointer-events: none;
+    transition: var(--transition);
+}
+
+.input-group input:focus,
+.input-group input:not(:placeholder-shown) {
+    border-bottom-color: var(--accent);
+}
+
+.input-group input:focus + label,
+.input-group input:not(:placeholder-shown) + label {
+    top: -12px;
+    font-size: 12px;
+    color: var(--accent);
+}
+
+.toggle-password {
+    position: absolute;
+    right: 0;
+    top: 12px;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.toggle-password:hover {
+    color: var(--text-primary);
+}
+
+.btn-primary {
+    background-color: var(--accent);
+    color: #FFFFFF;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    font-size: 16px;
+    font-weight: 700;
+    font-family: var(--font-family);
+    cursor: pointer;
+    transition: var(--transition);
+    margin-top: 8px;
+}
+
+.btn-primary:hover {
+    background-color: var(--accent-hover);
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+}
+
+/* --- Ссылка на регистрацию --- */
+.register-link-container {
+    margin-top: 24px;
+    text-align: center;
+    font-size: 14px;
+}
+
+.link-action {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 500;
+    transition: var(--transition);
+    margin-left: 6px;
+}
+
+.link-action:hover {
+    text-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+}
+
+/* --- Модальное окно --- */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    opacity: 0;
+    visibility: hidden;
+    transition: var(--transition);
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-card {
+    background: var(--surface-main);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    width: 100%;
+    max-width: 480px;
+    padding: 32px;
+    transform: scale(0.95);
+    transition: var(--transition);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.modal-overlay.active .modal-card {
+    transform: scale(1);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.modal-header h2 {
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.btn-close {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 24px;
+    cursor: pointer;
+    line-height: 1;
+    transition: var(--transition);
+}
+
+.btn-close:hover {
+    color: var(--text-primary);
+}
+
+.modal-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.btn-secondary {
+    background-color: transparent;
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: var(--font-family);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-secondary:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 12px;
+}
+
+/* --- Футер и Авторы проекта --- */
+.app-footer {
+    position: fixed; /* Фиксируем футер всегда внизу экрана */
+    bottom: 24px;
+    left: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    z-index: 10;
+}
+
+.copyright {
+    color: var(--text-secondary);
+    font-size: 12px;
+}
+
+.authors-popover-container {
+    position: relative;
+}
+
+.authors-trigger {
+    color: var(--text-secondary);
+    font-size: 13px;
+    cursor: pointer;
+    transition: var(--transition);
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-underline-offset: 4px;
+}
+
+.authors-trigger:hover {
+    color: var(--text-primary);
+    text-decoration-color: var(--text-primary);
+}
+
+/* Окошко со списком (Поповер) */
+.authors-popover {
+    position: absolute;
+    bottom: calc(100% + 16px); /* Появляется строго НАД ссылкой "Авторы" */
+    left: 50%;
+    transform: translateX(-50%) translateY(10px);
+    width: 340px;
+    background: var(--surface-main);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 24px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    opacity: 0;
+    visibility: hidden;
+    transition: var(--transition);
+    z-index: 20;
+    max-height: 300px; /* Ограничиваем высоту */
+    overflow-y: auto;  /* Включаем прокрутку, если список большой */
+}
+
+/* Состояние: Открыто */
+.authors-popover.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* Кастомный скроллбар для окошка */
+.authors-popover::-webkit-scrollbar {
+    width: 6px;
+}
+.authors-popover::-webkit-scrollbar-track {
+    background: transparent;
+    margin: 12px 0;
+}
+.authors-popover::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 10px;
+}
+.authors-popover::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary);
+}
+
+.popover-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 16px;
+    text-align: center;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 12px;
+}
+
+.authors-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.authors-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    gap: 16px;
+}
+
+.authors-list li span {
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.authors-list li a {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 600;
+    transition: var(--transition);
+    white-space: nowrap;
+}
+
+.authors-list li a:hover {
+    text-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+    color: var(--text-primary);
+}

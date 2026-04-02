@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход | Строительный калькулятор</title>
+    <link rel="icon" href="../pic/view.png" type="image/png">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <main class="login-wrapper">
+        <div class="login-logo">
+            <img src="../pic/logo.png" alt="Строительный калькулятор" class="logo-image">
+        </div>
+        
+        <div class="login-card">
+            <h1 class="login-title">Вход</h1>
+            <form id="login-form" class="login-form">
+                <div class="input-group">
+                    <input type="text" id="username" placeholder=" " required autocomplete="username">
+                    <label for="username">Логин</label>
+                </div>
+                <div class="input-group">
+                    <input type="password" id="password" placeholder=" " required autocomplete="current-password">
+                    <label for="password">Пароль</label>
+                    <button type="button" class="toggle-password" id="toggle-password" aria-label="Показать пароль">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                    </button>
+                </div>
+                <button type="submit" class="btn-primary">Войти</button>
+            </form>
+
+            <div class="register-link-container">
+                <span style="color: var(--text-secondary);">Нет аккаунта?</span>
+                <a href="#" id="open-register-modal" class="link-action">Зарегистрироваться</a>
+            </div>
+        </div>
+    </main>
+
+    <footer class="app-footer">
+        <div class="authors-popover-container">
+            <div class="authors-popover" id="authors-popover">
+                <h3 class="popover-title">Команда "Opora Team"</h3>
+                <ul class="authors-list">
+                    <li><span>Project Manager</span> <a href="https://t.me/Samso" target="_blank">@Samso</a></li>
+                    <li><span>Backend-разработчик</span> <a href="https://t.me/zZencorZz" target="_blank">@zZencorZz</a></li>
+                    <li><span>Frontend-разработчик</span> <a href="https://t.me/Afrobobus" target="_blank">@Afrobobus</a></li>
+                    <li><span>DevOps-разработчик</span> <a href="https://t.me/amiuglyyyy" target="_blank">@amiuglyyyy</a></li>
+                    <li><span>QA-менеджер</span> <a href="https://t.me/KoT_ITshniK" target="_blank">@KoT_ITshniK</a></li>
+                    <li><span>Репозиторий</span> <a href="https://github.com/vuekaeruka/construction-calculator" target="_blank">GitHub</a></li>
+                </ul>
+            </div>
+            <span class="authors-trigger" id="authors-btn">Авторы проекта</span>
+        </div>
+        <div class="copyright">2026, все права защищены.</div>
+    </footer>
+
+    <div class="modal-overlay" id="register-modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h2>Регистрация</h2>
+                <button class="btn-close" id="close-register-modal-btn" aria-label="Закрыть">×</button>
+            </div>
+            <form class="modal-form" id="register-form" novalidate>
+                <div class="input-group">
+                    <input type="text" id="reg-lastname" placeholder=" " required maxlength="255">
+                    <label for="reg-lastname">Фамилия</label>
+                </div>
+                <div class="input-group">
+                    <input type="text" id="reg-firstname" placeholder=" " required maxlength="255">
+                    <label for="reg-firstname">Имя</label>
+                </div>
+                <div class="input-group">
+                    <input type="text" id="reg-login" placeholder=" " required maxlength="50">
+                    <label for="reg-login">Логин</label>
+                </div>
+                <div class="input-group">
+                    <input type="password" id="reg-password" placeholder=" " required maxlength="255">
+                    <label for="reg-password">Пароль</label>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" id="cancel-register-modal-btn">Отмена</button>
+                    <button type="submit" class="btn-primary">Зарегистрироваться</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

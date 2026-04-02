@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Расчет крыши | Строительный калькулятор</title>
+    <link rel="icon" href="../pic/view.png" type="image/png">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="navbar">
+        <div class="navbar-container">
+            <div class="logo">
+                <img src="../pic/logo.png" alt="Строительный калькулятор" class="logo-image">
+            </div>
+            <div class="user-profile">
+                <div class="user-info-text">
+                    <span class="user-name" id="current-user-name">Загрузка...</span>
+                    <span class="user-role" id="current-user-login"></span>
+                </div>
+                <button id="logout-btn" class="btn-secondary btn-sm" style="margin-left: 12px;">Выйти</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <header class="page-header">
+            <div class="header-left">
+                <a href="../client-card/index.html" class="btn-back" id="btn-back" title="Вернуться назад">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                </a>
+                <h1 class="page-title">Крыша</h1>
+            </div>
+            <div class="header-actions">
+                <button type="button" class="btn-secondary" id="clear-calc-btn">Очистить расчет</button>
+            </div>
+        </header>
+
+        <div class="client-mini-card">
+            <div class="client-details">
+                <span class="label">Клиент:</span>
+                <strong id="client-name">Загрузка данных...</strong>
+                <span class="sub-text" id="client-phone"></span>
+            </div>
+        </div>
+
+        <form id="calc-roof-form" class="calc-form" novalidate>
+            <div class="form-section address-section">
+                <div class="input-group">
+                    <input type="text" id="object-address" placeholder=" " required>
+                    <label for="object-address">Ввести адрес объекта строительства</label>
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-column">
+                    <div class="form-section">
+                        <h3 class="section-title">Конфигурация крыши</h3>
+                        <div class="input-group select-group">
+                            <label class="static-label">Тип крыши</label>
+                            <select id="roof-type" class="custom-select">
+                                <option value="Односкатная">Односкатная</option>
+                                <option value="Двускатная" selected>Двускатная</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3 class="section-title">Габариты скатов</h3>
+                        <div class="input-group">
+                            <input type="number" id="slope-width" placeholder=" " min="2" max="100" step="0.1" required>
+                            <label for="slope-width">Ширина ската, м</label>
+                        </div>
+                        <div class="input-group">
+                            <input type="number" id="left-slope-length" placeholder=" " min="2" max="100" step="0.1" required>
+                            <label for="left-slope-length">Длина (основного/левого) ската, м</label>
+                        </div>
+                        <div class="input-group" id="right-slope-group">
+                            <input type="number" id="right-slope-length" placeholder=" " min="2" max="100" step="0.1" required>
+                            <label for="right-slope-length">Длина правого ската, м</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-column">
+                    <div class="form-section">
+                        <h3 class="section-title">Материалы обшивки</h3>
+                        <div class="input-group select-group">
+                            <label class="static-label">ОСБ</label>
+                            <select id="osb-id" class="custom-select">
+                                <option value="none">Без ОСБ</option>
+                                <option value="1">ОСБ 9 мм</option>
+                                <option value="2" selected>ОСБ 12 мм</option>
+                            </select>
+                        </div>
+                        <div class="input-group select-group">
+                            <label class="static-label">Гидро-пароизоляция</label>
+                            <select id="water-proofing-id" class="custom-select">
+                                <option value="none">Без изоляции</option>
+                                <option value="3" selected>Стандартная мембрана</option>
+                                <option value="4">Премиум мембрана</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <label class="toggle-switch-wrapper">
+                            <input type="checkbox" id="toggle-insulation" class="toggle-input" checked>
+                            <span class="toggle-slider"></span>
+                            <h3 class="section-title toggle-title">Утепление кровли</h3>
+                        </label>
+                        
+                        <div class="collapsible-content active" id="insulation-content" style="display: flex;">
+                            <div class="input-group select-group">
+                                <label class="static-label">Материал утеплителя</label>
+                                <select id="insulation-id" class="custom-select">
+                                    <option value="7" selected>Минеральная вата</option>
+                                    <option value="8">Базальтовая вата</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <input type="number" id="insulation-thickness" placeholder=" " min="50" max="400" step="10" value="200">
+                                <label for="insulation-thickness">Толщина утепления, мм</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-primary btn-large" id="submit-btn">Рассчитать</button>
+            </div>
+        </form>
+    </main>
+
+    <footer class="app-footer">
+        <div class="authors-popover-container">
+            <div class="authors-popover" id="authors-popover">
+                <h3 class="popover-title">Команда "Opora Team"</h3>
+                <ul class="authors-list">
+                    <li><span>Project Manager</span> <a href="https://t.me/Samso" target="_blank">@Samso</a></li>
+                    <li><span>Backend-разработчик</span> <a href="https://t.me/zZencorZz" target="_blank">@zZencorZz</a></li>
+                    <li><span>Frontend-разработчик</span> <a href="https://t.me/Afrobobus" target="_blank">@Afrobobus</a></li>
+                    <li><span>DevOps-разработчик</span> <a href="https://t.me/amiuglyyyy" target="_blank">@amiuglyyyy</a></li>
+                    <li><span>QA-менеджер</span> <a href="https://t.me/KoT_ITshniK" target="_blank">@KoT_ITshniK</a></li>
+                    <li><span>Репозиторий</span> <a href="https://github.com/vuekaeruka/construction-calculator" target="_blank">GitHub</a></li>
+                </ul>
+            </div>
+            <span class="authors-trigger" id="authors-btn">Авторы проекта</span>
+        </div>
+        <div class="copyright">2026, все права защищены.</div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
