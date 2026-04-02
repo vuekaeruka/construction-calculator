@@ -24,6 +24,9 @@ class ClientService:
     async def get_clients_filter_by(uow: IUnitOfWork, filters: ClientFilter):
         async with uow:
             clients = await uow.clients.get_all_filter_by(**filters.clean_dict())
+            for client in clients:
+                calculations_count = len(client.calculations) if client.calculations else 0
+                setattr(client, 'calculations_count', calculations_count)
             return clients or []
 
     @staticmethod
@@ -32,6 +35,8 @@ class ClientService:
             client = await uow.clients.get_one_filter_by(id=client_id)
             if not client:
                 raise HTTPException(status_code=404, detail='Client not found')
+            calculations_count = len(client.calculations) if client.calculations else 0
+            setattr(client, 'calculations_count', calculations_count)
             return client
         
     @staticmethod

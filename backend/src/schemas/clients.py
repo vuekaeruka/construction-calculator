@@ -11,6 +11,7 @@ class ClientSchema(BaseSchema):
     last_name: str
     first_name: str
     patronymic: str
+    calculations_count: Optional[int] = None
 
 class ClientFilter(BaseSchema):
     email: Optional[EmailStr] = Field(default=None, max_length=255)
