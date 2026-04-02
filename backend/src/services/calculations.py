@@ -111,29 +111,20 @@ class CalcRoof(Calc):
             roof_area = self.init.slope_width * (self.init.left_slope_length + self.init.right_slope_length)
 
         if roof_type == RoofType.DOUBLE_SLOPE:
-            return [
-                (self.board_volume(roof_area, type='roof'), 1),
-                (self.calculate_roof_sheet_area(roof_area, roof_type), 10),
-                (self.insulation_volume(roof_area, self.modification.insulation_thickness), self.modification.insulation_id),
-                (self.osb_area(roof_area, type='roof'), self.modification.osb_id),
-                (self.steam_water_proofing_area(roof_area), self.modification.water_proofing_id)
-            ]
-
-        if roof_type == RoofType.DOUBLE_SLOPE:
             return {RoofType.DOUBLE_SLOPE: [
-                (self.board_volume(roof_area, type='roof'), 1),
+                (self.board_volume(roof_area, element_type='roof'), 1),
                 (self.calculate_roof_sheet_area(roof_area, RoofType.DOUBLE_SLOPE), 10),
                 (self.insulation_volume(roof_area, self.modification.insulation_thickness), self.modification.insulation_id),
-                (self.osb_area(roof_area, type='roof'), self.modification.osb_id),
+                (self.osb_area(roof_area, element_type='roof'), self.modification.osb_id),
                 (self.steam_water_proofing_area(roof_area), self.modification.water_proofing_id)
                 ]
             }
         elif roof_type == RoofType.SINGLE_SLOPE:
             return {RoofType.SINGLE_SLOPE: [
-                (self.board_volume(roof_area, type='roof'), 1),
+                (self.board_volume(roof_area, element_type='roof'), 1),
                 (self.calculate_roof_sheet_area(roof_area, RoofType.SINGLE_SLOPE), 10),
                 (self.insulation_volume(roof_area, self.modification.insulation_thickness), self.modification.insulation_id),
-                (self.osb_area(roof_area, type='roof'), self.modification.osb_id),
+                (self.osb_area(roof_area, element_type='roof'), self.modification.osb_id),
                 (self.steam_water_proofing_area(roof_area), self.modification.water_proofing_id)
                 ]
             }
