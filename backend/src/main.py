@@ -12,17 +12,17 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Construction Calculator API", lifespan=lifespan)
 
-app.include_router(router=clients_router)
-app.include_router(router=auth_router)
-app.include_router(router=users_router)
-app.include_router(router=material_categories_router)
-app.include_router(router=material_router)
-app.include_router(router=calculations_router)
-app.include_router(router=email_router)
+app.include_router(router=clients_router, prefix="/api")
+app.include_router(router=auth_router, prefix="/api")
+app.include_router(router=users_router, prefix="/api")
+app.include_router(router=material_categories_router, prefix="/api")
+app.include_router(router=material_router, prefix="/api")
+app.include_router(router=calculations_router, prefix="/api")
+app.include_router(router=email_router, prefix="/api")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:3001"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
