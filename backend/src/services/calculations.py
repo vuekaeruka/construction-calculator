@@ -323,12 +323,13 @@ class CalculationService:
             
             existing_element_names = {el.element_name for el in calculation.elements}
 
-            if data.construction_element.roof and Element.ROOF in existing_element_names:
-                raise HTTPException(status_code=400, detail="The calculation already has a roof")
-            
-            if data.construction_element.foundation and Element.ROOF in existing_element_names:
-                raise HTTPException(status_code=400, detail="The calculation already has a foundation")
-            
+            if data.construction_element:
+                if data.construction_element.roof and Element.ROOF in existing_element_names:
+                    raise HTTPException(status_code=400, detail="The calculation already has a roof")
+                
+                if data.construction_element.foundation and Element.ROOF in existing_element_names:
+                    raise HTTPException(status_code=400, detail="The calculation already has a foundation")
+                
             calculation_total_price = calculation.price
             
             if calc_map:
