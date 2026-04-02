@@ -140,5 +140,4 @@ class EmailService:
                 return {"status": "success"}
 
             except Exception as e:
-                print(f"Detailed Error: {type(e).__name__}: {e}")
                 raise HTTPException(status_code=500, detail=f"Mail server error: {str(e)}")

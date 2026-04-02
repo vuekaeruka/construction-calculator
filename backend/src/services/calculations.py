@@ -317,9 +317,17 @@ class CalculationService:
             calculation = await uow.calculations.get_one_filter_by(id=calculation_id)
             if not calculation:
                 raise HTTPException(status_code=404, detail='Calculation not found')
-            
+                    
             if calculation.status == CalcStatus.CONTRACT_SIGNED:
                 raise HTTPException(status_code=400, detail='Cannot update a calculation with signed contract')
+            
+            existing_element_names = {el.element_name for el in calculation.elements}
+
+            if data.construction_element.roof and Element.ROOF in existing_element_names:
+                raise HTTPException(status_code=400, detail="The calculation already has a roof")
+            
+            if data.construction_element.foundation and Element.ROOF in existing_element_names:
+                raise HTTPException(status_code=400, detail="The calculation already has a foundation")
             
             calculation_total_price = calculation.price
             

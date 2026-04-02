@@ -4,7 +4,7 @@ __pycache__/
 # Bat CLI
 /migr.bat
 /run.bat
-
+/git.bat
 
 # Alembic
 /backend/migrations/
