@@ -12,6 +12,7 @@ class UserSchema(BaseSchema):
     id: int
     last_name: str
     first_name: str
+    login: str
 
 class UserFilter(BaseSchema):
     last_name: Optional[str] = Field(default=None, max_length=255)
