@@ -34,19 +34,11 @@ class CalculationSchema(BaseSchema):
     client: ClientSchema
     address: str
     price: float
+    status: str
     created_at: datetime
     updated_at: datetime
     expires_at: datetime
     elements: List[CalcElementSchema]
-
-    @computed_field
-    @property
-    def status(self) -> str:
-        if getattr(self, "_original_status", None) == CalcStatus.CONTRACT_SIGNED.value:
-            return CalcStatus.CONTRACT_SIGNED.value
-        if datetime.now() > self.expires_at:
-            return CalcStatus.EXPIRED.value
-        return CalcStatus.RELEVANT.value
 
 class ShortCalculationSchema(BaseSchema):
     id: int
