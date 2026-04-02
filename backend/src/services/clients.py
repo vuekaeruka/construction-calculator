@@ -12,9 +12,9 @@ class ClientService:
             if existing_email:
                 raise HTTPException(status_code=400, detail="Client with this email already exists")
             
-            exiting_phone = await uow.clients.get_one_filter_by(phone=data.phone_number)
+            exiting_phone = await uow.clients.get_one_filter_by(phone_number=data.phone_number)
             if exiting_phone:
-                raise HTTPException(status_code=400, detail="Client with this phone already exists")
+                raise HTTPException(status_code=400, detail="Client with this phone number already exists")
             
             new_client = await uow.clients.create(data)
             await uow.commit()
@@ -48,9 +48,9 @@ class ClientService:
                     raise HTTPException(status_code=400, detail="Client with this email already exists")
             
             if data.phone_number:
-                exiting_phone = await uow.clients.get_one_filter_by(phone=data.phone_number)
+                exiting_phone = await uow.clients.get_one_filter_by(phone_number=data.phone_number)
                 if exiting_phone:
-                    raise HTTPException(status_code=400, detail="Client with this phone already exists")
+                    raise HTTPException(status_code=400, detail="Client with this phone number already exists")
 
             upd_client = await uow.clients.update(entity_id=client_id, **data.clean_dict())
             if not upd_client:
