@@ -14,7 +14,7 @@ from src.schemas.calculations import (CalculationFilter,
                                       CalcElementCreateSchema, 
                                       CalcSubElementCreateSchema, 
                                       CalcPositionCreateSchema,
-                                      CalculationSchema
+                                      ConsructionElementUpdateSchema
                                     )
 from src.utils.enums import Element, SubElement, RoofType, FoundationType, CalcStatus, CALC_LIFETIME_DAYS
 
@@ -185,7 +185,7 @@ class CalculationService:
     async def __create_calc_element(
         uow: IUnitOfWork,
         calculation_id: int,
-        data: CalculationRequestPOSTSchema | CalculationRequestPUTSchema,
+        data: CalculationRequestPOSTSchema | CalculationRequestPUTSchema | ConsructionElementUpdateSchema,
         map: dict
     ):
         if data.construction_element.frame:
@@ -249,7 +249,7 @@ class CalculationService:
         return element_total_price
     
     @staticmethod
-    def __get_calc_map(data: CalculationRequestPOSTSchema | CalculationRequestPUTSchema):
+    def __get_calc_map(data: CalculationRequestPOSTSchema | CalculationRequestPUTSchema | ConsructionElementUpdateSchema ):
         if not data.construction_element:
             return None
         elif data.construction_element.frame:
@@ -260,6 +260,7 @@ class CalculationService:
             return CalcFoundation(data.construction_element.foundation).calculate()
         else:
             return None
+        
 
     @staticmethod
     async def create_calculation(uow: IUnitOfWork, data: CalculationRequestPOSTSchema):
@@ -327,7 +328,7 @@ class CalculationService:
                 if data.construction_element.roof and Element.ROOF in existing_element_names:
                     raise HTTPException(status_code=400, detail="The calculation already has a roof")
                 
-                if data.construction_element.foundation and Element.ROOF in existing_element_names:
+                if data.construction_element.foundation and Element.FOUNDATION in existing_element_names:
                     raise HTTPException(status_code=400, detail="The calculation already has a foundation")
                 
             calculation_total_price = calculation.price
@@ -339,7 +340,6 @@ class CalculationService:
                 data_dict.update({'price': calculation_total_price})
 
             upd_calculation = await uow.calculations.update(calculation_id, **data_dict)
-            print(f'Calculation {CalculationSchema(**upd_calculation.__dict__)}')
             await uow.commit()
             return upd_calculation   
             
@@ -372,7 +372,7 @@ class CalculationService:
                 raise HTTPException(status_code=400, detail='Cannot update a calculation with signed contract')
 
             if calculation.expires_at >= datetime.now():
-                raise HTTPException(status_code=400, detail='Calculation has expired')
+                raise HTTPException(status_code=400, detail='Calculation has not expired')
             else:
                 calc_elements = await uow.calc_elements.get_all_filter_by(calculation_id=calculation_id)
                 total_price = 0
@@ -410,7 +410,48 @@ class CalculationService:
 
                 upd_calculation = await uow.calculations.get_one_filter_by(id=calculation_id)
                 return upd_calculation
+    
+    @staticmethod
+    async def update_calc_element(uow: IUnitOfWork, calculation_id: int, calc_element_id: int, data: ConsructionElementUpdateSchema):
+        data_dict = data.clean_dict()
+        calc_map = CalculationService.__get_calc_map(data)
+        if not calc_map:
+            raise HTTPException(status_code=400, detail='Construction element missing')
+        async with uow:
+            calculation = await uow.calculations.get_one_filter_by(id=calculation_id)
+            if not calculation:
+                raise HTTPException(status_code=404, detail='Calculation not found')
             
+            if calculation.status == CalcStatus.CONTRACT_SIGNED:
+                raise HTTPException(status_code=400, detail='Cannot update a calculation with signed contract')
+
+            calc_element = await uow.calc_elements.get_one_filter_by(id=calc_element_id)
+            if not calc_element:
+                raise HTTPException(status_code=404, detail='Construction element not found')
+
+            if calc_element_id not in [calc_el.id for calc_el in calculation.elements]:
+                raise HTTPException(status_code=400, detail=f'Construction element with id={calc_element_id} not found in current calculation with id={calculation_id}')
+            
+            try:
+                calc_sub_elements = await uow.calc_sub_elements.get_all_filter_by(calc_element_id=calc_element.id) or []
+                for calc_sub_el in calc_sub_elements:
+                    calc_positions = await uow.calc_positions.get_all_filter_by(calc_sub_element_id=calc_sub_el.id) or []
+                    for calc_pos in calc_positions:
+                        await uow.calc_positions.delete(calc_pos.id)
+                    await uow.calc_sub_elements.delete(calc_sub_el.id)
+                await uow.calc_elements.delete(calc_element.id)
+                
+                element_total_price = await CalculationService.__create_calc_element(uow, calculation_id, data=data, map=calc_map)
+            
+                calculation_total_price = calculation.price - calc_element.price + element_total_price
+                data_dict.update({'price': calculation_total_price})
+
+                upd_calculation = await uow.calculations.update(calculation_id, **data_dict)
+                await uow.commit()
+                return upd_calculation  
+            except Exception as e:
+                raise HTTPException(status_code=500, detail=f'Error {e}')
+
     @staticmethod
     async def delete_calc_element(uow: IUnitOfWork, calculation_id: int, calc_element_id: int):
         async with uow:
@@ -420,7 +461,7 @@ class CalculationService:
             
             calc_element = await uow.calc_elements.get_one_filter_by(id=calc_element_id)
             if not calc_element:
-                raise HTTPException(status_code=404, detail='Cnostruction element not found')
+                raise HTTPException(status_code=404, detail='Construction element not found')
 
             if calc_element_id not in [calc_el.id for calc_el in calculation.elements]:
                 raise HTTPException(status_code=400, detail=f'Construction element with id={calc_element_id} not found in current calculation with id={calculation_id}')
@@ -433,4 +474,3 @@ class CalculationService:
                 await uow.calc_sub_elements.delete(calc_sub_el.id)
             await uow.calc_elements.delete(calc_element.id)
             await uow.commit()
-            

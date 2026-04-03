@@ -68,6 +68,9 @@ class ConsructionElement(BaseSchema):
     roof: Optional[RoofSchema] = None
     foundation: Optional[FoundationSchema] = None
 
+class ConsructionElementUpdateSchema(BaseSchema):
+    construction_element: ConsructionElement
+
 class CalculationRequestPOSTSchema(BaseSchema):
     client_id: int
     address: str
