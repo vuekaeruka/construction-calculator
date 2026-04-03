@@ -31,3 +31,7 @@ async def delete_calculation(uow: UOWdep, calculation_id: int):
 @router.patch('/{calculation_id}/expire', status_code=200, response_model=CalculationSchema)
 async def expire_calculation(uow: UOWdep, calculation_id: int):
     return await CalculationService.expire_calculation(uow, calculation_id)
+
+@router.delete('/{calculation_id}/elements/{calc_element_id}', status_code=204)
+async def delete_calc_element(uow: UOWdep, calculation_id: int, calc_element_id: int):
+    return await CalculationService.delete_calc_element(uow, calculation_id, calc_element_id)

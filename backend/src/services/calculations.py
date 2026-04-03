@@ -348,7 +348,7 @@ class CalculationService:
         async with uow:
             calculation = await uow.calculations.get_one_filter_by(id=calculation_id)
             if not calculation:
-                raise HTTPException(status_code=404, detail={'Calculation not found'})
+                raise HTTPException(status_code=404, detail='Calculation not found')
             calc_elements = await uow.calc_elements.get_all_filter_by(calculation_id=calculation_id) or []
             for calc_el in calc_elements:
                 calc_sub_elements = await uow.calc_sub_elements.get_all_filter_by(calc_element_id=calc_el.id) or []
@@ -410,3 +410,27 @@ class CalculationService:
 
                 upd_calculation = await uow.calculations.get_one_filter_by(id=calculation_id)
                 return upd_calculation
+            
+    @staticmethod
+    async def delete_calc_element(uow: IUnitOfWork, calculation_id: int, calc_element_id: int):
+        async with uow:
+            calculation = await uow.calculations.get_one_filter_by(id=calculation_id)
+            if not calculation:
+                raise HTTPException(status_code=404, detail='Calculation not found')
+            
+            calc_element = await uow.calc_elements.get_one_filter_by(id=calc_element_id)
+            if not calc_element:
+                raise HTTPException(status_code=404, detail='Cnostruction element not found')
+
+            if calc_element_id not in [calc_el.id for calc_el in calculation.elements]:
+                raise HTTPException(status_code=400, detail=f'Construction element with id={calc_element_id} not found in current calculation with id={calculation_id}')
+            
+            calc_sub_elements = await uow.calc_sub_elements.get_all_filter_by(calc_element_id=calc_element.id) or []
+            for calc_sub_el in calc_sub_elements:
+                calc_positions = await uow.calc_positions.get_all_filter_by(calc_sub_element_id=calc_sub_el.id) or []
+                for calc_pos in calc_positions:
+                    await uow.calc_positions.delete(calc_pos.id)
+                await uow.calc_sub_elements.delete(calc_sub_el.id)
+            await uow.calc_elements.delete(calc_element.id)
+            await uow.commit()
+            
