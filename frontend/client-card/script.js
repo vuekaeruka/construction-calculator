@@ -1,16 +1,15 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- ЗАГРУЗКА ПРОФИЛЯ ПОЛЬЗОВАТЕЛЯ И ЛОГИКА ВЫХОДА ---
     const logoutBtn = document.getElementById('logout-btn');
+    const token = localStorage.getItem('access_token');
     
     const loadUserProfile = async () => {
-        const token = localStorage.getItem('access_token');
         if (!token) {
             window.location.href = '../login/index.html';
             return;
         }
 
         try {
-            // ИЗМЕНЕНО: относительный путь к API
             const response = await fetch('/api/users/me', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -38,12 +37,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- ИНИЦИАЛИЗАЦИЯ КАРТОЧКИ КЛИЕНТА ---
+    // --- ИНИЦИАЛИЗАЦИЯ КАРТОЧКИ КЛИЕНТА (ЖЕСТКАЯ ВАЛИДАЦИЯ ID) ---
     const urlParams = new URLSearchParams(window.location.search);
-    const clientId = urlParams.get('id');
+    const rawClientId = urlParams.get('id');
+    const clientId = parseInt(rawClientId, 10);
 
-    if (!clientId) {
-        alert('Клиент не найден');
+    if (isNaN(clientId)) {
+        alert('Ошибка: некорректный ID клиента в адресной строке.');
         window.location.href = '../clients/index.html';
         return;
     }
@@ -117,21 +117,25 @@ document.addEventListener('DOMContentLoaded', () => {
             else if (calc.status === 'Заключен договор') statusBadge = '<span class="badge contract">Заключен договор</span>';
             else statusBadge = `<span class="badge">${calc.status}</span>`;
 
-            const calcUrl = `../calculation/index.html?clientId=${currentClient.id}&calcId=${calc.id}`;
+            // ИСПРАВЛЕНО: Используем надежный clientId из URL, а не currentClient.id
+            const calcUrl = `../calculation/index.html?clientId=${clientId}&calcId=${calc.id}`;
 
             tr.innerHTML = `
-                <td onclick="window.location.href='${calcUrl}'">
-                    <strong>Расчет №${calc.id}</strong><br>
-                    <span style="font-size: 12px; color: var(--text-secondary)">${formatMoney(calc.price)}</span>
+                <td data-label="Расчет" onclick="window.location.href='${calcUrl}'">
+                    <div class="td-content">
+                        <strong>Расчет №${calc.id}</strong>
+                        <span class="sub-text">${formatMoney(calc.price)}</span>
+                    </div>
                 </td>
-                <td onclick="window.location.href='${calcUrl}'">${formatDate(calc.created_at)}</td>
-                <td onclick="window.location.href='${calcUrl}'">${statusBadge}</td>
-                <td onclick="window.location.href='${calcUrl}'">${calc.address || 'Не указан'}</td>
-                <td class="text-right">
+                <td data-label="Дата" onclick="window.location.href='${calcUrl}'">${formatDate(calc.created_at)}</td>
+                <td data-label="Статус" onclick="window.location.href='${calcUrl}'">${statusBadge}</td>
+                <td data-label="Адрес" onclick="window.location.href='${calcUrl}'">
+                    <div class="td-content address-content">
+                        ${calc.address || 'Не указан'}
+                    </div>
+                </td>
+                <td data-label="Действия" class="text-right">
                     <div class="action-icons">
-                        <button class="icon-btn copy" title="Копировать расчет" data-id="${calc.id}">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                        </button>
                         <button class="icon-btn delete" title="Удалить расчет" data-id="${calc.id}">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                         </button>
@@ -141,18 +145,30 @@ document.addEventListener('DOMContentLoaded', () => {
             tableBody.appendChild(tr);
         });
 
-        // Слушатели для кнопок в таблице
-        document.querySelectorAll('.icon-btn.copy').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation(); 
-                alert(`Копирование расчета ID: ${btn.dataset.id} (В разработке)`);
-            });
-        });
-
+        // Обработчик для удаления расчета
         document.querySelectorAll('.icon-btn.delete').forEach(btn => {
-            btn.addEventListener('click', (e) => {
+            btn.addEventListener('click', async (e) => {
                 e.stopPropagation();
-                alert(`Удаление расчета пока не реализовано на бэкенде.`);
+                const calcIdToDelete = btn.dataset.id;
+                
+                if (!confirm(`Вы уверены, что хотите навсегда удалить расчет №${calcIdToDelete}?`)) return;
+
+                try {
+                    const response = await fetch(`/api/calculations/${calcIdToDelete}`, {
+                        method: 'DELETE',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+
+                    if (response.ok) {
+                        fetchCalculationsData();
+                    } else {
+                        const errorData = await response.json();
+                        alert(`Ошибка удаления: ${errorData.detail || 'Не удалось удалить расчет'}`);
+                    }
+                } catch (error) {
+                    console.error('Ошибка сети:', error);
+                    alert('Не удалось связаться с сервером для удаления расчета.');
+                }
             });
         });
     };
@@ -160,24 +176,36 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- ВЗАИМОДЕЙСТВИЕ С БЭКЕНДОМ (API) ---
     const fetchClientData = async () => {
         try {
-            // ИЗМЕНЕНО: относительный путь к API
-            const response = await fetch(`/api/clients/${clientId}`);
+            const response = await fetch(`/api/clients/${clientId}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            
             if (response.ok) {
                 currentClient = await response.json();
                 renderClientInfo();
             } else {
-                alert('Не удалось загрузить данные клиента');
+                let errorDetails = '';
+                try {
+                    const errData = await response.json();
+                    errorDetails = JSON.stringify(errData.detail || errData);
+                } catch(e) {}
+                
+                alert(`Не удалось загрузить данные клиента.\nОшибка сервера: ${response.status}\nДетали: ${errorDetails}`);
                 window.location.href = '../clients/index.html';
             }
         } catch (error) {
             console.error('Ошибка сети:', error);
+            alert('Ошибка сети при загрузке клиента.');
+            window.location.href = '../clients/index.html';
         }
     };
 
     const fetchCalculationsData = async () => {
         try {
-            // ИЗМЕНЕНО: относительный путь к API
-            const response = await fetch(`/api/calculations/?client_id=${clientId}`);
+            const response = await fetch(`/api/calculations/?client_id=${clientId}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            
             if (response.ok) {
                 clientCalculations = await response.json();
                 renderTable();
@@ -259,21 +287,27 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         if (!validateEditForm()) return;
         
-        const cleanPhone = inputPhone.value.replace(/\D/g, '').substring(0, 11);
+        const newPhone = inputPhone.value.replace(/\D/g, '').substring(0, 11);
+        const newEmail = inputEmail.value.trim();
+
+        const finalPhone = (newPhone === currentClient.phone_number) ? null : newPhone;
+        const finalEmail = (newEmail === currentClient.email) ? null : newEmail;
 
         const payload = {
             last_name: inputLastName.value.trim(),
             first_name: inputFirstName.value.trim(),
             patronymic: inputMiddleName.value.trim() || "",
-            phone_number: cleanPhone,
-            email: inputEmail.value.trim()
+            phone_number: finalPhone,
+            email: finalEmail
         };
 
         try {
-            // ИЗМЕНЕНО: относительный путь к API
             const response = await fetch(`/api/clients/${clientId}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
                 body: JSON.stringify(payload)
             });
 
@@ -332,9 +366,10 @@ document.addEventListener('DOMContentLoaded', () => {
     calcOptionBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             const type = btn.dataset.type;
-            if (type === 'frame') window.location.href = `../calc-frame/index.html?clientId=${currentClient.id}`;
-            else if (type === 'foundation') window.location.href = `../calc-foundation/index.html?clientId=${currentClient.id}`;
-            else if (type === 'roof') window.location.href = `../calc-roof/index.html?clientId=${currentClient.id}`;
+            // ИСПРАВЛЕНО: Используем надежный clientId из URL
+            if (type === 'frame') window.location.href = `../calc-frame/index.html?clientId=${clientId}`;
+            else if (type === 'foundation') window.location.href = `../calc-foundation/index.html?clientId=${clientId}`;
+            else if (type === 'roof') window.location.href = `../calc-roof/index.html?clientId=${clientId}`;
             selectCalcModal.classList.remove('active');
         });
     });

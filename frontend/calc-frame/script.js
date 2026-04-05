@@ -21,7 +21,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            // ИЗМЕНЕНО: относительный путь к API
             const response = await fetch('/api/users/me', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -80,7 +79,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 4. ЗАГРУЗКА ДАННЫХ ИЗ API ---
     const loadClientData = async () => {
         try {
-            // ИЗМЕНЕНО: относительный путь к API
             const response = await fetch(`/api/clients/${clientId}`);
             if (response.ok) {
                 const client = await response.json();
@@ -104,7 +102,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const loadCalculationData = async () => {
         if (!calcId) return;
         try {
-            // ИЗМЕНЕНО: относительный путь к API
             const response = await fetch(`/api/calculations/${calcId}`);
             if (response.ok) {
                 const calc = await response.json();
@@ -118,8 +115,41 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    // Динамическая подгрузка материалов (Синхронизация с БД)
+    const loadMaterials = async () => {
+        try {
+            const response = await fetch('/api/materials/');
+            if (response.ok) {
+                const materials = await response.json();
+                const selects = document.querySelectorAll('select[data-category-name]');
+                
+                selects.forEach(select => {
+                    const categoryName = select.getAttribute('data-category-name').toLowerCase();
+                    const noneOption = Array.from(select.options).find(opt => opt.value === 'none');
+                    
+                    select.innerHTML = ''; 
+                    if (noneOption) select.appendChild(noneOption);
+                    
+                    const filteredMaterials = materials.filter(m => 
+                        m.category && m.category.name.toLowerCase().includes(categoryName)
+                    );
+                    
+                    filteredMaterials.forEach(mat => {
+                        const option = document.createElement('option');
+                        option.value = mat.id;
+                        option.textContent = mat.name; 
+                        select.appendChild(option);
+                    });
+                });
+            }
+        } catch (error) {
+            console.error('Ошибка загрузки материалов:', error);
+        }
+    };
+
     loadClientData();
     loadCalculationData();
+    loadMaterials();
 
     // --- 5. УПРАВЛЕНИЕ UI И ВАЛИДАЦИЯ ПОЛЕЙ ---
     const updateLabelState = (input) => {
@@ -153,6 +183,27 @@ document.addEventListener('DOMContentLoaded', () => {
             updateLabelState(input);
         });
     });
+
+    const validateNumber = (id, name) => {
+        const input = document.getElementById(id);
+        const val = parseFloat(input.value);
+        const min = parseFloat(input.getAttribute('min'));
+        const max = parseFloat(input.getAttribute('max'));
+
+        if (isNaN(val)) {
+            alert(`Пожалуйста, заполните поле "${name}".`);
+            input.focus();
+            return false;
+        }
+
+        if (val < min || val > max) {
+            alert(`Значение в поле "${name}" должно быть от ${min} до ${max}.`);
+            input.focus();
+            return false;
+        }
+
+        return true;
+    };
 
     // --- 6. РАСКРЫВАЮЩИЕСЯ СЕКЦИИ ---
     toggleDoorsWindows.addEventListener('change', (e) => {
@@ -241,7 +292,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 8. ПОДГОТОВКА И ОТПРАВКА ДАННЫХ (API) ---
     const getSelectIntOrNull = (id) => {
         const val = document.getElementById(id).value;
-        return (val && val !== 'none') ? parseInt(val) : null;
+        return (val && val !== 'none' && val !== '') ? parseInt(val) : null;
     };
 
     const getOpenings = (type) => {
@@ -269,24 +320,66 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        if (!validateNumber('wall-height', 'Высота этажа')) return;
+        if (!validateNumber('perimeter', 'Периметр внешних стен')) return;
+        if (!validateNumber('floor-slab-area', 'Площадь основания (перекрытия)')) return;
+        if (!validateNumber('int-wall-length', 'Длина внутренних стен')) return;
+
+        // --- ИЗМЕНЕНИЕ: Логика кросс-валидации внутренних стен ---
+        const intWallLengthInput = document.getElementById('int-wall-length');
+        const intWallLength = parseFloat(intWallLengthInput.value) || 0;
+        
+        const intWallThicknessSelect = document.getElementById('int-wall-thickness');
+        const intWallThickness = parseInt(intWallThicknessSelect.value) || 0;
+
+        if (intWallThickness > 0 && intWallLength <= 0) {
+            alert('Если выбрана толщина внутренних стен, необходимо указать их длину больше 0.');
+            intWallLengthInput.focus();
+            return;
+        }
+
+        if (intWallLength > 0 && intWallThickness === 0) {
+            alert('Если указана длина внутренних стен, необходимо выбрать их толщину.');
+            intWallThicknessSelect.focus();
+            return;
+        }
+        // --- КОНЕЦ ИЗМЕНЕНИЯ ---
+
+        const extInsulationId = getSelectIntOrNull('ext-insulation');
+        if (extInsulationId !== null) {
+            if (!validateNumber('ext-insulation-thickness', 'Толщина утеплителя (внешние стены)')) return;
+        }
+
+        if (toggleFloors.checked) {
+            if (!validateNumber('floor-thickness', 'Толщина перекрытия')) return;
+        }
+
+        // ОСБ внешних стен обязательно
+        const extOsbId = document.getElementById('ext-osb-type').value;
+        if (!extOsbId || extOsbId === 'none') {
+            alert('Пожалуйста, выберите ОСБ для внешних стен (обязательно).');
+            document.getElementById('ext-osb-type').focus();
+            return;
+        }
+
         // 1. Собираем InitFrame
         const initFrame = {
-            wall_height: parseFloat(document.getElementById('wall-height').value) || 0,
-            ext_wall_perimeter: parseFloat(document.getElementById('perimeter').value) || 0,
-            floor_slab_area: parseFloat(document.getElementById('floor-slab-area').value) || 0,
-            int_wall_length: parseFloat(document.getElementById('int-wall-length').value) || 0,
-            int_wall_thickness: parseInt(document.getElementById('int-wall-thickness').value) || 0,
+            wall_height: parseFloat(document.getElementById('wall-height').value),
+            ext_wall_perimeter: parseFloat(document.getElementById('perimeter').value),
+            floor_slab_area: parseFloat(document.getElementById('floor-slab-area').value),
+            int_wall_length: intWallLength,
+            int_wall_thickness: intWallThickness,
             ext_wall_thickness: parseInt(document.getElementById('ext-wall-thickness').value) || 0,
-            floor_slab_thickness: 0
+            floor_slab_thickness: 0 // Обновится ниже, если перекрытия включены
         };
 
         // 2. Собираем ExtWallCladding
         const extWallCladding = {
-            osb_id: parseInt(document.getElementById('ext-osb-type').value), // Required по схеме бэкенда
+            osb_id: parseInt(extOsbId),
             steam_water_proofing_id: getSelectIntOrNull('ext-vapor-barrier'),
             wind_protection_id: getSelectIntOrNull('ext-wind-protection'),
-            insulation_id: getSelectIntOrNull('ext-insulation'),
-            insulation_thickness: parseFloat(document.getElementById('ext-insulation-thickness').value) || 0
+            insulation_id: extInsulationId,
+            insulation_thickness: extInsulationId ? parseFloat(document.getElementById('ext-insulation-thickness').value) : 0
         };
 
         // 3. Собираем IntWallCladding
@@ -296,12 +389,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // 4. Собираем FloorSlab если включен
         let floorSlab = null;
         if (toggleFloors.checked) {
-            initFrame.floor_slab_thickness = parseInt(document.getElementById('floor-thickness').value) || 0;
-            if (!initFrame.floor_slab_thickness) {
-                alert('Пожалуйста, укажите толщину перекрытия.');
-                document.getElementById('floor-thickness').focus();
-                return;
-            }
+            initFrame.floor_slab_thickness = parseInt(document.getElementById('floor-thickness').value);
             floorSlab = {
                 osb_id: getSelectIntOrNull('floor-osb'),
                 steam_water_proofing_id: getSelectIntOrNull('floor-vapor'),
@@ -327,13 +415,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
 
-        // Отправка на Бэкенд
         const method = calcId ? 'PUT' : 'POST';
-        
-        // ИЗМЕНЕНО: относительный путь к API
-        const url = calcId 
-            ? `/api/calculations/${calcId}` 
-            : `/api/calculations/`;
+        const url = calcId ? `/api/calculations/${calcId}` : `/api/calculations/`;
 
         try {
             submitBtn.textContent = 'Обработка...';
@@ -386,7 +469,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Закрытие поповера при клике вне его
     window.addEventListener('click', (e) => {
         if (authorsPopover && authorsPopover.classList.contains('active') && 
             !authorsPopover.contains(e.target) && 

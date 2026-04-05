@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
+
     // ==========================================
     // 1. АВТОРИЗАЦИЯ (ЛОГИН)
     // ==========================================
@@ -6,18 +7,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const loginUsernameInput = document.getElementById('username');
     const loginPasswordInput = document.getElementById('password');
     const togglePasswordBtn = document.getElementById('toggle-password');
-    
+
     // Переключение видимости пароля
     togglePasswordBtn.addEventListener('click', () => {
         const type = loginPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
         loginPasswordInput.setAttribute('type', type);
+        
         togglePasswordBtn.style.opacity = type === 'text' ? '1' : '0.6';
     });
-    
+
     // Отправка формы входа
     loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-
+        
         const username = loginUsernameInput.value.trim();
         const password = loginPasswordInput.value.trim();
 
@@ -55,7 +57,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-
     // ==========================================
     // 2. РЕГИСТРАЦИЯ (МОДАЛЬНОЕ ОКНО)
     // ==========================================
@@ -73,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const closeModal = () => {
         registerModal.classList.remove('active');
-        registerForm.reset(); 
+        registerForm.reset();
     };
 
     closeRegisterModalBtn.addEventListener('click', closeModal);
@@ -131,7 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             // ИЗМЕНЕНО: относительный путь к API
-            const response = await fetch('/api/auth/register', {   
+            const response = await fetch('/api/auth/register', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -143,6 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = await response.json();
                 localStorage.setItem('access_token', data.access_token);
                 localStorage.setItem('refresh_token', data.refresh_token);
+                
                 window.location.href = '../clients/index.html';
             } else {
                 const errorData = await response.json();
@@ -165,13 +167,8 @@ document.addEventListener('DOMContentLoaded', () => {
         authorsPopover.classList.toggle('active');
     });
 
-    // Единый обработчик клика по окну (закрывает и регистрацию, и авторов)
+    // Единый обработчик клика по окну (закрывает поповер авторов)
     window.addEventListener('click', (e) => {
-        // Закрытие регистрации по клику на фон
-        if (e.target === registerModal) {
-            closeModal();
-        }
-        
         // Закрытие поповера авторов, если клик был не по нему
         if (authorsPopover.classList.contains('active') && 
             !authorsPopover.contains(e.target) && 
@@ -179,4 +176,5 @@ document.addEventListener('DOMContentLoaded', () => {
             authorsPopover.classList.remove('active');
         }
     });
+
 });

@@ -24,7 +24,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            // ИЗМЕНЕНО: относительный путь к API
             const response = await fetch('/api/users/me', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -123,15 +122,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 element.subelements.forEach(sub => {
                     if(sub.positions.length > 0) {
+                        // Строка категории (не превращается в карточку на мобилках)
                         tableRowsHTML += `<tr class="category-row"><td colspan="5">${sub.sub_element_name}</td></tr>`;
                         sub.positions.forEach(pos => {
+                            // ИЗМЕНЕНО: Добавлены data-label для мобильной адаптации
                             tableRowsHTML += `
                                 <tr>
-                                    <td>${pos.material.name}</td>
-                                    <td class="text-center">${pos.material.unit}</td>
-                                    <td class="text-right">${pos.quantity}</td>
-                                    <td class="text-right">${formatMoney(pos.material.market_price)}</td>
-                                    <td class="text-right font-medium">${formatMoney(pos.price)}</td>
+                                    <td data-label="Материал">${pos.material.name}</td>
+                                    <td class="text-right" data-label="Ед. изм.">${pos.material.unit}</td>
+                                    <td class="text-right" data-label="Количество">${pos.quantity}</td>
+                                    <td class="text-right" data-label="Цена за ед.">${formatMoney(pos.material.market_price)}</td>
+                                    <td class="text-right font-medium" data-label="Стоимость">${formatMoney(pos.price)}</td>
                                 </tr>
                             `;
                         });
@@ -142,20 +143,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     tableRowsHTML = `<tr><td colspan="5" class="text-center" style="color: var(--text-secondary);">Нет добавленных материалов</td></tr>`;
                 }
 
-                let editUrl = '#';
-                if (element.element_name === 'Каркас') editUrl = `../calc-frame/index.html?clientId=${client.id || clientId}&calcId=${calcId}`;
-                else if (element.element_name === 'Фундамент') editUrl = `../calc-foundation/index.html?clientId=${client.id || clientId}&calcId=${calcId}`;
-                else if (element.element_name === 'Крыша') editUrl = `../calc-roof/index.html?clientId=${client.id || clientId}&calcId=${calcId}`;
-
-                let editButtonHTML = '';
-                if (!isContractSigned) {
-                    editButtonHTML = `
-                        <button class="btn-secondary btn-sm edit-btn" onclick="event.stopPropagation(); window.location.href='${editUrl}'">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                            Изменить
-                        </button>`;
-                }
-
                 accItem.innerHTML = `
                     <div class="accordion-header">
                         <div class="acc-title-group">
@@ -164,7 +151,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                         <div class="acc-actions">
                             <span class="block-total">${formatMoney(element.price)}</span>
-                            ${editButtonHTML}
                         </div>
                     </div>
                     <div class="accordion-body">
@@ -173,7 +159,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <thead>
                                     <tr>
                                         <th>Материал</th>
-                                        <th class="text-center">Ед. изм.</th>
+                                        <th class="text-right">Ед. изм.</th>
                                         <th class="text-right">Количество</th>
                                         <th class="text-right">Цена за ед.</th>
                                         <th class="text-right">Стоимость</th>
@@ -202,7 +188,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 6. ВЗАИМОДЕЙСТВИЕ С API ---
     const fetchCalculation = async () => {
         try {
-            // ИЗМЕНЕНО: относительный путь к API
             const response = await fetch(`/api/calculations/${calcId}`);
             if (response.ok) {
                 currentCalcData = await response.json();
@@ -227,7 +212,6 @@ document.addEventListener('DOMContentLoaded', () => {
             changeStatusBtn.disabled = true;
             changeStatusBtn.textContent = 'Обработка...';
 
-            // ИЗМЕНЕНО: относительный путь к API
             const response = await fetch(`/api/calculations/${calcId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
@@ -259,7 +243,6 @@ document.addEventListener('DOMContentLoaded', () => {
         sendEmailBtn.disabled = true;
 
         try {
-            // ИЗМЕНЕНО: относительный путь к API
             const response = await fetch(`/api/email/send/${calcId}`, {
                 method: 'POST'
             });

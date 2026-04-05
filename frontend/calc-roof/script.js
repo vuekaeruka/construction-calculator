@@ -21,7 +21,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            // ИЗМЕНЕНО: относительный путь к API
             const response = await fetch('/api/users/me', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -81,7 +80,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 4. ЗАГРУЗКА ДАННЫХ ИЗ API ---
     const loadClientData = async () => {
         try {
-            // ИЗМЕНЕНО: относительный путь к API
             const response = await fetch(`/api/clients/${clientId}`);
             if (response.ok) {
                 const client = await response.json();
@@ -105,7 +103,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const loadCalculationData = async () => {
         if (!calcId) return;
         try {
-            // ИЗМЕНЕНО: относительный путь к API
             const response = await fetch(`/api/calculations/${calcId}`);
             if (response.ok) {
                 const calc = await response.json();
@@ -119,8 +116,47 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    // НОВАЯ ФУНКЦИЯ: Динамическая загрузка материалов из базы данных бэкенда
+    const loadMaterials = async () => {
+        try {
+            const response = await fetch('/api/materials/');
+            if (response.ok) {
+                const materials = await response.json();
+                
+                // Находим все селекты, в которых прописан атрибут data-category-name
+                const selects = document.querySelectorAll('select[data-category-name]');
+                
+                selects.forEach(select => {
+                    const categoryName = select.getAttribute('data-category-name').toLowerCase();
+                    
+                    // Ищем опцию 'none' (чтобы сохранить её, например "Без ОСБ")
+                    const noneOption = Array.from(select.options).find(opt => opt.value === 'none');
+                    
+                    select.innerHTML = ''; // Очищаем жестко заданные старые опции
+                    if (noneOption) select.appendChild(noneOption);
+                    
+                    // Фильтруем материалы, пришедшие от бэкенда, по имени категории
+                    const filteredMaterials = materials.filter(m => 
+                        m.category && m.category.name.toLowerCase().includes(categoryName)
+                    );
+                    
+                    // Добавляем актуальные материалы в выпадающий список
+                    filteredMaterials.forEach(mat => {
+                        const option = document.createElement('option');
+                        option.value = mat.id;
+                        option.textContent = mat.name; // Можно добавить цену: + ` (${mat.market_price} ₽)`
+                        select.appendChild(option);
+                    });
+                });
+            }
+        } catch (error) {
+            console.error('Ошибка загрузки материалов:', error);
+        }
+    };
+
     loadClientData();
     loadCalculationData();
+    loadMaterials(); // Вызываем загрузку материалов
 
     // --- 5. УПРАВЛЕНИЕ UI (Лейблы, валидация) ---
     const updateLabelState = (input) => {
@@ -156,8 +192,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --- 6. ДИНАМИЧЕСКИЕ СЕКЦИИ И ПРОВЕРКИ ---
-    
-    // Переключение второго ската
     const updateRoofTypeVisibility = () => {
         if (roofTypeSelect.value === 'Двускатная') {
             rightSlopeGroup.style.display = 'block';
@@ -165,28 +199,26 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             rightSlopeGroup.style.display = 'none';
             rightSlopeInput.removeAttribute('required');
-            rightSlopeInput.value = ''; // Очищаем значение, чтобы не улетело скрытое
+            rightSlopeInput.value = ''; // Очищаем значение
             updateLabelState(rightSlopeInput);
         }
     };
     roofTypeSelect.addEventListener('change', updateRoofTypeVisibility);
     updateRoofTypeVisibility();
 
-    // Переключение утепления
     toggleInsulation.addEventListener('change', (e) => {
         insulationContent.style.display = e.target.checked ? 'flex' : 'none';
     });
 
-    const validateNumber = (id, name, isRequired = true) => {
+    const validateNumber = (id, name) => {
         const input = document.getElementById(id);
         
-        // Пропускаем проверку, если поле скрыто
-        if (input.closest('.input-group') && input.closest('.input-group').style.display === 'none') {
+        if (input.offsetParent === null) {
             return true;
         }
 
         const val = parseFloat(input.value);
-        if (isNaN(val) && isRequired) {
+        if (isNaN(val)) {
             alert(`Пожалуйста, заполните поле "${name}".`);
             input.focus();
             return false;
@@ -207,13 +239,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 7. ПОДГОТОВКА И ОТПРАВКА ДАННЫХ (API) ---
     const getSelectIntOrNull = (id) => {
         const val = document.getElementById(id).value;
-        return (val && val !== 'none') ? parseInt(val) : null;
+        return (val && val !== 'none' && val !== '') ? parseInt(val) : null;
     };
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        // Валидация базовых полей
         if (addressInput.value.trim() === '') {
             alert('Пожалуйста, введите адрес объекта строительства.');
             addressInput.focus();
@@ -222,28 +253,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (!validateNumber('slope-width', 'Ширина ската')) return;
         if (!validateNumber('left-slope-length', 'Длина (основного/левого) ската')) return;
-        
-        const roofType = roofTypeSelect.value;
-        if (roofType === 'Двускатная') {
-            if (!validateNumber('right-slope-length', 'Длина правого ската')) return;
-        }
+        if (!validateNumber('right-slope-length', 'Длина правого ската')) return; 
+        if (!validateNumber('insulation-thickness', 'Толщина утепления')) return;
 
+        const roofType = roofTypeSelect.value;
         const isInsulated = toggleInsulation.checked;
-        if (isInsulated) {
-            if (!validateNumber('insulation-thickness', 'Толщина утепления')) return;
-        }
 
         const initRoof = {
             slope_width: parseFloat(document.getElementById('slope-width').value),
             left_slope_length: parseFloat(document.getElementById('left-slope-length').value),
-            roof_type: roofType
+            roof_type: roofType,
+            right_slope_length: roofType === 'Двускатная' 
+                ? parseFloat(document.getElementById('right-slope-length').value) 
+                : null
         };
-
-        if (roofType === 'Двускатная') {
-            initRoof.right_slope_length = parseFloat(document.getElementById('right-slope-length').value);
-        } else {
-            initRoof.right_slope_length = null;
-        }
 
         const roofModification = {
             osb_id: getSelectIntOrNull('osb-id'),
@@ -264,11 +287,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         const method = calcId ? 'PUT' : 'POST';
-        
-        // ИЗМЕНЕНО: относительный путь к API
-        const url = calcId 
-            ? `/api/calculations/${calcId}` 
-            : `/api/calculations/`;
+        const url = calcId ? `/api/calculations/${calcId}` : `/api/calculations/`;
 
         try {
             submitBtn.textContent = 'Обработка...';

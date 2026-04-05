@@ -94,18 +94,14 @@
                         <h3 class="section-title">Материалы обшивки</h3>
                         <div class="input-group select-group">
                             <label class="static-label">ОСБ</label>
-                            <select id="osb-id" class="custom-select">
+                            <select id="osb-id" class="custom-select" data-category-name="ОСБ">
                                 <option value="none">Без ОСБ</option>
-                                <option value="1">ОСБ 9 мм</option>
-                                <option value="2" selected>ОСБ 12 мм</option>
                             </select>
                         </div>
                         <div class="input-group select-group">
                             <label class="static-label">Гидро-пароизоляция</label>
-                            <select id="water-proofing-id" class="custom-select">
+                            <select id="water-proofing-id" class="custom-select" data-category-name="Изоляция">
                                 <option value="none">Без изоляции</option>
-                                <option value="3" selected>Стандартная мембрана</option>
-                                <option value="4">Премиум мембрана</option>
                             </select>
                         </div>
                     </div>
@@ -120,10 +116,8 @@
                         <div class="collapsible-content active" id="insulation-content" style="display: flex;">
                             <div class="input-group select-group">
                                 <label class="static-label">Материал утеплителя</label>
-                                <select id="insulation-id" class="custom-select">
-                                    <option value="7" selected>Минеральная вата</option>
-                                    <option value="8">Базальтовая вата</option>
-                                </select>
+                                <select id="insulation-id" class="custom-select" data-category-name="Утеплитель">
+                                    </select>
                             </div>
                             <div class="input-group">
                                 <input type="number" id="insulation-thickness" placeholder=" " min="50" max="400" step="10" value="200">

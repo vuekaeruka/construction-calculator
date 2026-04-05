@@ -32,7 +32,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            // ИЗМЕНЕНО: относительный путь к API
             const response = await fetch('/api/users/me', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -61,7 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- Вспомогательная функция: форматирование телефона для таблицы ---
+    // --- Вспомогательная функция: форматирование телефона ---
     const formatPhoneForDisplay = (digits) => {
         if (!digits) return 'Не указан';
         if (digits.length === 11) {
@@ -83,15 +82,29 @@ document.addEventListener('DOMContentLoaded', () => {
             tr.style.cursor = 'pointer';
             tr.onclick = () => { window.location.href = `../client-card/index.html?id=${client.id}`; };
 
+            // ИСПРАВЛЕНО: Добавлены обертки <div class="td-content"> для правильного выравнивания
             tr.innerHTML = `
-                <td>
-                    <strong>${client.fullName}</strong>
-                    <span class="sub-text">ID: ${client.id.toString().padStart(4, '0')}</span>
+                <td data-label="Клиент">
+                    <div class="td-content">
+                        <strong>${client.fullName}</strong>
+                        <span class="sub-text">ID: ${client.id.toString().padStart(4, '0')}</span>
+                    </div>
                 </td>
-                <td>${client.phone}<span class="sub-text">${client.email}</span></td>
-                <td>${client.projects} шт.</td>
-                <td class="text-right">
-                    <a href="../client-card/index.html?id=${client.id}" class="link-action" onclick="event.stopPropagation();">Открыть →</a>
+                <td data-label="Контакты">
+                    <div class="td-content">
+                        ${client.phone}
+                        <span class="sub-text">${client.email}</span>
+                    </div>
+                </td>
+                <td data-label="Проекты">
+                    <div class="td-content">
+                        ${client.projects} шт.
+                    </div>
+                </td>
+                <td class="text-right" data-label="Действия">
+                    <div class="td-content" style="align-items: flex-end;">
+                        <a href="../client-card/index.html?id=${client.id}" class="link-action" onclick="event.stopPropagation();">Открыть →</a>
+                    </div>
                 </td>
             `;
             tableBody.appendChild(tr);
@@ -101,7 +114,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- ЗАГРУЗКА КЛИЕНТОВ С БЭКЕНДА (GET) ---
     const fetchClients = async () => {
         try {
-            // ИЗМЕНЕНО: относительный путь к API
             const response = await fetch('/api/clients/', {
                 method: 'GET',
                 headers: { 'Content-Type': 'application/json' }
@@ -234,7 +246,6 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         try {
-            // ИЗМЕНЕНО: относительный путь к API
             const response = await fetch('/api/clients/', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },

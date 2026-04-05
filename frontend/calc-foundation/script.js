@@ -21,7 +21,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            // ИЗМЕНЕНО: относительный путь к API
             const response = await fetch('/api/users/me', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -58,13 +57,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const addressInput = document.getElementById('object-address');
     const clientNameEl = document.getElementById('client-name');
     const clientPhoneEl = document.getElementById('client-phone');
-
-    const foundationTypeSelect = document.getElementById('foundation-type');
-    const stripParams = document.getElementById('strip-params');
-    const pileParams = document.getElementById('pile-params');
-
-    const toggleRebar = document.getElementById('toggle-rebar');
-    const rebarContent = document.getElementById('rebar-content');
     
     const textInputs = document.querySelectorAll('.input-group input');
 
@@ -81,7 +73,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 4. ЗАГРУЗКА ДАННЫХ ИЗ API ---
     const loadClientData = async () => {
         try {
-            // ИЗМЕНЕНО: относительный путь к API
             const response = await fetch(`/api/clients/${clientId}`);
             if (response.ok) {
                 const client = await response.json();
@@ -106,7 +97,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!calcId) return;
         
         try {
-            // ИЗМЕНЕНО: относительный путь к API
             const response = await fetch(`/api/calculations/${calcId}`);
             if (response.ok) {
                 const calc = await response.json();
@@ -126,7 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 5. УПРАВЛЕНИЕ UI (Лейблы, валидация полей ввода) ---
     const updateLabelState = (input) => {
         const group = input.closest('.input-group');
-        if (input.value.trim() !== '') {
+        if (input.value !== undefined && input.value.toString().trim() !== '') {
             group.classList.add('has-value');
         } else {
             group.classList.remove('has-value');
@@ -159,23 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // --- 6. РАСКРЫВАЮЩИЕСЯ СЕКЦИИ ---
-    foundationTypeSelect.addEventListener('change', (e) => {
-        stripParams.style.display = 'none';
-        pileParams.style.display = 'none';
-        
-        if (e.target.value === 'strip') {
-            stripParams.style.display = 'flex';
-        } else if (e.target.value === 'pile') {
-            pileParams.style.display = 'flex';
-        }
-    });
-
-    toggleRebar.addEventListener('change', (e) => {
-        rebarContent.style.display = e.target.checked ? 'flex' : 'none';
-    });
-
-    // --- 7. ВАЛИДАЦИЯ И ОТПРАВКА ДАННЫХ (SUBMIT) ---
+    // --- 6. ВАЛИДАЦИЯ И ОТПРАВКА ДАННЫХ (SUBMIT) ---
     const validateNumber = (id, name) => {
         const input = document.getElementById(id);
         const val = parseFloat(input.value);
@@ -207,56 +181,33 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        if (!validateNumber('build-length', 'Общая длина строения')) return;
-        if (!validateNumber('build-width', 'Общая ширина строения')) return;
+        if (!validateNumber('plate-length', 'Длина плиты')) return;
+        if (!validateNumber('plate-width', 'Ширина плиты')) return;
+        if (!validateNumber('plate-height', 'Толщина плиты')) return;
+        if (!validateNumber('rebar-step', 'Шаг ячейки арматуры')) return;
+        if (!validateNumber('rebar-length', 'Длина хлыста арматуры')) return;
+        if (!validateNumber('board-length', 'Длина доски опалубки')) return;
+        if (!validateNumber('board-width', 'Ширина доски опалубки')) return;
 
-        const type = foundationTypeSelect.value;
-        let heightValue = 0.3; 
-        
-        if (type === 'strip') {
-            if (!validateNumber('strip-total-length', 'Общая длина ленты')) return;
-            if (!validateNumber('strip-width', 'Ширина ленты')) return;
-            if (!validateNumber('strip-depth', 'Глубина заложения')) return;
-            if (!validateNumber('strip-height', 'Высота цоколя')) return;
-            
-            const depth = parseFloat(document.getElementById('strip-depth').value);
-            const height = parseFloat(document.getElementById('strip-height').value);
-            heightValue = depth + height;
-        } else if (type === 'pile') {
-            if (!validateNumber('pile-count', 'Количество свай')) return;
-            if (!validateNumber('pile-length', 'Длина сваи')) return;
-            
-            heightValue = parseFloat(document.getElementById('pile-length').value);
-        }
-
-        if (!validateNumber('sand-cushion', 'Песчаная подушка')) return;
-
-        const length = parseFloat(document.getElementById('build-length').value);
-        const width = parseFloat(document.getElementById('build-width').value);
-
-        // Формирование Payload
+        // Строгое соответствие FoundationSchema из бэкенда
         const payload = {
             client_id: parseInt(clientId),
             address: addressInput.value.trim(),
             construction_element: {
                 foundation: {
-                    width: width,
-                    length: length,
-                    height: heightValue,
-                    step_rebar: 0.2,       
-                    rebar_length: length,   
-                    board_length: 6.0,      
-                    board_width: 0.15      
+                    length: parseFloat(document.getElementById('plate-length').value),
+                    width: parseFloat(document.getElementById('plate-width').value),
+                    height: parseFloat(document.getElementById('plate-height').value),
+                    step_rebar: parseFloat(document.getElementById('rebar-step').value),
+                    rebar_length: parseFloat(document.getElementById('rebar-length').value),
+                    board_length: parseFloat(document.getElementById('board-length').value),
+                    board_width: parseFloat(document.getElementById('board-width').value)
                 }
             }
         };
 
         const method = calcId ? 'PUT' : 'POST';
-        
-        // ИЗМЕНЕНО: относительный путь к API
-        const url = calcId 
-            ? `/api/calculations/${calcId}` 
-            : `/api/calculations/`;
+        const url = calcId ? `/api/calculations/${calcId}` : `/api/calculations/`;
 
         try {
             submitBtn.textContent = 'Обработка...';
@@ -290,14 +241,14 @@ document.addEventListener('DOMContentLoaded', () => {
     clearBtn.addEventListener('click', () => {
         if(confirm('Вы уверены, что хотите сбросить все введенные данные?')) {
             form.reset(); 
-            foundationTypeSelect.dispatchEvent(new Event('change')); 
-            toggleRebar.dispatchEvent(new Event('change'));
-            document.querySelectorAll('.custom-select').forEach(select => select.selectedIndex = 0);
-            setTimeout(() => textInputs.forEach(input => updateLabelState(input)), 10);
+            // Небольшая задержка, чтобы браузер успел очистить value перед обновлением UI
+            setTimeout(() => {
+                textInputs.forEach(input => updateLabelState(input));
+            }, 10);
         }
     });
 
-    // --- 8. ФУТЕР И ПОПОВЕР АВТОРОВ ---
+    // --- 7. ФУТЕР И ПОПОВЕР АВТОРОВ ---
     const authorsBtn = document.getElementById('authors-btn');
     const authorsPopover = document.getElementById('authors-popover');
 

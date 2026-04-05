@@ -63,110 +63,51 @@
                 <div class="form-column">
                     <div class="form-section">
                         <h3 class="section-title">Тип фундамента</h3>
-                        <div class="input-group select-group">
-                            <label class="static-label">Выберите тип</label>
-                            <select id="foundation-type" class="custom-select">
-                                <option value="strip">Ленточный фундамент</option>
-                                <option value="pile">Свайный фундамент</option>
-                            </select>
+                        <div class="input-group">
+                            <input type="text" id="foundation-type" value="Монолитная плита" disabled>
+                            <label for="foundation-type">Поддерживаемый системой тип</label>
                         </div>
                     </div>
 
-                    <div class="form-section" id="dimensions-section">
-                        <h3 class="section-title">Габариты строения</h3>
+                    <div class="form-section">
+                        <h3 class="section-title">Габариты плиты</h3>
                         <div class="input-group">
-                            <input type="number" id="build-length" placeholder=" " min="2" max="100" step="0.1" required>
-                            <label for="build-length">Общая длина строения, м</label>
+                            <input type="number" id="plate-length" placeholder=" " min="2" max="100" step="0.1" required>
+                            <label for="plate-length">Длина плиты, м</label>
                         </div>
                         <div class="input-group">
-                            <input type="number" id="build-width" placeholder=" " min="2" max="100" step="0.1" required>
-                            <label for="build-width">Общая ширина строения, м</label>
+                            <input type="number" id="plate-width" placeholder=" " min="2" max="100" step="0.1" required>
+                            <label for="plate-width">Ширина плиты, м</label>
                         </div>
-                        
-                        <div id="strip-params" class="dynamic-param-block active">
-                            <h4 class="subsection-title">Параметры ленты</h4>
-                            <div class="input-group">
-                                <input type="number" id="strip-total-length" placeholder=" " min="10" max="500" step="0.1">
-                                <label for="strip-total-length">Общая длина ленты, м</label>
-                            </div>
-                            <div class="input-group">
-                                <input type="number" id="strip-width" placeholder=" " min="200" max="1000" step="10">
-                                <label for="strip-width">Ширина ленты, мм</label>
-                            </div>
-                            <div class="input-group">
-                                <input type="number" id="strip-depth" placeholder=" " min="0.2" max="3" step="0.1">
-                                <label for="strip-depth">Глубина заложения, м</label>
-                            </div>
-                            <div class="input-group">
-                                <input type="number" id="strip-height" placeholder=" " min="0.1" max="2" step="0.1">
-                                <label for="strip-height">Высота цоколя (над землей), м</label>
-                            </div>
-                        </div>
-
-                        <div id="pile-params" class="dynamic-param-block" style="display: none;">
-                            <h4 class="subsection-title">Параметры свай</h4>
-                            <div class="input-group">
-                                <input type="number" id="pile-count" placeholder=" " min="4" max="200" step="1">
-                                <label for="pile-count">Количество свай, шт</label>
-                            </div>
-                            <div class="input-group">
-                                <input type="number" id="pile-length" placeholder=" " min="1" max="10" step="0.5">
-                                <label for="pile-length">Длина сваи, м</label>
-                            </div>
-                            <div class="input-group select-group">
-                                <label class="static-label">Диаметр / Сечение сваи</label>
-                                <select id="pile-diameter" class="custom-select">
-                                    <option value="150">150 мм</option>
-                                    <option value="200">200 мм</option>
-                                    <option value="250">250 мм</option>
-                                    <option value="300">300 мм</option>
-                                </select>
-                            </div>
+                        <div class="input-group">
+                            <input type="number" id="plate-height" placeholder=" " min="0.1" max="1.5" step="0.05" value="0.3" required>
+                            <label for="plate-height">Толщина плиты, м</label>
                         </div>
                     </div>
                 </div>
 
                 <div class="form-column">
                     <div class="form-section">
-                        <h3 class="section-title">Материалы</h3>
-                        <div class="input-group select-group">
-                            <label class="static-label">Марка бетона</label>
-                            <select id="concrete-grade" class="custom-select">
-                                <option value="m200">М200 (B15)</option>
-                                <option value="m250" selected>М250 (B20)</option>
-                                <option value="m300">М300 (B22.5)</option>
-                                <option value="m350">М350 (B25)</option>
-                            </select>
+                        <h3 class="section-title">Параметры армирования</h3>
+                        <div class="input-group">
+                            <input type="number" id="rebar-step" placeholder=" " min="0.1" max="0.5" step="0.05" value="0.2" required>
+                            <label for="rebar-step">Шаг ячейки арматуры, м</label>
                         </div>
                         <div class="input-group">
-                            <input type="number" id="sand-cushion" placeholder=" " min="0" max="500" step="10" value="200">
-                            <label for="sand-cushion">Песчаная подушка, мм</label>
+                            <input type="number" id="rebar-length" placeholder=" " min="1" max="12" step="0.1" value="11.7" required>
+                            <label for="rebar-length">Длина хлыста арматуры, м</label>
                         </div>
                     </div>
 
                     <div class="form-section">
-                        <label class="toggle-switch-wrapper">
-                            <input type="checkbox" id="toggle-rebar" class="toggle-input" checked>
-                            <span class="toggle-slider"></span>
-                            <h3 class="section-title toggle-title">Учесть арматуру</h3>
-                        </label>
-                        
-                        <div class="collapsible-content active" id="rebar-content" style="display: flex;">
-                            <div class="input-group select-group">
-                                <label class="static-label">Диаметр продольной арматуры</label>
-                                <select id="rebar-main" class="custom-select">
-                                    <option value="10">10 мм</option>
-                                    <option value="12" selected>12 мм</option>
-                                    <option value="14">14 мм</option>
-                                </select>
-                            </div>
-                            <div class="input-group select-group">
-                                <label class="static-label">Диаметр поперечной арматуры</label>
-                                <select id="rebar-cross" class="custom-select">
-                                    <option value="6">6 мм</option>
-                                    <option value="8" selected>8 мм</option>
-                                </select>
-                            </div>
+                        <h3 class="section-title">Параметры опалубки</h3>
+                        <div class="input-group">
+                            <input type="number" id="board-length" placeholder=" " min="1" max="6" step="0.5" value="6.0" required>
+                            <label for="board-length">Длина доски опалубки, м</label>
+                        </div>
+                        <div class="input-group">
+                            <input type="number" id="board-width" placeholder=" " min="0.1" max="0.5" step="0.01" value="0.15" required>
+                            <label for="board-width">Ширина доски опалубки, м</label>
                         </div>
                     </div>
                 </div>

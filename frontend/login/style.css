@@ -20,6 +20,7 @@
     box-sizing: border-box;
 }
 
+/* ИСПРАВЛЕНО: Теперь body это flex-колонка, а не просто центровщик */
 body {
     background-color: var(--bg-main);
     color: var(--text-primary);
@@ -27,27 +28,28 @@ body {
     -webkit-font-smoothing: antialiased;
     min-height: 100vh;
     display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.login-wrapper {
-    width: 100%;
-    max-width: 420px;
-    padding: 20px;
-    /* Выстраиваем элементы по вертикали и центрируем */
-    display: flex;
     flex-direction: column;
     align-items: center;
 }
 
-/* Стили для логотипа на странице входа */
+/* ИСПРАВЛЕНО: wrapper занимает всё пространство и выталкивает футер вниз */
+.login-wrapper {
+    width: 100%;
+    max-width: 420px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+}
+
 .login-logo {
     margin-bottom: 32px;
 }
 
 .login-logo .logo-image {
-    height: 48px; /* Делаем логотип крупным и заметным */
+    height: 48px; 
     width: auto;
     display: block;
 }
@@ -60,7 +62,7 @@ body {
     border-radius: var(--radius-md);
     padding: 48px 40px;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-    width: 100%; /* Чтобы карточка занимала всю ширину враппера */
+    width: 100%; 
 }
 
 .login-title {
@@ -273,16 +275,16 @@ body {
 }
 
 /* --- Футер и Авторы проекта --- */
+/* ИСПРАВЛЕНО: Убрали position: fixed */
 .app-footer {
-    position: fixed; /* Фиксируем футер всегда внизу экрана */
-    bottom: 24px;
-    left: 0;
     width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 8px;
     z-index: 10;
+    padding: 24px 0;
+    margin-top: auto; /* Мягко прижимает к низу */
 }
 
 .copyright {
@@ -312,7 +314,7 @@ body {
 /* Окошко со списком (Поповер) */
 .authors-popover {
     position: absolute;
-    bottom: calc(100% + 16px); /* Появляется строго НАД ссылкой "Авторы" */
+    bottom: calc(100% + 16px);
     left: 50%;
     transform: translateX(-50%) translateY(10px);
     width: 340px;
@@ -327,18 +329,16 @@ body {
     visibility: hidden;
     transition: var(--transition);
     z-index: 20;
-    max-height: 300px; /* Ограничиваем высоту */
-    overflow-y: auto;  /* Включаем прокрутку, если список большой */
+    max-height: 300px;
+    overflow-y: auto; 
 }
 
-/* Состояние: Открыто */
 .authors-popover.active {
     opacity: 1;
     visibility: visible;
     transform: translateX(-50%) translateY(0);
 }
 
-/* Кастомный скроллбар для окошка */
 .authors-popover::-webkit-scrollbar {
     width: 6px;
 }
@@ -395,4 +395,54 @@ body {
 .authors-list li a:hover {
     text-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
     color: var(--text-primary);
+}
+
+
+/* ==========================================
+   АДАПТАЦИЯ ДЛЯ МОБИЛЬНЫХ УСТРОЙСТВ
+   ========================================== */
+
+@media (max-width: 480px) {
+    .login-wrapper {
+        padding: 16px;
+    }
+    
+    .login-card {
+        padding: 32px 24px;
+    }
+
+    .login-title {
+        font-size: 24px;
+        margin-bottom: 24px;
+    }
+
+    /* Модальное окно регистрации */
+    .modal-card {
+        padding: 24px 16px;
+    }
+
+    .modal-header h2 {
+        font-size: 20px;
+    }
+
+    .modal-actions {
+        flex-direction: column-reverse; /* Кнопка "Отмена" внизу */
+        width: 100%;
+    }
+
+    .modal-actions button {
+        width: 100%;
+    }
+
+    /* Поповер авторов */
+    .authors-popover {
+        width: 290px;
+        padding: 20px;
+    }
+    
+    .authors-list li {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
 }

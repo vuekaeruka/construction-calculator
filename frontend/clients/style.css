@@ -2,7 +2,7 @@
     --bg-main: #0A0A0A;
     --surface-main: rgba(26, 26, 26, 0.4);
     --surface-hover: rgba(34, 34, 34, 0.8);
-    --surface-modal: rgba(26, 26, 26, 0.85);
+    --surface-modal: rgba(26, 26, 26, 0.95);
     --text-primary: #FFFFFF;
     --text-secondary: #A1A1AA;
     --accent: #EF4444;
@@ -15,568 +15,118 @@
     --font-family: 'Inter', sans-serif;
 }
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
-body {
-    background-color: var(--bg-main);
-    color: var(--text-primary);
-    font-family: var(--font-family);
-    -webkit-font-smoothing: antialiased;
-    min-height: 100vh;
+body { 
+    background-color: var(--bg-main); 
+    color: var(--text-primary); 
+    font-family: var(--font-family); 
+    -webkit-font-smoothing: antialiased; 
+    min-height: 100vh; 
     display: flex;
     flex-direction: column;
 }
 
 /* Навигация */
-.navbar {
-    background: rgba(10, 10, 10, 0.8);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-bottom: 1px solid var(--border-color);
-    position: sticky;
-    top: 0;
-    z-index: 10;
-}
+.navbar { background: rgba(10, 10, 10, 0.8); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 10; }
+.navbar-container { max-width: 1400px; margin: 0 auto; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; }
 
-.navbar-container {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 16px 24px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.logo {
+.logo { 
     display: flex;
     align-items: center;
-    font-weight: 800;
-    font-size: 20px;
-    letter-spacing: -0.02em;
+    font-weight: 800; 
+    font-size: 20px; 
+    letter-spacing: -0.02em; 
 }
-
 .logo-image {
     height: 60px;
     width: auto;
     display: block;
 }
 
-/* ИСПРАВЛЕНИЕ: Выравнивание профиля пользователя */
-.user-profile {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.user-info-text {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-}
-
-.user-name {
-    color: var(--text-primary);
-    font-size: 14px;
-    font-weight: 500;
-    line-height: 1.2;
-}
-
-.user-role {
-    color: var(--text-secondary);
-    font-size: 12px;
-    margin-top: 4px;
-}
-
-.avatar {
-    width: 32px;
-    height: 32px;
-    background: var(--surface-hover);
-    border: 1px solid var(--border-color);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    font-size: 14px;
-}
+/* Профиль пользователя */
+.user-profile { display: flex; align-items: center; gap: 12px; }
+.user-info-text { display: flex; flex-direction: column; align-items: flex-end;}
+.user-name { color: var(--text-primary); font-size: 14px; font-weight: 500; line-height: 1.2;}
+.user-role { color: var(--text-secondary); font-size: 12px; margin-top: 4px;}
+.avatar { width: 32px; height: 32px; background: var(--surface-hover); border: 1px solid var(--border-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; }
 
 /* Основной контент */
-.container {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 40px 24px;
+.container { 
+    max-width: 1200px; 
+    margin: 0 auto; 
+    padding: 40px 24px; 
     width: 100%;
     flex: 1;
 }
 
-.page-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 32px;
-    flex-wrap: wrap;
-    gap: 24px;
-}
+/* Шапка страницы */
+.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px; }
+.page-title { font-size: 32px; font-weight: 800; letter-spacing: -0.02em; }
+.controls-bar { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
 
-.page-title {
-    font-size: 32px;
-    font-weight: 800;
-    letter-spacing: -0.02em;
-}
+/* Поиск */
+.search-wrapper { position: relative; width: 320px; }
+.search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-secondary); }
+.search-input { width: 100%; background: var(--surface-main); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 10px 12px 10px 40px; color: var(--text-primary); font-size: 14px; font-family: var(--font-family); transition: var(--transition); }
+.search-input:focus { outline: none; border-color: var(--accent); background: rgba(0, 0, 0, 0.4); }
 
-/* Панель управления (Поиск и Фильтры) */
-.controls-bar {
-    display: flex;
-    gap: 12px;
-    align-items: center;
-}
+/* Фильтры */
+.filter-wrapper { position: relative; }
+.filter-dropdown { position: absolute; top: calc(100% + 8px); right: 0; background: var(--surface-modal); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 20px; width: 280px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5); backdrop-filter: blur(10px); opacity: 0; visibility: hidden; transform: translateY(-10px); transition: var(--transition); z-index: 20; }
+.filter-dropdown.active { opacity: 1; visibility: visible; transform: translateY(0); }
+.filter-group { margin-bottom: 20px; }
+.filter-title { font-size: 13px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; }
+.filter-actions { display: flex; justify-content: space-between; gap: 12px; border-top: 1px solid var(--border-color); padding-top: 16px; }
+.filter-badge { background: var(--accent); color: #FFF; font-size: 10px; font-weight: 700; width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-left: 6px; }
 
-.search-wrapper {
-    position: relative;
-    width: 300px;
-}
-
-.search-icon {
-    position: absolute;
-    left: 14px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--text-secondary);
-}
-
-.search-input {
-    width: 100%;
-    background: var(--surface-main);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-sm);
-    padding: 10px 16px 10px 40px;
-    color: var(--text-primary);
-    font-family: var(--font-family);
-    font-size: 14px;
-    transition: var(--transition);
-    outline: none;
-}
-
-.search-input:focus {
-    border-color: var(--border-light);
-    background: rgba(26, 26, 26, 0.6);
-}
-
-.search-input::placeholder {
-    color: var(--text-secondary);
-}
+/* Кастомный селект для фильтра */
+.custom-select { width: 100%; background: rgba(0, 0, 0, 0.3); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 10px 12px; font-family: var(--font-family); font-size: 14px; outline: none; appearance: none; background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23A1A1AA' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 12px center; background-size: 16px; cursor: pointer; transition: var(--transition); }
+.custom-select:focus { border-color: var(--accent); }
+.custom-select option { background: var(--bg-main); color: var(--text-primary); }
 
 /* Кнопки */
-.btn-primary {
-    background-color: var(--accent);
-    color: #FFFFFF;
-    border: none;
-    border-radius: var(--radius-sm);
-    padding: 10px 20px;
-    font-size: 14px;
-    font-weight: 700;
-    font-family: var(--font-family);
-    cursor: pointer;
-    transition: var(--transition);
-    white-space: nowrap;
-}
-
-.btn-primary:hover {
-    background-color: var(--accent-hover);
-    box-shadow: 0 0 15px rgba(239, 68, 68, 0.3);
-}
-
-.btn-secondary {
-    background-color: transparent;
-    color: var(--text-primary);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-sm);
-    padding: 10px 20px;
-    font-size: 14px;
-    font-weight: 500;
-    font-family: var(--font-family);
-    cursor: pointer;
-    transition: var(--transition);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.btn-secondary:hover {
-    background-color: var(--surface-hover);
-}
-
-/* --- Стили для Dropdown Фильтров --- */
-.filter-wrapper {
-    position: relative;
-}
-
-.filter-badge {
-    width: 8px;
-    height: 8px;
-    background-color: var(--accent);
-    border-radius: 50%;
-    margin-left: 4px;
-    box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
-}
-
-.filter-dropdown {
-    position: absolute;
-    top: calc(100% + 8px);
-    right: 0;
-    width: 280px;
-    background: var(--surface-modal);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    padding: 20px;
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
-    z-index: 50;
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(-10px);
-    transition: var(--transition);
-}
-
-.filter-dropdown.active {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
-}
-
-.filter-group {
-    margin-bottom: 20px;
-}
-
-.filter-title {
-    font-size: 12px;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: 12px;
-    font-weight: 700;
-}
-
-/* Кастомные чекбоксы */
-.custom-checkbox {
-    display: flex;
-    align-items: center;
-    position: relative;
-    padding-left: 28px;
-    margin-bottom: 12px;
-    cursor: pointer;
-    font-size: 14px;
-    color: var(--text-primary);
-    user-select: none;
-    transition: var(--transition);
-}
-
-.custom-checkbox:hover {
-    color: var(--accent);
-}
-
-.custom-checkbox input {
-    position: absolute;
-    opacity: 0;
-    cursor: pointer;
-    height: 0;
-    width: 0;
-}
-
-.checkmark {
-    position: absolute;
-    top: 50%;
-    left: 0;
-    transform: translateY(-50%);
-    height: 18px;
-    width: 18px;
-    background-color: rgba(0, 0, 0, 0.3);
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    transition: var(--transition);
-}
-
-.custom-checkbox:hover input ~ .checkmark {
-    border-color: var(--border-light);
-}
-
-.custom-checkbox input:checked ~ .checkmark {
-    background-color: var(--accent);
-    border-color: var(--accent);
-}
-
-.checkmark:after {
-    content: "";
-    position: absolute;
-    display: none;
-    left: 6px;
-    top: 2px;
-    width: 4px;
-    height: 9px;
-    border: solid white;
-    border-width: 0 2px 2px 0;
-    transform: rotate(45deg);
-}
-
-.custom-checkbox input:checked ~ .checkmark:after {
-    display: block;
-}
-
-/* Кастомный Select */
-.custom-select {
-    width: 100%;
-    background: rgba(0, 0, 0, 0.3);
-    color: var(--text-primary);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-sm);
-    padding: 10px 12px;
-    font-family: var(--font-family);
-    font-size: 14px;
-    outline: none;
-    appearance: none;
-    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23A1A1AA' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-    background-repeat: no-repeat;
-    background-position: right 12px center;
-    background-size: 16px;
-    cursor: pointer;
-    transition: var(--transition);
-}
-
-.custom-select:focus {
-    border-color: var(--accent);
-}
-
-.custom-select option {
-    background: var(--bg-main);
-    color: var(--text-primary);
-}
-
-.filter-actions {
-    display: flex;
-    gap: 10px;
-    border-top: 1px solid var(--border-color);
-    padding-top: 16px;
-    margin-top: 8px;
-}
-
-.btn-sm {
-    padding: 8px 16px;
-    flex: 1;
-    justify-content: center;
-}
+.btn-primary { background-color: var(--accent); color: #FFFFFF; border: none; border-radius: var(--radius-sm); padding: 10px 20px; font-size: 14px; font-weight: 700; font-family: var(--font-family); cursor: pointer; transition: var(--transition); }
+.btn-primary:hover { background-color: var(--accent-hover); box-shadow: 0 0 15px rgba(239, 68, 68, 0.3); }
+.btn-secondary { background-color: transparent; color: var(--text-primary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 10px 20px; font-size: 14px; font-weight: 500; font-family: var(--font-family); cursor: pointer; transition: var(--transition); display: flex; align-items: center; gap: 6px; }
+.btn-secondary:hover { background: var(--surface-hover); }
+.btn-sm { padding: 8px 16px; flex: 1; justify-content: center; }
 
 /* Таблица */
-.table-card {
-    background: var(--surface-main);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    overflow: hidden;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-}
+.table-card { background: var(--surface-main); border: 1px solid var(--border-color); border-radius: var(--radius-md); overflow: hidden; }
+.table-responsive { overflow-x: auto; }
+.data-table { width: 100%; border-collapse: collapse; text-align: left; }
+.data-table th { padding: 16px 24px; font-size: 12px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border-light); background: rgba(255, 255, 255, 0.02); }
+.data-table td { padding: 16px 24px; font-size: 15px; border-bottom: 1px solid var(--border-color); color: var(--text-primary); transition: var(--transition); vertical-align: middle; }
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tbody tr:hover td { background: rgba(255, 255, 255, 0.03); }
 
-.table-responsive {
-    overflow-x: auto;
-}
-
-.data-table {
-    width: 100%;
-    border-collapse: collapse;
-    text-align: left;
-}
-
-.data-table th {
-    padding: 16px 24px;
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    border-bottom: 1px solid var(--border-light);
-    background: rgba(0, 0, 0, 0.2);
-}
-
-.data-table td {
-    padding: 16px 24px;
-    font-size: 14px;
-    border-bottom: 1px solid var(--border-color);
-    color: var(--text-primary);
-    vertical-align: middle;
-}
-
-.data-table tr {
-    transition: var(--transition);
-}
-
-.data-table tbody tr:hover {
-    background: var(--surface-hover);
-}
-
-.data-table tbody tr:last-child td {
-    border-bottom: none;
-}
-
-.text-right {
-    text-align: right;
-}
-
-.sub-text {
-    display: block;
-    color: var(--text-secondary);
-    font-size: 12px;
-    margin-top: 4px;
-}
-
-/* Бейджи статусов */
-.badge {
-    display: inline-flex;
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
-}
-
-.badge.active {
-    background: rgba(16, 185, 129, 0.1);
-    color: #10B981;
-    border: 1px solid rgba(16, 185, 129, 0.2);
-}
-
-.badge.inactive {
-    background: rgba(161, 161, 170, 0.1);
-    color: #A1A1AA;
-    border: 1px solid rgba(161, 161, 170, 0.2);
-}
-
-.link-action {
-    color: var(--accent);
-    text-decoration: none;
-    font-weight: 500;
-    transition: var(--transition);
-}
-
-.link-action:hover {
-    text-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
-}
+/* Выравнивание и обертки для ячеек */
+.td-content { display: flex; flex-direction: column; align-items: flex-start; text-align: left; }
+.sub-text { display: block; font-size: 13px; color: var(--text-secondary); margin-top: 4px; }
+.text-right { text-align: right; }
+.link-action { color: var(--accent); text-decoration: none; font-weight: 500; transition: var(--transition); }
+.link-action:hover { text-shadow: 0 0 8px rgba(239, 68, 68, 0.4); }
 
 /* Модальное окно */
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 100;
-    opacity: 0;
-    visibility: hidden;
-    transition: var(--transition);
-}
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: center; z-index: 100; opacity: 0; visibility: hidden; transition: var(--transition); }
+.modal-overlay.active { opacity: 1; visibility: visible; }
+.modal-card { background: var(--surface-modal); border: 1px solid var(--border-color); border-radius: var(--radius-md); width: 100%; max-width: 480px; padding: 32px; transform: scale(0.95); transition: var(--transition); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
+.modal-overlay.active .modal-card { transform: scale(1); }
 
-.modal-overlay.active {
-    opacity: 1;
-    visibility: visible;
-}
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+.modal-header h2 { font-size: 20px; font-weight: 700; }
+.btn-close { background: none; border: none; color: var(--text-secondary); font-size: 24px; cursor: pointer; line-height: 1; transition: var(--transition); }
+.btn-close:hover { color: var(--text-primary); }
 
-.modal-card {
-    background: var(--surface-modal);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    width: 100%;
-    max-width: 480px;
-    padding: 32px;
-    transform: scale(0.95);
-    transition: var(--transition);
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-}
+.modal-form { display: flex; flex-direction: column; gap: 20px; }
+.input-group { position: relative; width: 100%; }
+.input-group input { width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--border-color); padding: 8px 0; color: var(--text-primary); font-size: 15px; font-family: var(--font-family); transition: var(--transition); outline: none; }
+.input-group label { position: absolute; left: 0; top: 8px; color: var(--text-secondary); font-size: 15px; pointer-events: none; transition: var(--transition); }
+.input-group input:focus, .input-group input:not(:placeholder-shown) { border-bottom-color: var(--accent); }
+.input-group input:focus + label, .input-group input:not(:placeholder-shown) + label { top: -12px; font-size: 11px; color: var(--accent); }
 
-.modal-overlay.active .modal-card {
-    transform: scale(1);
-}
-
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 24px;
-}
-
-.btn-close {
-    background: none;
-    border: none;
-    color: var(--text-secondary);
-    font-size: 24px;
-    cursor: pointer;
-    line-height: 1;
-    transition: var(--transition);
-}
-
-.btn-close:hover {
-    color: var(--text-primary);
-}
-
-.modal-form {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-.input-group {
-    position: relative;
-    width: 100%;
-}
-
-.input-group input {
-    width: 100%;
-    background: transparent;
-    border: none;
-    border-bottom: 1px solid var(--border-color);
-    padding: 12px 0;
-    color: var(--text-primary);
-    font-size: 15px;
-    font-family: var(--font-family);
-    transition: var(--transition);
-    outline: none;
-}
-
-.input-group label {
-    position: absolute;
-    left: 0;
-    top: 12px;
-    color: var(--text-secondary);
-    font-size: 15px;
-    pointer-events: none;
-    transition: var(--transition);
-}
-
-.input-group input:focus,
-.input-group input:not(:placeholder-shown) {
-    border-bottom-color: var(--accent);
-}
-
-.input-group input:focus + label,
-.input-group input:not(:placeholder-shown) + label {
-    top: -12px;
-    font-size: 11px;
-    color: var(--accent);
-}
-
-.modal-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
-    margin-top: 12px;
-}
+.modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 12px; }
 
 /* --- Футер и Авторы проекта --- */
 .app-footer {
@@ -700,4 +250,113 @@ body {
 .authors-list li a:hover {
     text-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
     color: var(--text-primary);
+}
+
+
+/* ==========================================
+   АДАПТАЦИЯ ДЛЯ МОБИЛЬНЫХ УСТРОЙСТВ (КЛИЕНТЫ)
+   ========================================== */
+@media (max-width: 768px) {
+    .container {
+        padding: 24px 16px;
+    }
+
+    /* Исправление "уехавших" кнопок в панели управления */
+    .controls-bar {
+        flex-direction: column; 
+        align-items: stretch;
+        gap: 12px;
+    }
+
+    .search-wrapper {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    /* Объединяем кнопку Фильтров и Создать в один ряд */
+    .filter-wrapper,
+    #filter-btn,
+    #open-modal-btn {
+        width: 100%;
+        flex: 1; 
+    }
+
+    .controls-bar > .filter-wrapper {
+        display: flex;
+        gap: 12px;
+    }
+
+    /* Убираем сдвиг выпадающего меню фильтров, делаем его на всю ширину */
+    .filter-dropdown {
+        left: 0;
+        right: 0;
+        width: 100%;
+        top: 110%; 
+    }
+
+    /* --- АДАПТАЦИЯ ТАБЛИЦЫ (Table-to-Cards) --- */
+    
+    .data-table thead {
+        display: none;
+    }
+
+    .data-table, .data-table tbody, .data-table tr, .data-table td {
+        display: block;
+        width: 100%;
+    }
+
+    .data-table tr {
+        background: var(--surface-main);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        margin-bottom: 16px;
+        padding: 16px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    .data-table td {
+        display: flex;
+        justify-content: space-between; 
+        align-items: flex-start;
+        padding: 10px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        text-align: right;
+        font-size: 14px;
+    }
+
+    /* Выравнивание текста ячейки справа */
+    .data-table td .td-content {
+        align-items: flex-end;
+        text-align: right;
+    }
+
+    /* ИСПРАВЛЕНО: возвращаем нормальное распределение по краям для последней ячейки */
+    .data-table td:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+        margin-top: 8px;
+        justify-content: space-between; 
+    }
+
+    .data-table td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: var(--text-secondary);
+        text-align: left;
+        padding-right: 16px;
+    }
+
+    .modal-card {
+        padding: 24px 16px;
+        max-width: 90%;
+    }
+
+    .modal-actions {
+        flex-direction: column-reverse;
+        width: 100%;
+    }
+
+    .modal-actions button {
+        width: 100%;
+    }
 }
