@@ -1,0 +1,42 @@
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy import Integer, String, Float, ForeignKey
+from typing import List
+
+from src.models.base import BaseSQLModels
+
+class Material(BaseSQLModels):
+
+    __tablename__ = "materials"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    category_id: Mapped[int] = mapped_column(Integer, ForeignKey("material_categories.id"))
+    name: Mapped[str] = mapped_column(String(255))
+    unit: Mapped[str] = mapped_column(String(50))
+    unit_value: Mapped[float] = mapped_column(Float)
+    cost_price: Mapped[float] = mapped_column(Float)
+    market_price: Mapped[float] = mapped_column(Float)
+
+    category: Mapped['MaterialCategory'] = relationship(
+        'MaterialCategory',
+        foreign_keys=[category_id],
+        lazy='joined',
+        back_populates='materials'
+    )
+    positions: Mapped[list['CalcPosition']] = relationship(
+        'CalcPosition',
+        back_populates='material',
+        lazy='selectin'
+    )
+
+class MaterialCategory(BaseSQLModels):
+
+    __tablename__ = "material_categories"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    name: Mapped[str] = mapped_column(String(255))
+
+    materials: Mapped[List['Material']] = relationship(
+        'Material',
+        lazy='selectin',
+        back_populates='category'
+    )
