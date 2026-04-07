@@ -2,7 +2,7 @@ from datetime import datetime
 from fastapi import HTTPException, Depends
 from jwt import PyJWT
 
-from src.schemas.users import UserCreateSchema, UserLoginSchema
+from src.schemas.users import UserCreateSchema
 from src.utils.unit_of_work import IUnitOfWork
 from src.utils.enums import TokenType
 from src.config import pwd_context, SecurityConfig, oauth2_scheme

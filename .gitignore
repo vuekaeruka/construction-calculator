@@ -1,20 +1,12 @@
 # PyCache
 __pycache__/
 
-# Bat CLI
-/migr.bat
-/run.bat
-/git.bat
-
 # Alembic
 /backend/migrations/
 /backend/alembic.ini
 
-# SQLite
+# SQL
 /backend/*.db
 
 # ENV
 /backend/src/.env
-
-# Frontend
-/frontend

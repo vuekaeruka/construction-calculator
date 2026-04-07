@@ -1,4 +1,4 @@
-from fastapi import HTTPException, Depends
+from fastapi import HTTPException
 
 from src.schemas.users import UserFilter, UserUpdateSchema, UserCreateSchema
 from src.utils.unit_of_work import IUnitOfWork

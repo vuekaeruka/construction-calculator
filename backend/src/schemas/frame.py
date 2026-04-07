@@ -11,7 +11,7 @@ class InitFrame(BaseSchema):
     int_wall_thickness: int     # Толщина внутренних стен
     ext_wall_thickness: int     # Толщина внешней стены
     floor_slab_thickness: int   # Толщина перекрытия
-    
+        
 # Обшивка внешних стен
 class ExtWallCladding(BaseSchema):
     osb_id: int                                    # ОСБ - material_id

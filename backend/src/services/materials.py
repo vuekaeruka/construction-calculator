@@ -2,7 +2,6 @@ from fastapi import HTTPException
 
 from src.utils.unit_of_work import IUnitOfWork
 from src.schemas.materials import MaterialCreateSchema, MaterialUpdateSchema, MaterialFilterSchema
-from src.models.materials import Material
 
 class MaterialService:
     

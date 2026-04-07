@@ -1,8 +1,7 @@
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import Integer, String, DateTime, Float, Text, ForeignKey, case, func
+from sqlalchemy import Integer, String, DateTime, Float, Text, ForeignKey
 from datetime import datetime, timedelta
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy.ext.hybrid import hybrid_property
 
 from src.models.base import BaseSQLModels
 from src.utils.enums import CalcStatus, CALC_LIFETIME_DAYS, Element

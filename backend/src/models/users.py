@@ -1,7 +1,5 @@
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import Integer, String, DateTime, event
-from datetime import datetime
-from typing import List
+from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import Integer, String
 
 from src.models.base import BaseSQLModels
 

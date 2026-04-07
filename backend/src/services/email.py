@@ -1,11 +1,9 @@
-import base64
 from fastapi import HTTPException
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import aiosmtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from datetime import datetime
 from dotenv import load_dotenv
 import os
 

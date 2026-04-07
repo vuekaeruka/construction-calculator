@@ -1,5 +1,4 @@
 from typing import Optional, List
-from pydantic import computed_field
 from datetime import datetime
 
 from src.schemas.base_schema import BaseSchema

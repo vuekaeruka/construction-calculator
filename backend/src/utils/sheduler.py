@@ -1,6 +1,5 @@
 from datetime import datetime
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-import os
 
 from src.dependencies import UOWdep
 from src.utils.enums import CalcStatus
@@ -21,8 +20,9 @@ scheduler = AsyncIOScheduler()
 def start_scheduler():
     scheduler.add_job(
         expire_calculations,
-        trigger="interval",
-        minutes=1,
+        trigger="cron",
+        hour=0,
+        minute=0,
         args=[UOWdep()]
     )
     scheduler.start()

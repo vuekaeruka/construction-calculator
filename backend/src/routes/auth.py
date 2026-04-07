@@ -1,9 +1,8 @@
-from typing import List
-from fastapi import APIRouter, Form, Response, Cookie, Depends
+from fastapi import APIRouter, Form, Cookie
 
 from src.services.auth import AuthService
-from src.schemas.users import UserCreateSchema, UserSchema, UserLoginSchema
-from src.dependencies import UOWdep, UserDep
+from src.schemas.users import UserCreateSchema
+from src.dependencies import UOWdep
 
 router = APIRouter(prefix='/auth', tags=['Auth'])
 

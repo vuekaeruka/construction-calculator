@@ -1,6 +1,5 @@
 from typing import Optional
 from pydantic import EmailStr, Field
-from datetime import datetime
 
 from src.schemas.base_schema import BaseSchema
 
