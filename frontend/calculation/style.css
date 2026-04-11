@@ -98,6 +98,63 @@ body {
 .btn-outline-danger:hover { background: rgba(239, 68, 68, 0.1); border-color: var(--accent); }
 .btn-sm { padding: 8px 16px; font-size: 13px; }
 
+/* Выпадающее меню экспорта */
+.export-wrapper { position: relative; display: flex; }
+.export-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    background: var(--surface-modal);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 8px;
+    min-width: 200px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: var(--transition);
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.export-dropdown.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+.export-dropdown-item {
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: var(--font-family);
+    text-align: left;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+}
+.export-dropdown-item:hover {
+    background: var(--surface-hover);
+    color: var(--accent);
+}
+.export-dropdown-item svg {
+    color: var(--text-secondary);
+    transition: var(--transition);
+}
+.export-dropdown-item:hover svg {
+    color: var(--accent);
+}
+
 /* Инфо-панели */
 .info-panels-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px; }
 .info-panel { background: var(--surface-main); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 20px; display: flex; flex-direction: column; gap: 12px; }
@@ -312,6 +369,21 @@ body {
         width: 100%;
         justify-content: center;
     }
+    
+    /* Адаптация нового меню экспорта на мобильных */
+    .export-wrapper {
+        width: 100%;
+    }
+    .export-wrapper button {
+        width: 100%;
+        justify-content: center;
+    }
+    .export-dropdown {
+        width: 100%;
+        left: 0;
+        right: 0;
+        top: calc(100% + 8px);
+    }
 
     /* Инфо-панели */
     .info-panels-grid {
@@ -388,9 +460,8 @@ body {
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     }
 
-    /* ИСПРАВЛЕНО: Спец. стили для строки-заголовка категории */
     .data-table tr.category-row {
-        background: var(--bg-main) !important; /* Жестко красим в цвет фона страницы */
+        background: var(--bg-main) !important;
         border: none;
         padding: 0;
         margin-bottom: 8px;
@@ -399,7 +470,7 @@ body {
     }
 
     .data-table tr.category-row td {
-        background: var(--bg-main) !important; /* Жестко красим саму ячейку */
+        background: var(--bg-main) !important;
         color: var(--text-secondary); 
         font-size: 13px;
         font-weight: 700;
@@ -431,7 +502,7 @@ body {
         padding-bottom: 0;
     }
 
-    /* Ярлыки столбцов (взяты из data-label) */
+    /* Ярлыки столбцов */
     .data-table td:not(.category-row td)::before {
         content: attr(data-label);
         font-weight: 600;

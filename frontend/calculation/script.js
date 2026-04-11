@@ -59,6 +59,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const calcStatusEl = document.getElementById('calc-status');
     const changeStatusBtn = document.getElementById('change-status-btn');
     const sendEmailBtn = document.getElementById('send-email-btn');
+    const exportPdfBtn = document.getElementById('export-pdf-btn');
+    const exportExcelBtn = document.getElementById('export-excel-btn');
+    const exportMenuBtn = document.getElementById('export-menu-btn');
+    const exportDropdown = document.getElementById('export-dropdown');
     const container = document.getElementById('calculations-container');
     const grandTotalEl = document.getElementById('grand-total-sum');
     const addElementBtn = document.getElementById('add-element-btn');
@@ -121,11 +125,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 let tableRowsHTML = '';
                 
                 element.subelements.forEach(sub => {
-                    if(sub.positions.length > 0) {
-                        // Строка категории (не превращается в карточку на мобилках)
+                    const validPositions = sub.positions.filter(pos => pos.quantity > 0);
+
+                    if(validPositions.length > 0) {
                         tableRowsHTML += `<tr class="category-row"><td colspan="5">${sub.sub_element_name}</td></tr>`;
-                        sub.positions.forEach(pos => {
-                            // ИЗМЕНЕНО: Добавлены data-label для мобильной адаптации
+                        validPositions.forEach(pos => {
                             tableRowsHTML += `
                                 <tr>
                                     <td data-label="Материал">${pos.material.name}</td>
@@ -276,6 +280,117 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // --- 8.5. ЛОГИКА МЕНЮ ЭКСПОРТА ---
+    if (exportMenuBtn && exportDropdown) {
+        exportMenuBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            exportDropdown.classList.toggle('active');
+        });
+    }
+
+    // --- 8.6. ЭКСПОРТ В PDF ---
+    if (exportPdfBtn) {
+        exportPdfBtn.addEventListener('click', () => {
+            if (!currentCalcData) return;
+
+            exportDropdown.classList.remove('active'); // Сразу закрываем меню
+            const originalHTML = exportMenuBtn.innerHTML; // Меняем текст на главной кнопке
+            exportMenuBtn.innerHTML = 'Генерация...';
+            exportMenuBtn.disabled = true;
+
+            const elementToExport = document.getElementById('pdf-export-area');
+
+            const accordions = elementToExport.querySelectorAll('.accordion-item');
+            const wasClosed = [];
+            accordions.forEach((acc, index) => {
+                if (!acc.classList.contains('active')) {
+                    wasClosed.push(index);
+                    acc.classList.add('active');
+                }
+            });
+
+            if (addElementBtn) addElementBtn.style.display = 'none';
+
+            const opt = {
+                margin:       10,
+                filename:     `Smeta_${calcId}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#0A0A0A' }, 
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            html2pdf().set(opt).from(elementToExport).save().then(() => {
+                exportMenuBtn.innerHTML = originalHTML;
+                exportMenuBtn.disabled = false;
+
+                if (addElementBtn && currentCalcData.status !== 'Заключен договор') {
+                    addElementBtn.style.display = 'inline-flex';
+                }
+                
+                wasClosed.forEach(index => {
+                    accordions[index].classList.remove('active');
+                });
+            }).catch(err => {
+                console.error('Ошибка генерации PDF:', err);
+                alert('Произошла ошибка при создании PDF-файла.');
+                exportMenuBtn.innerHTML = originalHTML;
+                exportMenuBtn.disabled = false;
+            });
+        });
+    }
+
+    // --- 8.7. ЭКСПОРТ В EXCEL (CSV) ---
+    if (exportExcelBtn) {
+        exportExcelBtn.addEventListener('click', () => {
+            if (!currentCalcData || !currentCalcData.elements) return;
+
+            exportDropdown.classList.remove('active'); // Сразу закрываем меню
+
+            // Добавляем BOM (Byte Order Mark), чтобы Excel правильно распознал UTF-8 (русские символы)
+            let csvContent = "\uFEFF"; 
+            
+            // Заголовки столбцов
+            csvContent += "Конструкция;Категория;Материал;Ед. изм.;Количество;Цена за ед.;Стоимость\n";
+
+            currentCalcData.elements.forEach(element => {
+                const constrName = `"${element.element_name.replace(/"/g, '""')}"`;
+
+                element.subelements.forEach(sub => {
+                    const validPositions = sub.positions.filter(pos => pos.quantity > 0);
+                    
+                    if (validPositions.length > 0) {
+                        const categoryName = `"${sub.sub_element_name.replace(/"/g, '""')}"`;
+                        
+                        validPositions.forEach(pos => {
+                            const materialName = `"${pos.material.name.replace(/"/g, '""')}"`;
+                            const unit = `"${pos.material.unit}"`;
+                            const quantity = pos.quantity;
+                            const pricePerUnit = pos.material.market_price;
+                            const totalCost = pos.price;
+
+                            // Формируем строку и добавляем в общий контент (используем точку с запятой для русского Excel)
+                            csvContent += `${constrName};${categoryName};${materialName};${unit};${quantity};${pricePerUnit};${totalCost}\n`;
+                        });
+                    }
+                });
+            });
+
+            // Итоговая стоимость
+            csvContent += `\n;;;;;ИТОГО:;${currentCalcData.price}\n`;
+
+            // Создаем Blob и скачиваем файл
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", `Smeta_${calcId}.csv`);
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+    }
+
     // --- 9. ЛОГИКА МОДАЛЬНОГО ОКНА (Добавить элемент) ---
     const selectCalcModal = document.getElementById('select-calc-modal');
     const closeCalcModalBtn = document.getElementById('close-calc-modal-btn');
@@ -328,6 +443,13 @@ document.addEventListener('DOMContentLoaded', () => {
             !authorsPopover.contains(e.target) && 
             e.target !== authorsBtn) {
             authorsPopover.classList.remove('active');
+        }
+
+        // Закрытие меню экспорта при клике вне него
+        if (exportDropdown && exportDropdown.classList.contains('active') && 
+            !exportDropdown.contains(e.target) && 
+            e.target !== exportMenuBtn) {
+            exportDropdown.classList.remove('active');
         }
     });
 });

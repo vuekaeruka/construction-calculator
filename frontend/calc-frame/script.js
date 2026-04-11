@@ -61,9 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const toggleDoorsWindows = document.getElementById('toggle-doors-windows');
     const doorsWindowsContent = document.getElementById('doors-windows-content');
     
-    const toggleFloors = document.getElementById('toggle-floors');
     const floorsContent = document.getElementById('floors-content');
-
     const textInputs = document.querySelectorAll('.input-group input');
 
     // Кнопка "Назад"
@@ -215,18 +213,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    toggleFloors.addEventListener('change', (e) => {
-        if (e.target.checked) {
-            floorsContent.classList.add('active');
-        } else {
-            floorsContent.classList.remove('active');
-            floorsContent.querySelectorAll('input').forEach(input => {
-                input.value = '';
-                updateLabelState(input);
-            });
-        }
-    });
-
     // --- 7. ДИНАМИЧЕСКИЕ ПРОЕМЫ ---
     const getProemRowTemplate = (type) => {
         const removeIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>`;
@@ -295,6 +281,66 @@ document.addEventListener('DOMContentLoaded', () => {
         return (val && val !== 'none' && val !== '') ? parseInt(val) : null;
     };
 
+    // Валидация нулевых и пустых значений в проемах
+    const validateOpenings = (type, label) => {
+        const container = document.querySelector(`.proem-rows-container[data-proem-type="${type}"]`);
+        if (!container) return true;
+        
+        const rows = container.querySelectorAll('.proem-row');
+        for (let row of rows) {
+            const hInput = row.querySelector(`input[name="${type}-height[]"]`);
+            const wInput = row.querySelector(`input[name="${type}-width[]"]`);
+            const qInput = row.querySelector(`input[name="${type}-quantity[]"]`);
+
+            const hStr = hInput.value.trim();
+            const wStr = wInput.value.trim();
+            const qStr = qInput.value.trim();
+
+            if (hStr === '' && wStr === '' && qStr === '') continue;
+
+            const h = parseFloat(hStr);
+            const w = parseFloat(wStr);
+            const q = parseInt(qStr);
+
+            if (isNaN(h) || h <= 0) {
+                alert(`Некорректная высота в секции "${label}". Размеры должны быть больше 0.`);
+                hInput.focus();
+                return false;
+            }
+            if (isNaN(w) || w <= 0) {
+                alert(`Некорректная ширина в секции "${label}". Размеры должны быть больше 0.`);
+                wInput.focus();
+                return false;
+            }
+            if (isNaN(q) || q <= 0) {
+                alert(`Некорректное количество в секции "${label}". Должно быть больше 0.`);
+                qInput.focus();
+                return false;
+            }
+        }
+        return true;
+    };
+
+    // Подсчет суммарной ширины проемов одного типа с учетом количества (включая динамические строки)
+    const getTotalOpeningsWidth = (type) => {
+        const container = document.querySelector(`.proem-rows-container[data-proem-type="${type}"]`);
+        if (!container) return 0;
+        const rows = container.querySelectorAll('.proem-row');
+        let totalWidth = 0;
+        rows.forEach(row => {
+            const wStr = row.querySelector(`input[name="${type}-width[]"]`).value.trim();
+            const qStr = row.querySelector(`input[name="${type}-quantity[]"]`).value.trim();
+            if (wStr !== '' && qStr !== '') {
+                const w = parseFloat(wStr);
+                const q = parseInt(qStr);
+                if (!isNaN(w) && !isNaN(q) && w > 0 && q > 0) {
+                    totalWidth += (w * q);
+                }
+            }
+        });
+        return totalWidth;
+    };
+
     const getOpenings = (type) => {
         const container = document.querySelector(`.proem-rows-container[data-proem-type="${type}"]`);
         if (!container) return null;
@@ -304,7 +350,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const h = parseFloat(row.querySelector(`input[name="${type}-height[]"]`).value);
             const w = parseFloat(row.querySelector(`input[name="${type}-width[]"]`).value);
             const q = parseInt(row.querySelector(`input[name="${type}-quantity[]"]`).value);
-            if (!isNaN(h) && !isNaN(w) && !isNaN(q)) {
+            
+            if (!isNaN(h) && h > 0 && !isNaN(w) && w > 0 && !isNaN(q) && q > 0) {
                 openings.push({ height: h, width: w, quantity: q });
             }
         });
@@ -325,10 +372,20 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!validateNumber('floor-slab-area', 'Площадь основания (перекрытия)')) return;
         if (!validateNumber('int-wall-length', 'Длина внутренних стен')) return;
 
-        // --- ИЗМЕНЕНИЕ: Логика кросс-валидации внутренних стен ---
+        // Извлечение значений для кросс-валидаций
+        const perimeterInput = document.getElementById('perimeter');
+        const perimeter = parseFloat(perimeterInput.value) || 0;
+
         const intWallLengthInput = document.getElementById('int-wall-length');
         const intWallLength = parseFloat(intWallLengthInput.value) || 0;
-        
+
+        // Длина внутренних стен не должна быть больше периметра внешних
+        if (intWallLength > perimeter) {
+            alert('Длина внутренних стен не может превышать периметр внешних стен.');
+            intWallLengthInput.focus();
+            return;
+        }
+
         const intWallThicknessSelect = document.getElementById('int-wall-thickness');
         const intWallThickness = parseInt(intWallThicknessSelect.value) || 0;
 
@@ -343,15 +400,40 @@ document.addEventListener('DOMContentLoaded', () => {
             intWallThicknessSelect.focus();
             return;
         }
-        // --- КОНЕЦ ИЗМЕНЕНИЯ ---
+
+        // Строгая валидация проемов и их суммарных размеров
+        if (toggleDoorsWindows.checked) {
+            if (!validateOpenings('ext-door', 'Внешние двери')) return;
+            if (!validateOpenings('int-door', 'Внутренние двери')) return;
+            if (!validateOpenings('window', 'Оконные проемы')) return;
+
+            // БАГФИКС: Проверка суммарной ширины внешних проемов
+            const totalExtDoorsWidth = getTotalOpeningsWidth('ext-door');
+            const totalWindowsWidth = getTotalOpeningsWidth('window');
+            const totalExtOpeningsWidth = totalExtDoorsWidth + totalWindowsWidth;
+
+            if (totalExtOpeningsWidth >= perimeter) {
+                alert(`Суммарная ширина внешних дверей и окон (${totalExtOpeningsWidth.toFixed(2)} м) не может превышать или быть равной периметру внешних стен (${perimeter.toFixed(2)} м).`);
+                return;
+            }
+
+            // БАГФИКС: Проверка суммарной ширины внутренних дверей
+            const totalIntDoorsWidth = getTotalOpeningsWidth('int-door');
+            if (intWallLength > 0 && totalIntDoorsWidth >= intWallLength) {
+                alert(`Суммарная ширина внутренних дверей (${totalIntDoorsWidth.toFixed(2)} м) не может превышать или быть равной длине внутренних стен (${intWallLength.toFixed(2)} м).`);
+                return;
+            } else if (intWallLength === 0 && totalIntDoorsWidth > 0) {
+                alert('Невозможно добавить внутренние двери, так как длина внутренних стен равна 0.');
+                return;
+            }
+        }
+
+        // Обязательная валидация перекрытий
+        if (!validateNumber('floor-thickness', 'Толщина перекрытия')) return;
 
         const extInsulationId = getSelectIntOrNull('ext-insulation');
         if (extInsulationId !== null) {
             if (!validateNumber('ext-insulation-thickness', 'Толщина утеплителя (внешние стены)')) return;
-        }
-
-        if (toggleFloors.checked) {
-            if (!validateNumber('floor-thickness', 'Толщина перекрытия')) return;
         }
 
         // ОСБ внешних стен обязательно
@@ -362,15 +444,26 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        // ОСБ перекрытий обязательно
+        const floorOsbId = document.getElementById('floor-osb').value;
+        if (!floorOsbId || floorOsbId === 'none') {
+            alert('Пожалуйста, выберите ОСБ для перекрытий (обязательно).');
+            document.getElementById('floor-osb').focus();
+            return;
+        }
+
+        // Компенсация бага бэкенда при расчете объема досок
+        const correctedIntWallThickness = intWallThickness > 0 ? (intWallThickness / 2) : 0;
+
         // 1. Собираем InitFrame
         const initFrame = {
             wall_height: parseFloat(document.getElementById('wall-height').value),
-            ext_wall_perimeter: parseFloat(document.getElementById('perimeter').value),
+            ext_wall_perimeter: perimeter,
             floor_slab_area: parseFloat(document.getElementById('floor-slab-area').value),
             int_wall_length: intWallLength,
-            int_wall_thickness: intWallThickness,
+            int_wall_thickness: correctedIntWallThickness, 
             ext_wall_thickness: parseInt(document.getElementById('ext-wall-thickness').value) || 0,
-            floor_slab_thickness: 0 // Обновится ниже, если перекрытия включены
+            floor_slab_thickness: parseInt(document.getElementById('floor-thickness').value)
         };
 
         // 2. Собираем ExtWallCladding
@@ -386,17 +479,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const intOsbId = getSelectIntOrNull('int-osb-type');
         const intWallCladding = intOsbId ? { osb_id: intOsbId } : null;
 
-        // 4. Собираем FloorSlab если включен
-        let floorSlab = null;
-        if (toggleFloors.checked) {
-            initFrame.floor_slab_thickness = parseInt(document.getElementById('floor-thickness').value);
-            floorSlab = {
-                osb_id: getSelectIntOrNull('floor-osb'),
-                steam_water_proofing_id: getSelectIntOrNull('floor-vapor'),
-                wind_protection_id: getSelectIntOrNull('floor-wind'),
-                insulation_id: getSelectIntOrNull('floor-insulation')
-            };
-        }
+        // 4. Собираем FloorSlab 
+        const floorSlab = {
+            osb_id: parseInt(floorOsbId),
+            steam_water_proofing_id: getSelectIntOrNull('floor-vapor'),
+            wind_protection_id: getSelectIntOrNull('floor-wind'),
+            insulation_id: getSelectIntOrNull('floor-insulation')
+        };
 
         // Собираем общий Payload
         const payload = {
@@ -451,7 +540,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if(confirm('Вы уверены, что хотите сбросить все введенные данные?')) {
             form.reset(); 
             doorsWindowsContent.classList.remove('active');
-            floorsContent.classList.remove('active');
             resetDynamicRows();
             document.querySelectorAll('.custom-select').forEach(select => select.selectedIndex = 0);
             setTimeout(() => textInputs.forEach(input => updateLabelState(input)), 10);
